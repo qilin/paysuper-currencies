@@ -1,0 +1,37 @@
+language: go
+sudo: false
+
+stages:
+  - test
+  - name: deploy
+    if: branch = master
+jobs:
+  include:
+    - stage: test
+      services:
+        - mongodb
+      go:
+        - 1.11.x
+      env:
+        - GO111MODULE=on
+        - MONGO_HOST=127.0.0.1:27017
+        - MONGO_DB=currency_rates_test
+        - CENTRIFUGO_SECRET=some-key
+        - XE_AUTH_CREDENTIALS=some-credentials
+        - XE_PAIRS_CORRECTIONS=USDRUB:1.03,RUBUSD:0.97
+        - XE_COMMON_CORRECTION=1.01
+      install: true
+      script:
+        - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: deploy
+      services: docker
+      install: true
+      script:
+        - docker run -it
+          -e JENKINS_AUTH_TOKEN=$JENKINS_AUTH_TOKEN
+          -e JENKINS_BUILD_TOKEN=$JENKINS_BUILD_TOKEN
+          -e JENKINS_BUILD_PROJECT=$TRAVIS_REPO_SLUG
+          -e JENKINS_BUILD_BRANCH=$TRAVIS_BRANCH
+          p1hub/p1jenkinstrigger

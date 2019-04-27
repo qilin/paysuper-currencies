@@ -1,0 +1,39 @@
+version: '3.6'
+
+services:
+  paysuper-currencues-rates:
+    build: .
+      container_name: paysuper-currencues-rates-go
+      networks:
+        - p1devnet
+      restart: always
+      ports:
+        - "8086:8086"
+      environment:
+        MONGO_HOST: "payone-mongo:27017"
+        MONGO_DB: currency_rates
+        MONGO_USER: ""
+        MONGO_PASSWORD: ""
+        CENTRIFUGO_SECRET: "secret"
+        MICRO_REGISTRY: consul
+        XE_AUTH_CREDENTIALS: $XE_AUTH_CREDENTIALS
+      tty: true
+
+  centrifugo:
+    image: centrifugo/centrifugo:latest
+    environment:
+      - CENTRIFUGO_SECRET=secret
+      - CENTRIFUGO_ADMIN_PASSWORD=admin
+      - CENTRIFUGO_ADMIN_SECRET=secret
+    volumes:
+      - D:/Projects/Go/github.com/ProtocolONE/payone-notifier/configs/centrifugo:/centrifugo
+    tty: true
+    command: centrifugo --admin -c /centrifugo/config.json
+    ports:
+      - "8000:8000"
+    networks:
+      - p1devnet
+
+networks:
+  p1devnet:
+    external: true
