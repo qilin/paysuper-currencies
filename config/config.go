@@ -15,12 +15,9 @@ type Config struct {
 
     MicroRegistry string `envconfig:"MICRO_REGISTRY" required:"false"`
 
-    XeSupportedCurrencies []string           `envconfig:"XE_SUPPORTED_CURRENCIES" default:"USD,EUR,RUB,CAD,AUD,GBP,JPY,SGD,KRW,TRY,BRL,UAH,MXN,NZD,NOK,PLN,CNY,INR,CLP,PEN,COP,ZAR,HKD,TWD,THB,VND,SAR,AED,ARS,ILS,KZT,KWD,QAR,UYU,IDR,MYR,PHP"`
-    XeBaseCurrencies      []string           `envconfig:"XE_BASE_CURRENCIES" default:"EUR,USD"`
-    XeCommonCorrection    float64            `envconfig:"XE_COMMON_CORRECTION" default:"1"`
-    XePairsCorrections    map[string]float64 `envconfig:"XE_PAIRS_CORRECTIONS" default:""`
-    XeAuthCredentials     string             `envconfig:"XE_AUTH_CREDENTIALS" required:"true"`
-    XeRatesRequestPeriod  int64              `envconfig:"XE_RATES_REQUEST_PERIOD" default:"24"` // in hours
+    OxrSupportedCurrencies []string `envconfig:"OXR_SUPPORTED_CURRENCIES" default:"USD,EUR,RUB,CAD,AUD,GBP,JPY,SGD,KRW,TRY,BRL,UAH,MXN,NZD,NOK,PLN,CNY,INR,CLP,PEN,COP,ZAR,HKD,TWD,THB,VND,SAR,AED,ARS,ILS,KZT,KWD,QAR,UYU,IDR,MYR,PHP"`
+    OxrBaseCurrencies      []string `envconfig:"OXR_BASE_CURRENCIES" default:"EUR,USD"`
+    OxrAppId               string   `envconfig:"OXR_APP_ID" required:"true"`
 }
 
 func NewConfig() (*Config, error) {

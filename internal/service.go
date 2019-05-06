@@ -5,6 +5,7 @@ import (
     "context"
     "encoding/json"
     "errors"
+    "fmt"
     "github.com/centrifugal/gocent"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
@@ -18,6 +19,7 @@ import (
     "io/ioutil"
     "net/http"
     "net/url"
+    "strings"
 )
 
 const (
@@ -32,6 +34,7 @@ const (
     errorDbReqInvalid             = "attempt to insert invalid structure to db"
     errorFromCurrencyNotSupported = "from currency not supported"
     errorToCurrencyNotSupported   = "to currency not supported"
+    errorCollectionSuffixEmpty    = "collection suffix is empty"
     errorCurrencyPairNotExists    = "currency pair is not exists"
     errorCurrentRateRequest       = "current rate request error"
     errorCentralBankRateRequest   = "central bank rate request error"
@@ -39,11 +42,16 @@ const (
 
     MIMEApplicationJSON = "application/json"
 
-    HeaderAccept        = "Accept"
-    HeaderContentType   = "Content-Type"
-    HeaderAuthorization = "Authorization"
+    HeaderAccept      = "Accept"
+    HeaderContentType = "Content-Type"
 
-    BasicAuthorization = "Basic %s"
+    collectionNameTemplate = "%s_%s"
+
+    collectionSuffixOxr = "oxr"
+    collectionSuffixCb = "cb"
+    collectionSuffixPaysuper = "paysuper"
+    collectionSuffixStock = "stock"
+    collectionSuffixCardpay = "cardpay"
 )
 
 // Service is application entry point.
@@ -134,23 +142,6 @@ func (s *Service) getJson(resp *http.Response, target interface{}) error {
     return json.Unmarshal(body, target)
 }
 
-func (s *Service) getCorrectionForPair(pair string) float64 {
-    correction := float64(1)
-
-    if !s.isPairExists(pair) {
-        return correction
-    }
-
-    if val, ok := s.cfg.XePairsCorrections[pair]; ok {
-        correction = val
-    } else {
-        if s.cfg.XeCommonCorrection > 0 && s.cfg.XeCommonCorrection != 1 {
-            correction = s.cfg.XeCommonCorrection
-        }
-    }
-    return correction
-}
-
 func (s *Service) isPairExists(pair string) bool {
     if len(pair) != 6 {
         return false
@@ -159,10 +150,6 @@ func (s *Service) isPairExists(pair string) bool {
     from := string(pair[0:3])
     to := string(pair[3:6])
 
-    if from == to {
-        return false
-    }
-
     if !s.isCurrencySupported(from) || !s.isCurrencySupported(to) {
         return false
     }
@@ -170,7 +157,7 @@ func (s *Service) isPairExists(pair string) bool {
 }
 
 func (s *Service) isCurrencySupported(cur string) bool {
-    return s.contains(s.cfg.XeSupportedCurrencies, cur)
+    return s.contains(s.cfg.OxrSupportedCurrencies, cur)
 }
 
 func (s *Service) contains(slice []string, item string) bool {
@@ -183,24 +170,37 @@ func (s *Service) contains(slice []string, item string) bool {
     return ok
 }
 
-func (s *Service) saveRate(rd *currencyrates.RateData) error {
-    if !s.isPairExists(rd.Pair) {
-        zap.S().Errorw(errorCurrencyPairNotExists, "req", rd)
-        return errors.New(errorCurrencyPairNotExists)
+func (s *Service) saveRates(collectionSuffix string, rds []*currencyrates.RateData) error {
+    if collectionSuffix == "" {
+        return errors.New(errorCollectionSuffixEmpty)
     }
 
-    rd.Id = bson.NewObjectId().Hex()
-    rd.CreatedAt = ptypes.TimestampNow()
+    data := []interface{}{}
 
-    if err := s.validateReq(rd); err != nil {
-        zap.S().Errorw(errorDbReqInvalid, "error", err, "data", rd)
-        return err
+    for _, rd := range rds {
+
+        if !s.isPairExists(rd.Pair) {
+            zap.S().Errorw(errorCurrencyPairNotExists, "req", rd)
+            return errors.New(errorCurrencyPairNotExists)
+        }
+
+        rd.Id = bson.NewObjectId().Hex()
+        rd.CreatedAt = ptypes.TimestampNow()
+
+        if err := s.validateReq(rd); err != nil {
+            zap.S().Errorw(errorDbReqInvalid, "error", err, "data", rd)
+            return err
+        }
+
+        data = append(data, rd)
     }
 
-    err := s.db.Collection(pkg.CollectionRate).Insert(rd)
+    cName := fmt.Sprintf(collectionNameTemplate, pkg.CollectionRate, collectionSuffix)
+
+    err := s.db.Collection(cName).Insert(data...)
 
     if err != nil {
-        zap.S().Errorw(errorDbInsertFailed, "error", err, "data", rd)
+        zap.S().Errorw(errorDbInsertFailed, "error", err, "data", rds)
         return err
     }
 
@@ -225,13 +225,12 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
     }
 }
 
-func (s *Service) GetCurrentRate(
+func (s *Service) GetOxrRate(
     ctx context.Context,
-    req *currencyrates.GetCurrentRateRequest,
+    req *currencyrates.GetRateRequest,
     res *currencyrates.RateData,
 ) error {
-    query := bson.M{"is_cb_rate": false}
-    err := s.getRate(req.From, req.To, query, res)
+    err := s.getRate(collectionSuffixOxr, req.From, req.To, bson.M{}, res)
     if err != nil {
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
@@ -251,8 +250,8 @@ func (s *Service) GetCentralBankRateForDate(
         return err
     }
 
-    query := bson.M{"is_cb_rate": true, "created_at": bson.M{"$lte": dt}}
-    err = s.getRate(req.From, req.To, query, res)
+    query := bson.M{"created_at": bson.M{"$lte": dt}}
+    err = s.getRate(collectionSuffixCb, req.From, req.To, query, res)
     if err != nil {
         zap.S().Errorw(errorCentralBankRateRequest, "error", err, "req", req)
         return err
@@ -261,7 +260,46 @@ func (s *Service) GetCentralBankRateForDate(
     return nil
 }
 
-func (s *Service) getRate(from string, to string, query bson.M, res *currencyrates.RateData) error {
+func (s *Service) GetPaysuperRate(
+    ctx context.Context,
+    req *currencyrates.GetRateRequest,
+    res *currencyrates.RateData,
+) error {
+    err := s.getRate(collectionSuffixPaysuper, req.From, req.To, bson.M{}, res)
+    if err != nil {
+        zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
+        return err
+    }
+    return nil
+}
+
+func (s *Service) GetStockRate(
+    ctx context.Context,
+    req *currencyrates.GetRateRequest,
+    res *currencyrates.RateData,
+) error {
+    err := s.getRate(collectionSuffixStock, req.From, req.To, bson.M{}, res)
+    if err != nil {
+        zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
+        return err
+    }
+    return nil
+}
+
+func (s *Service) GetCardpayRate(
+    ctx context.Context,
+    req *currencyrates.GetRateRequest,
+    res *currencyrates.RateData,
+) error {
+    err := s.getRate(collectionSuffixCardpay, req.From, req.To, bson.M{}, res)
+    if err != nil {
+        zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
+        return err
+    }
+    return nil
+}
+
+func (s *Service) getRate(collectionSuffix string, from string, to string, query bson.M, res *currencyrates.RateData) error {
     if !s.isCurrencySupported(from) {
         return errors.New(errorFromCurrencyNotSupported)
     }
@@ -271,7 +309,9 @@ func (s *Service) getRate(from string, to string, query bson.M, res *currencyrat
 
     query["pair"] = from + to
 
-    err := s.db.Collection(pkg.CollectionRate).Find(query).Sort("-_id").Limit(1).One(&res)
+    cName := fmt.Sprintf(collectionNameTemplate, pkg.CollectionRate, strings.ToLower(collectionSuffix))
+
+    err := s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
     if err != nil {
         return err
     }

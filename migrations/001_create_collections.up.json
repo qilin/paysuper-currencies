@@ -1,0 +1,11 @@
+[
+  {
+    "create": "currency_rates_oxr"
+  },
+  {
+    "create": "currency_rates_paysuper"
+  },
+  {
+    "create": "currency_rates_cb"
+  }
+]

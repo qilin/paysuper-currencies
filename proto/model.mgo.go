@@ -16,9 +16,6 @@ type MgoRateData struct {
     CreatedAt     time.Time     `bson:"created_at"`
     Pair          string        `bson:"pair"`
     Rate          float64       `bson:"rate"`
-    Correction    float64       `bson:"correction"`
-    CorrectedRate float64       `bson:"corrected_rate"`
-    IsCbRate      bool          `bson:"is_cb_rate"`
     Source        string        `bson:"source"`
 }
 
@@ -33,9 +30,6 @@ func (p *RateData) SetBSON(raw bson.Raw) error {
     p.Id = decoded.Id.Hex()
     p.Pair = decoded.Pair
     p.Rate = decoded.Rate
-    p.Correction = decoded.Correction
-    p.CorrectedRate = decoded.CorrectedRate
-    p.IsCbRate = decoded.IsCbRate
     p.Source = decoded.Source
 
     p.CreatedAt, err = ptypes.TimestampProto(decoded.CreatedAt)
@@ -50,9 +44,6 @@ func (p *RateData) GetBSON() (interface{}, error) {
     st := &MgoRateData{
         Pair:          p.Pair,
         Rate:          p.Rate,
-        Correction:    p.Correction,
-        CorrectedRate: p.CorrectedRate,
-        IsCbRate:      p.IsCbRate,
         Source:        p.Source,
     }
 

@@ -18,12 +18,10 @@ This service designed for sync currencies rates and store it locally with histor
 | CENTRIFUGO_KEY                       | true     | -                        | Centrifugo secret key                                                               |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
 | MICRO_REGISTRY                       | -        | -                        | Microservices registry                                                              |
-| XE_BASE_CURRENCIES                   | -        | EUR,USD                  | Base currencies to get rates from/to on xe.com                                      |  
-| XE_SUPPORTED_CURRENCIES              | -        | USD, EUR, RUB, CAD, AUD, GBP, JPY, SGD, KRW, TRY, BRL, UAH, MXN, NZD, NOK, PLN, CNY, INR, CLP, PEN, COP, ZAR, HKD, TWD, THB, VND, SAR, AED, ARS, ILS, KZT, KWD, QAR, UYU, IDR, MYR, PHP | Currencies to get rates to/from base currencies on xe.com |
-| XE_COMMON_CORRECTION                 | -        | 1                        | Common rate correction for all currency pairs, in %                                 |  
-| XE_PAIRS_CORRECTIONS                 | -        | -                        | Individual rate correction for currency pair, in %, example for USD-to-RUB rate + 3% and RUB-to-USD - 3%: "USDRUB:1.03,RUBUSD:0.97" |
-| XE_AUTH_CREDENTIALS                  | true     | 1                        | Auth credentials for Xe.com api                                                     |
-| XE_RATES_REQUEST_PERIOD              | -        | 24                       | Rate request period (in hours)                                                      |
+| OXR_BASE_CURRENCIES                  | -        | EUR,USD                  | Base currencies to get rates from/to on openexchangerates.org                       |  
+| OXR_SUPPORTED_CURRENCIES             | -        | USD, EUR, RUB, CAD, AUD, GBP, JPY, SGD, KRW, TRY, BRL, UAH, MXN, NZD, NOK, PLN, CNY, INR, CLP, PEN, COP, ZAR, HKD, TWD, THB, VND, SAR, AED, ARS, ILS, KZT, KWD, QAR, UYU, IDR, MYR, PHP | Currencies to get rates to/from base currencies on openexchangerates.org |
+| OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
+
 
 ### Example of data, store in DB:
 
@@ -33,9 +31,6 @@ This service designed for sync currencies rates and store it locally with histor
   "created_at": "2019-04-29T13:58:35.921Z",
   "pair": "USDRUB",
   "rate": 64.679270801,
-  "correction": 1.03,
-  "corrected_rate": 66.61964892503,
-  "is_cb_rate": false,
   "source": "XE"
 }
 ```

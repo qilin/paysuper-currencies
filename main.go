@@ -52,13 +52,35 @@ func main() {
     if source != "" {
         logger.Info("Updating currency rates from " + source)
 
+        defer db.Close()
+
+        var err error
+
         switch source {
-        case "xe":
-            cs.RequestRatesXe()
+        case "oxr":
+            err = cs.RequestRatesOxr()
+            if err == nil {
+                err = cs.RequestRatesPaysuper()
+            }
+        case "paysuper":
+            err = cs.RequestRatesPaysuper()
+        case "centralbank":
+            err = cs.RequestRatesCbrf()
+            if err == nil {
+                err = cs.RequestRatesCbeu()
+            }
+        case "stock":
+            err = cs.RequestRatesStock()
+        case "cardpay":
+            err = cs.RequestRatesCardpay()
         default:
             logger.Fatal("Source is unknown, exiting")
         }
-        db.Close()
+
+        if err != nil {
+            logger.Fatal("Updating currency rates error", zap.Error(err))
+        }
+
         return
     }
 

@@ -5,13 +5,19 @@ package currencyrates;
 import "google/protobuf/timestamp.proto";
 
 service currencyratesService {
-    rpc GetCurrentRate (GetCurrentRateRequest) returns (RateData) {
+    rpc GetOxrRate (GetRateRequest) returns (RateData) {
+    }
+    rpc GetPaysuperRate (GetRateRequest) returns (RateData) {
     }
     rpc GetCentralBankRateForDate (GetCentralBankRateRequest) returns (RateData) {
     }
+    rpc GetStockRate (GetRateRequest) returns (RateData) {
+    }
+    rpc GetCardpayRate (GetRateRequest) returns (RateData) {
+    }
 }
 
-message GetCurrentRateRequest {
+message GetRateRequest {
     //@inject_tag: validate:"required,alpha,len=3"
     string from = 1;
     //@inject_tag: validate:"required,alpha,len=3"
@@ -36,12 +42,6 @@ message RateData {
     string pair = 3;
     //@inject_tag: validate:"required,numeric,gt=0" json:"rate" bson:"rate"
     double rate = 4;
-    //@inject_tag: validate:"required,numeric,gt=0" json:"correction" bson:"correction"
-    double correction = 5;
-    //@inject_tag: validate:"required,numeric,gt=0" json:"corrected_rate" bson:"corrected_rate"
-    double corrected_rate = 6;
-    //@inject_tag: json:"is_cb_rate" bson:"is_cb_rate"
-    bool is_cb_rate = 7;
     //@inject_tag: validate:"required,alpha" json:"source" bson:"source"
-    string source = 8;
+    string source = 5;
 }

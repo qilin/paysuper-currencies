@@ -8,7 +8,7 @@ It is generated from these files:
 	currencyrates.proto
 
 It has these top-level messages:
-	GetCurrentRateRequest
+	GetRateRequest
 	GetCentralBankRateRequest
 	RateData
 */
@@ -44,8 +44,11 @@ var _ server.Option
 // Client API for CurrencyratesService service
 
 type CurrencyratesService interface {
-	GetCurrentRate(ctx context.Context, in *GetCurrentRateRequest, opts ...client.CallOption) (*RateData, error)
+	GetOxrRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
+	GetPaysuperRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
 	GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, opts ...client.CallOption) (*RateData, error)
+	GetStockRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
+	GetCardpayRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
 }
 
 type currencyratesService struct {
@@ -66,8 +69,18 @@ func NewCurrencyratesService(name string, c client.Client) CurrencyratesService 
 	}
 }
 
-func (c *currencyratesService) GetCurrentRate(ctx context.Context, in *GetCurrentRateRequest, opts ...client.CallOption) (*RateData, error) {
-	req := c.c.NewRequest(c.name, "CurrencyratesService.GetCurrentRate", in)
+func (c *currencyratesService) GetOxrRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetOxrRate", in)
+	out := new(RateData)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetPaysuperRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetPaysuperRate", in)
 	out := new(RateData)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -86,17 +99,43 @@ func (c *currencyratesService) GetCentralBankRateForDate(ctx context.Context, in
 	return out, nil
 }
 
+func (c *currencyratesService) GetStockRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetStockRate", in)
+	out := new(RateData)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetCardpayRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetCardpayRate", in)
+	out := new(RateData)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for CurrencyratesService service
 
 type CurrencyratesServiceHandler interface {
-	GetCurrentRate(context.Context, *GetCurrentRateRequest, *RateData) error
+	GetOxrRate(context.Context, *GetRateRequest, *RateData) error
+	GetPaysuperRate(context.Context, *GetRateRequest, *RateData) error
 	GetCentralBankRateForDate(context.Context, *GetCentralBankRateRequest, *RateData) error
+	GetStockRate(context.Context, *GetRateRequest, *RateData) error
+	GetCardpayRate(context.Context, *GetRateRequest, *RateData) error
 }
 
 func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServiceHandler, opts ...server.HandlerOption) error {
 	type currencyratesService interface {
-		GetCurrentRate(ctx context.Context, in *GetCurrentRateRequest, out *RateData) error
+		GetOxrRate(ctx context.Context, in *GetRateRequest, out *RateData) error
+		GetPaysuperRate(ctx context.Context, in *GetRateRequest, out *RateData) error
 		GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, out *RateData) error
+		GetStockRate(ctx context.Context, in *GetRateRequest, out *RateData) error
+		GetCardpayRate(ctx context.Context, in *GetRateRequest, out *RateData) error
 	}
 	type CurrencyratesService struct {
 		currencyratesService
@@ -109,10 +148,22 @@ type currencyratesServiceHandler struct {
 	CurrencyratesServiceHandler
 }
 
-func (h *currencyratesServiceHandler) GetCurrentRate(ctx context.Context, in *GetCurrentRateRequest, out *RateData) error {
-	return h.CurrencyratesServiceHandler.GetCurrentRate(ctx, in, out)
+func (h *currencyratesServiceHandler) GetOxrRate(ctx context.Context, in *GetRateRequest, out *RateData) error {
+	return h.CurrencyratesServiceHandler.GetOxrRate(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetPaysuperRate(ctx context.Context, in *GetRateRequest, out *RateData) error {
+	return h.CurrencyratesServiceHandler.GetPaysuperRate(ctx, in, out)
 }
 
 func (h *currencyratesServiceHandler) GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, out *RateData) error {
 	return h.CurrencyratesServiceHandler.GetCentralBankRateForDate(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetStockRate(ctx context.Context, in *GetRateRequest, out *RateData) error {
+	return h.CurrencyratesServiceHandler.GetStockRate(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetCardpayRate(ctx context.Context, in *GetRateRequest, out *RateData) error {
+	return h.CurrencyratesServiceHandler.GetCardpayRate(ctx, in, out)
 }

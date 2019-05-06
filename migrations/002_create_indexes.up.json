@@ -1,18 +1,53 @@
-[{
-  "createIndexes": "currency_rates",
-  "indexes": [
-    {
-      "key": {
-        "pair": 1,
-        "is_cb_rate": -1
+[
+  {
+    "createIndexes": "currency_rates_oxr",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
       },
-      "name": "pair_type"
-    },
-    {
-      "key": {
-        "created_at": -1
+      {
+        "key": {
+          "created_at": -1
+        },
+        "name": "created_at"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_paysuper",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
       },
-      "name": "created_at"
-    }
-  ]
-}]
+      {
+        "key": {
+          "created_at": -1
+        },
+        "name": "created_at"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_cb",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
+      },
+      {
+        "key": {
+          "created_at": -1
+        },
+        "name": "created_at"
+      }
+    ]
+  }
+]

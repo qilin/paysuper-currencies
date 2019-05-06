@@ -15,7 +15,6 @@ import (
 
 var (
     r = float64(72.3096)
-    c = float64(1)
 )
 
 type CurrenciesratesServiceTestSuite struct {
@@ -50,26 +49,20 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
     suite.service, err = NewService(suite.config, db)
     assert.NoError(suite.T(), err, "Service creation failed")
 
-    rd := &currencyrates.RateData{
-        Pair:          "EURRUB",
-        Rate:          r,
-        Correction:    c,
-        CorrectedRate: r * c,
-        Source:        "TEST",
-        IsCbRate:      false,
+    rates := []*currencyrates.RateData{
+        {
+            Pair:   "EURRUB",
+            Rate:   r - 1,
+            Source: "TEST",
+        },
+        {
+            Pair:   "EURRUB",
+            Rate:   r,
+            Source: "TEST",
+        },
     }
-    err = suite.service.saveRate(rd)
-    assert.NoError(suite.T(), err)
-
-    rd = &currencyrates.RateData{
-        Pair:          "EURRUB",
-        Rate:          r - 1,
-        Correction:    c,
-        CorrectedRate: (r - 1) * c,
-        Source:        "TEST",
-        IsCbRate:      true,
-    }
-    err = suite.service.saveRate(rd)
+    err = suite.service.saveRates(collectionSuffixOxr, rates)
+    err = suite.service.saveRates(collectionSuffixCb, rates)
     assert.NoError(suite.T(), err)
 }
 
@@ -81,13 +74,8 @@ func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestService_CreatedOk() {
-    assert.True(suite.T(), len(suite.service.cfg.XeSupportedCurrencies) > 0)
-    assert.True(suite.T(), len(suite.service.cfg.XeBaseCurrencies) > 0)
-    assert.True(suite.T(), suite.service.cfg.XeCommonCorrection > 0)
-    assert.True(suite.T(), suite.service.cfg.XeCommonCorrection != float64(1))
-    assert.True(suite.T(), len(suite.service.cfg.XeAuthCredentials) > 0)
-    assert.True(suite.T(), len(suite.service.cfg.XePairsCorrections) > 0)
-    assert.True(suite.T(), suite.service.cfg.XeRatesRequestPeriod > 0)
+    assert.True(suite.T(), len(suite.service.cfg.OxrSupportedCurrencies) > 0)
+    assert.True(suite.T(), len(suite.service.cfg.OxrBaseCurrencies) > 0)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsCurrencySupported_Ok() {
@@ -107,119 +95,89 @@ func (suite *CurrenciesratesServiceTestSuite) TestIsPairExists_Fail() {
     assert.False(suite.T(), suite.service.isPairExists("USD"))
     assert.False(suite.T(), suite.service.isPairExists("USDUSDUSD"))
     assert.False(suite.T(), suite.service.isPairExists("USDZWD"))
-    assert.False(suite.T(), suite.service.isPairExists("USDUSD"))
+    assert.True(suite.T(), suite.service.isPairExists("USDUSD"))
     assert.False(suite.T(), suite.service.isPairExists("BLAALB"))
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetCorrectionForPair_UnexistingOk() {
-    assert.Equal(suite.T(), suite.service.getCorrectionForPair(""), float64(1))
-    assert.Equal(suite.T(), suite.service.getCorrectionForPair("BLAHBLAH"), float64(1))
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetCorrectionForPair_CommonOk() {
-    c := suite.service.getCorrectionForPair("EURUSD")
-    cc := suite.service.cfg.XeCommonCorrection
-    assert.Equal(suite.T(), c, cc)
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetCorrectionForPair_PairsOk() {
-    cc := suite.service.cfg.XeCommonCorrection
-    for k, v := range suite.service.cfg.XePairsCorrections {
-        c := suite.service.getCorrectionForPair(k)
-        assert.Equal(suite.T(), c, v)
-        assert.NotEqual(suite.T(), c, cc)
-    }
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Ok() {
     rd := &currencyrates.RateData{
-        Pair:          "EURRUB",
-        Rate:          r + 1,
-        Correction:    c,
-        CorrectedRate: (r + 1) * c,
-        Source:        "TEST",
-        IsCbRate:      false,
+        Pair:   "EURRUB",
+        Rate:   r + 1,
+        Source: "TEST",
     }
-    err := suite.service.saveRate(rd)
+    err := suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
     assert.NoError(suite.T(), err)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Failed() {
 
     rd := &currencyrates.RateData{}
-    err := suite.service.saveRate(rd)
+    err := suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
 
     rd = &currencyrates.RateData{
-        Pair:     "USDEUR",
-        Source:   "TEST",
-        IsCbRate: false,
+        Pair:   "USDEUR",
+        Source: "TEST",
     }
-    err = suite.service.saveRate(rd)
+    err = suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
     assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), "Key: 'RateData.Rate' Error:Field validation for 'Rate' failed on the 'required' tag\nKey: 'RateData.Correction' Error:Field validation for 'Correction' failed on the 'required' tag\nKey: 'RateData.CorrectedRate' Error:Field validation for 'CorrectedRate' failed on the 'required' tag")
+    assert.Equal(suite.T(), err.Error(), "Key: 'RateData.Rate' Error:Field validation for 'Rate' failed on the 'required' tag")
 
     rd = &currencyrates.RateData{
-        Pair:          "USDZWD",
-        Rate:          r,
-        Correction:    c,
-        CorrectedRate: r * c,
-        Source:        "TEST",
-        IsCbRate:      false,
+        Pair:   "USDZWD",
+        Rate:   r,
+        Source: "TEST",
     }
-    err = suite.service.saveRate(rd)
+    err = suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestGetCurrentRate_Ok() {
-    req := &currencyrates.GetCurrentRateRequest{
+func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Ok() {
+    req := &currencyrates.GetRateRequest{
         From: "EUR",
         To:   "RUB",
     }
 
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetCurrentRate(context.TODO(), req, res)
+    err := suite.service.GetOxrRate(context.TODO(), req, res)
 
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "EURRUB")
     assert.Equal(suite.T(), res.Rate, r)
-    assert.Equal(suite.T(), res.Correction, c)
-    assert.Equal(suite.T(), res.CorrectedRate, r*c)
     assert.Equal(suite.T(), res.Source, "TEST")
-    assert.Equal(suite.T(), res.IsCbRate, false)
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestGetCurrentRate_Fail() {
+func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Fail() {
     res := &currencyrates.RateData{}
 
-    req := &currencyrates.GetCurrentRateRequest{}
-    err := suite.service.GetCurrentRate(context.TODO(), req, res)
+    req := &currencyrates.GetRateRequest{}
+    err := suite.service.GetOxrRate(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorFromCurrencyNotSupported)
 
-    req = &currencyrates.GetCurrentRateRequest{
+    req = &currencyrates.GetRateRequest{
         From: "USD",
     }
-    err = suite.service.GetCurrentRate(context.TODO(), req, res)
+    err = suite.service.GetOxrRate(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-    req = &currencyrates.GetCurrentRateRequest{
+    req = &currencyrates.GetRateRequest{
         From: "USD",
         To:   "ZWD",
     }
-    err = suite.service.GetCurrentRate(context.TODO(), req, res)
+    err = suite.service.GetOxrRate(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-    req = &currencyrates.GetCurrentRateRequest{
+    req = &currencyrates.GetRateRequest{
         From: "EUR",
         To:   "JPY",
     }
-    err = suite.service.GetCurrentRate(context.TODO(), req, res)
+    err = suite.service.GetOxrRate(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 }
@@ -237,42 +195,32 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetCentralBankRateForDate_Ok()
 
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "EURRUB")
-    assert.Equal(suite.T(), res.Rate, r-1)
-    assert.Equal(suite.T(), res.Correction, c)
-    assert.Equal(suite.T(), res.CorrectedRate, (r-1)*c)
+    assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
-    assert.Equal(suite.T(), res.IsCbRate, true)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestUpdateRateOk() {
-    req := &currencyrates.GetCurrentRateRequest{
+    req := &currencyrates.GetRateRequest{
         From: "EUR",
         To:   "RUB",
     }
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetCurrentRate(context.TODO(), req, res)
+    err := suite.service.GetOxrRate(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "EURRUB")
     assert.Equal(suite.T(), res.Rate, r)
-    assert.Equal(suite.T(), res.Correction, c)
-    assert.Equal(suite.T(), res.CorrectedRate, r*c)
     assert.Equal(suite.T(), res.Source, "TEST")
-    assert.Equal(suite.T(), res.IsCbRate, false)
 
     rd := &currencyrates.RateData{
         Pair:          "EURRUB",
         Rate:          r + 1,
-        Correction:    c,
-        CorrectedRate: (r + 1) * c,
         Source:        "TEST",
-        IsCbRate:      false,
     }
-    err = suite.service.saveRate(rd)
+    err = suite.service.saveRates(collectionSuffixOxr, []*currencyrates.RateData{rd})
     assert.NoError(suite.T(), err)
 
-    err = suite.service.GetCurrentRate(context.TODO(), req, res)
+    err = suite.service.GetOxrRate(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Rate, r+1)
-    assert.Equal(suite.T(), res.CorrectedRate, (r+1)*c)
 }
