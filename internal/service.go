@@ -6,7 +6,7 @@ import (
     "encoding/json"
     "errors"
     "github.com/centrifugal/gocent"
-    "github.com/globalsign/mgo"
+    "github.com/paysuper/paysuper-database-mongo"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/config"
@@ -49,13 +49,13 @@ const (
 // Service is application entry point.
 type Service struct {
     cfg              *config.Config
-    db               *mgo.Database
+    db               *database.Source
     centrifugoClient *gocent.Client
     validate         *validator.Validate
 }
 
 // NewService create new Service.
-func NewService(cfg *config.Config, db *mgo.Database) (*Service, error) {
+func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
     return &Service{
         cfg:      cfg,
         db:       db,
@@ -72,7 +72,7 @@ func NewService(cfg *config.Config, db *mgo.Database) (*Service, error) {
 
 // Status used to return micro service health.
 func (s *Service) Status() (interface{}, error) {
-    err := s.db.Session.Ping()
+    err := s.db.Ping()
     if err != nil {
         return "fail", err
     }
@@ -197,7 +197,7 @@ func (s *Service) saveRate(rd *currencyrates.RateData) error {
         return err
     }
 
-    err := s.db.C(pkg.CollectionRate).Insert(rd)
+    err := s.db.Collection(pkg.CollectionRate).Insert(rd)
 
     if err != nil {
         zap.S().Errorw(errorDbInsertFailed, "error", err, "data", rd)
@@ -271,7 +271,7 @@ func (s *Service) getRate(from string, to string, query bson.M, res *currencyrat
 
     query["pair"] = from + to
 
-    err := s.db.C(pkg.CollectionRate).Find(query).Sort("-_id").Limit(1).One(&res)
+    err := s.db.Collection(pkg.CollectionRate).Find(query).Sort("-_id").Limit(1).One(&res)
     if err != nil {
         return err
     }

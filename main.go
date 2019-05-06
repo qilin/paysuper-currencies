@@ -5,7 +5,6 @@ import (
     "fmt"
     "github.com/InVisionApp/go-health"
     "github.com/InVisionApp/go-health/handlers"
-    "github.com/globalsign/mgo"
     "github.com/micro/go-micro"
     "github.com/micro/go-plugins/wrapper/monitoring/prometheus"
     k8s "github.com/micro/kubernetes/go/micro"
@@ -13,7 +12,7 @@ import (
     "github.com/paysuper/paysuper-currencies-rates/internal"
     "github.com/paysuper/paysuper-currencies-rates/pkg"
     currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
-    "github.com/paysuper/paysuper-currencies-rates/utils"
+    "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/pkg/constant"
     "github.com/prometheus/client_golang/prometheus/promhttp"
     "go.uber.org/zap"
@@ -30,15 +29,16 @@ func main() {
         logger.Fatal("Config init failed with error", zap.Error(err))
     }
 
-    mongoUrl := utils.GetMongoUrl(cfg)
-    session, err := mgo.Dial(mongoUrl)
-    if err != nil {
-        logger.Fatal(err.Error())
-        return
+    settings := database.Connection{
+        Host:     cfg.MongoHost,
+        Database: cfg.MongoDatabase,
+        User:     cfg.MongoUser,
+        Password: cfg.MongoPassword,
     }
-    defer session.Close()
-
-    db := session.DB(cfg.MongoDatabase)
+    db, err := database.NewDatabase(settings)
+    if err != nil {
+        logger.Fatal("Database connection failed", zap.Error(err), zap.String("connection_string", settings.String()))
+    }
 
     cs, err := internal.NewService(cfg, db)
     if err != nil {
@@ -58,6 +58,7 @@ func main() {
         default:
             logger.Fatal("Source is unknown, exiting")
         }
+        db.Close()
         return
     }
 
@@ -75,6 +76,10 @@ func main() {
                     logger.Fatal("Metrics listen failed", zap.Error(err))
                 }
             }()
+            return nil
+        }),
+        micro.AfterStop(func() error {
+            db.Close()
             return nil
         }),
     }

@@ -759,6 +759,16 @@ github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c h1:Lgl0gzECD8GnQ5
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105430-4daddbd57e4c h1:/RDlclDMVUnjFK13GV8t1pyn4VeYZCDPFM+jMyn73ek=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105430-4daddbd57e4c/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105715-355f83704aee h1:lwKUJ+gjsqJri6q8kqItCexEUbBWg2ClXV8qhwWZYjo=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105715-355f83704aee/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506122756-5061832ab3dd h1:I+hdn2ygmigahRB/ncB+dr2TM7fEOBsmRaQMj3s/crw=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506122756-5061832ab3dd/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124201-815e11898665 h1:Z3OxFlloZfRuA50whRDi/VkMU2UMl/Q5r55vuNmkNug=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124201-815e11898665/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc h1:gAT2p1CkbRurc5V+XXkVBUt8sV7fpfw2KwTA5SbUf5c=
+github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
 github.com/paysuper/paysuper-recurring-repository v1.0.104 h1:UOaz4BU7v+H/0LaTDSG6Ax4xD+76NyyQMupSrW5x4To=
 github.com/paysuper/paysuper-recurring-repository v1.0.104/go.mod h1:FyZzueaAoG6apdmfjz7BQd5QMgV3KRIGgFhRXHEIpro=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=

@@ -22,6 +22,7 @@ require (
 	github.com/micro/go-plugins v0.25.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/onsi/gomega v1.5.0 // indirect
+	github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc
 	github.com/paysuper/paysuper-recurring-repository v1.0.104
 	github.com/prometheus/client_golang v0.9.2
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
