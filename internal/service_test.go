@@ -6,7 +6,7 @@ import (
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/config"
     currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
-    "github.com/paysuper/paysuper-currencies-rates/utils"
+    "github.com/paysuper/paysuper-database-mongo"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/suite"
     "go.uber.org/zap"
@@ -38,10 +38,16 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
     suite.config, err = config.NewConfig()
     assert.NoError(suite.T(), err, "Config load failed")
 
-    session, err := mgo.Dial(utils.GetMongoUrl(suite.config))
+    settings := database.Connection{
+        Host:     suite.config.MongoHost,
+        Database: suite.config.MongoDatabase,
+        User:     suite.config.MongoUser,
+        Password: suite.config.MongoPassword,
+    }
+    db, err := database.NewDatabase(settings)
     assert.NoError(suite.T(), err, "Db connection failed")
 
-    suite.service, err = NewService(suite.config, session.DB(suite.config.MongoDatabase))
+    suite.service, err = NewService(suite.config, db)
     assert.NoError(suite.T(), err, "Service creation failed")
 
     rd := &currencyrates.RateData{
@@ -68,10 +74,10 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
-    if err := suite.service.db.DropDatabase(); err != nil {
+    if err := suite.service.db.Drop(); err != nil {
         suite.FailNow("Database deletion failed", "%v", err)
     }
-    suite.service.db.Session.Close()
+    suite.service.db.Close()
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestService_CreatedOk() {
