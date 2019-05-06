@@ -38,7 +38,7 @@ type xeRateItem struct {
     Inverse       float64
 }
 
-func (s *Service) requestRatesXe() {
+func (s *Service) RequestRatesXe() {
 
     params := url.Values{"to": []string{strings.Join(s.cfg.XeSupportedCurrencies, ",")}}
     to := params.Encode()

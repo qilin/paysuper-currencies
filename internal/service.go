@@ -18,7 +18,6 @@ import (
     "io/ioutil"
     "net/http"
     "net/url"
-    "time"
 )
 
 const (
@@ -61,6 +60,13 @@ func NewService(cfg *config.Config, db *mgo.Database) (*Service, error) {
         cfg:      cfg,
         db:       db,
         validate: validator.New(),
+        centrifugoClient: gocent.New(
+            gocent.Config{
+                Addr:       cfg.CentrifugoURL,
+                Key:        cfg.CentrifugoSecret,
+                HTTPClient: tools.NewLoggedHttpClient(zap.S()),
+            },
+        ),
     }, nil
 }
 
@@ -71,32 +77,6 @@ func (s *Service) Status() (interface{}, error) {
         return "fail", err
     }
     return "ok", nil
-}
-
-func (s *Service) Init() {
-
-    s.centrifugoClient = gocent.New(
-        gocent.Config{
-            Addr:       s.cfg.CentrifugoURL,
-            Key:        s.cfg.CentrifugoSecret,
-            HTTPClient: tools.NewLoggedHttpClient(zap.S()),
-        },
-    )
-
-    go s.initRateRequests()
-}
-
-func (s *Service) initRateRequests() {
-    go s.requestRatesXe()
-
-    xeRateTicker := time.NewTicker(time.Hour * time.Duration(s.cfg.XeRatesRequestPeriod))
-
-    for {
-        select {
-        case <-xeRateTicker.C:
-            go s.requestRatesXe()
-        }
-    }
 }
 
 func (s *Service) validateReq(req interface{}) error {
@@ -280,7 +260,6 @@ func (s *Service) GetCentralBankRateForDate(
 
     return nil
 }
-
 
 func (s *Service) getRate(from string, to string, query bson.M, res *currencyrates.RateData) error {
     if !s.isCurrencySupported(from) {

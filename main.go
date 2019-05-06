@@ -1,6 +1,7 @@
 package main
 
 import (
+    "flag"
     "fmt"
     "github.com/InVisionApp/go-health"
     "github.com/InVisionApp/go-health/handlers"
@@ -44,7 +45,22 @@ func main() {
         logger.Fatal("Can`t create currency rates service", zap.Error(err))
     }
 
-    cs.Init()
+    var source string
+    flag.StringVar(&source, "source", "", "rates source")
+    flag.Parse()
+
+    if source != "" {
+        logger.Info("Updating currency rates from " + source)
+
+        switch source {
+        case "xe":
+            cs.RequestRatesXe()
+        default:
+            logger.Fatal("Source is unknown, exiting")
+        }
+        return
+    }
+
     initHealth(cs, cfg.MetricsPort)
     initPrometheus()
 
@@ -81,7 +97,6 @@ func main() {
     if err := ms.Run(); err != nil {
         logger.Fatal("Can`t run service", zap.Error(err))
     }
-
 }
 
 func initHealth(checker health.ICheckable, port int) {
