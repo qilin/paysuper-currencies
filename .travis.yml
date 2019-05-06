@@ -17,9 +17,7 @@ jobs:
         - MONGO_HOST=127.0.0.1:27017
         - MONGO_DB=currency_rates_test
         - CENTRIFUGO_SECRET=some-key
-        - XE_AUTH_CREDENTIALS=some-credentials
-        - XE_PAIRS_CORRECTIONS=USDRUB:1.03,RUBUSD:0.97
-        - XE_COMMON_CORRECTION=1.01
+        - OXR_APP_ID=some-app-id
       install: true
       script:
         - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
