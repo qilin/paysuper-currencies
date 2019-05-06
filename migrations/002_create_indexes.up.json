@@ -1,0 +1,18 @@
+[{
+  "createIndexes": "currency_rates",
+  "indexes": [
+    {
+      "key": {
+        "pair": 1,
+        "is_cb_rate": -1
+      },
+      "name": "pair_type"
+    },
+    {
+      "key": {
+        "created_at": -1
+      },
+      "name": "created_at"
+    }
+  ]
+}]
