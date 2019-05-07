@@ -60,7 +60,8 @@ func main() {
         case "oxr":
             err = cs.RequestRatesOxr()
             if err == nil {
-                err = cs.RequestRatesPaysuper()
+                // todo: enable paysuper recalc
+                // err = cs.RequestRatesPaysuper()
             }
         case "paysuper":
             err = cs.RequestRatesPaysuper()

@@ -18,6 +18,10 @@ type Config struct {
     OxrSupportedCurrencies []string `envconfig:"OXR_SUPPORTED_CURRENCIES" default:"USD,EUR,RUB,CAD,AUD,GBP,JPY,SGD,KRW,TRY,BRL,UAH,MXN,NZD,NOK,PLN,CNY,INR,CLP,PEN,COP,ZAR,HKD,TWD,THB,VND,SAR,AED,ARS,ILS,KZT,KWD,QAR,UYU,IDR,MYR,PHP"`
     OxrBaseCurrencies      []string `envconfig:"OXR_BASE_CURRENCIES" default:"EUR,USD"`
     OxrAppId               string   `envconfig:"OXR_APP_ID" required:"true"`
+
+    CbrfBaseCurrencies      []string `envconfig:"CBRF_BASE_CURRENCIES" default:"EUR,USD"`
+
+    CbeuBaseCurrencies      []string `envconfig:"CBEU_BASE_CURRENCIES" default:"USD"`
 }
 
 func NewConfig() (*Config, error) {

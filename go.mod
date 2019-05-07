@@ -25,10 +25,12 @@ require (
 	github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc
 	github.com/paysuper/paysuper-recurring-repository v1.0.104
 	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
+	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/stretchr/testify v1.3.0
 	go.uber.org/zap v1.9.1
+	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
 )

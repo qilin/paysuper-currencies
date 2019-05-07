@@ -1,6 +1,8 @@
 package internal
 
+import "errors"
+
 func (s *Service) RequestRatesStock() error {
-    return nil
+    return errors.New("Not implemented")
 }
 

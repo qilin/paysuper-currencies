@@ -1,5 +1,7 @@
 package internal
 
+import "errors"
+
 func (s *Service) RequestRatesCardpay() error {
-    return nil
+    return errors.New("Not implemented")
 }

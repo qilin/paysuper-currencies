@@ -32,6 +32,8 @@ type oxrRatesResponse struct {
 }
 
 func (s *Service) RequestRatesOxr() error {
+    zap.S().Info("Requesting rates from OXR")
+
     headers := map[string]string{
         HeaderContentType:   MIMEApplicationJSON,
         HeaderAccept:        MIMEApplicationJSON,
@@ -62,7 +64,7 @@ func (s *Service) RequestRatesOxr() error {
         }
 
         res := &oxrRatesResponse{}
-        err = s.getJson(resp, res)
+        err = s.decodeJson(resp, res)
 
         if err != nil {
             zap.S().Errorw(errorOxrResponseParsingFailed, "error", err)
@@ -78,6 +80,8 @@ func (s *Service) RequestRatesOxr() error {
             return err
         }
     }
+
+    zap.S().Info("Rates from OXR updated")
 
     return nil
 }

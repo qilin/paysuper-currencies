@@ -4,6 +4,7 @@ import (
     "bytes"
     "context"
     "encoding/json"
+    "encoding/xml"
     "errors"
     "fmt"
     "github.com/centrifugal/gocent"
@@ -15,6 +16,7 @@ import (
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/tools"
     "go.uber.org/zap"
+    "golang.org/x/net/html/charset"
     "gopkg.in/go-playground/validator.v9"
     "io/ioutil"
     "net/http"
@@ -41,17 +43,18 @@ const (
     errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 
     MIMEApplicationJSON = "application/json"
+    MIMEApplicationXML  = "application/xml"
 
     HeaderAccept      = "Accept"
     HeaderContentType = "Content-Type"
 
     collectionNameTemplate = "%s_%s"
 
-    collectionSuffixOxr = "oxr"
-    collectionSuffixCb = "centralbanks"
+    collectionSuffixOxr      = "oxr"
+    collectionSuffixCb       = "centralbanks"
     collectionSuffixPaysuper = "paysuper"
-    collectionSuffixStock = "stock"
-    collectionSuffixCardpay = "cardpay"
+    collectionSuffixStock    = "stock"
+    collectionSuffixCardpay  = "cardpay"
 )
 
 // Service is application entry point.
@@ -134,12 +137,18 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
     return resp, nil
 }
 
-func (s *Service) getJson(resp *http.Response, target interface{}) error {
+func (s *Service) decodeJson(resp *http.Response, target interface{}) error {
     body, err := ioutil.ReadAll(resp.Body)
     if err != nil {
         return err
     }
     return json.Unmarshal(body, target)
+}
+
+func (s *Service) decodeXml(resp *http.Response, target interface{}) error {
+    decoder := xml.NewDecoder(resp.Body)
+    decoder.CharsetReader = charset.NewReaderLabel
+    return decoder.Decode(&target)
 }
 
 func (s *Service) isPairExists(pair string) bool {
