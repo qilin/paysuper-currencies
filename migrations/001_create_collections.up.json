@@ -6,6 +6,12 @@
     "create": "currency_rates_paysuper"
   },
   {
-    "create": "currency_rates_cb"
+    "create": "currency_rates_centralbanks"
+  },
+  {
+    "create": "currency_rates_stock"
+  },
+  {
+    "create": "currency_rates_cardpay"
   }
 ]

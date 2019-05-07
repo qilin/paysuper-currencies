@@ -48,7 +48,7 @@ const (
     collectionNameTemplate = "%s_%s"
 
     collectionSuffixOxr = "oxr"
-    collectionSuffixCb = "cb"
+    collectionSuffixCb = "centralbanks"
     collectionSuffixPaysuper = "paysuper"
     collectionSuffixStock = "stock"
     collectionSuffixCardpay = "cardpay"
