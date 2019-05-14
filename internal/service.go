@@ -48,6 +48,7 @@ const (
 
     MIMEApplicationJSON = "application/json"
     MIMEApplicationXML  = "application/xml"
+    MIMETextXML  = "text/xml"
 
     HeaderAccept      = "Accept"
     HeaderContentType = "Content-Type"

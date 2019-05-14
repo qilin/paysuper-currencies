@@ -21,7 +21,7 @@ const (
     cbeuUrlTemplate = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?%s"
 )
 
-type CbeuResposne struct {
+type CbeuResponse struct {
     XMLName xml.Name `xml:"http://www.gesmes.org/xml/2002-08-01 Envelope"`
     Data    Cube1    `xml:"Cube"`
 }
@@ -66,7 +66,7 @@ func (s *Service) RequestRatesCbeu() error {
         return err
     }
 
-    res := &CbeuResposne{}
+    res := &CbeuResponse{}
     err = s.decodeXml(resp, res)
 
     if err != nil {
@@ -88,7 +88,7 @@ func (s *Service) RequestRatesCbeu() error {
     return nil
 }
 
-func (s *Service) processRatesCbeu(res *CbeuResposne) error {
+func (s *Service) processRatesCbeu(res *CbeuResponse) error {
 
     if len(res.Data.Rates.Rates) == 0 {
         return errors.New(errorCbeuNoResults)

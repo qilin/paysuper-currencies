@@ -22,7 +22,7 @@ const (
     cbrfUrl    = "http://www.cbr.ru/scripts/XML_daily.asp"
 )
 
-type CbrfResposne struct {
+type CbrfResponse struct {
     XMLName xml.Name    `xml:"ValCurs"`
     Rates   []CbrfRates `xml:"Valute"`
 }
@@ -50,7 +50,7 @@ func (s *Service) RequestRatesCbrf() error {
         return err
     }
 
-    res := &CbrfResposne{}
+    res := &CbrfResponse{}
     err = s.decodeXml(resp, res)
 
     if err != nil {
@@ -72,7 +72,7 @@ func (s *Service) RequestRatesCbrf() error {
     return nil
 }
 
-func (s *Service) processRatesCbrf(res *CbrfResposne) error {
+func (s *Service) processRatesCbrf(res *CbrfResponse) error {
 
     if len(res.Rates) == 0 {
         return errors.New(errorCbrfNoResults)
