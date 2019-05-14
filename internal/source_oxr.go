@@ -23,7 +23,7 @@ const (
     oxrUrlTemplate = "https://openexchangerates.org/api/latest.json?base=%s&%s"
 )
 
-type oxrRatesResponse struct {
+type oxrResponse struct {
     Disclaimer string
     License    string
     Timestamp  int64
@@ -63,7 +63,7 @@ func (s *Service) RequestRatesOxr() error {
             return err
         }
 
-        res := &oxrRatesResponse{}
+        res := &oxrResponse{}
         err = s.decodeJson(resp, res)
 
         if err != nil {
@@ -86,7 +86,7 @@ func (s *Service) RequestRatesOxr() error {
     return nil
 }
 
-func (s *Service) processRatesOxr(res *oxrRatesResponse) error {
+func (s *Service) processRatesOxr(res *oxrResponse) error {
 
     from := res.Base
 
@@ -109,14 +109,14 @@ func (s *Service) processRatesOxr(res *oxrRatesResponse) error {
         // direct pair
         rates = append(rates, &currencyrates.RateData{
             Pair:          from+to,
-            Rate:          rate,
+            Rate:          s.toPrecise(rate),
             Source:        oxrSource,
         })
 
         // inverse pair
         rates = append(rates, &currencyrates.RateData{
             Pair:          to+from,
-            Rate:          1/rate,
+            Rate:          s.toPrecise(1/rate),
             Source:        oxrSource,
         })
     }

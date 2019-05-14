@@ -75,6 +75,9 @@ func main() {
             if err == nil {
                 err = cs.RequestRatesCbpl()
             }
+            if err == nil {
+                err = cs.RequestRatesCbau()
+            }
         case "stock":
             err = cs.RequestRatesStock()
         case "cardpay":

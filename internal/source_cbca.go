@@ -25,7 +25,7 @@ const (
     cbcaKeyMask = "FX%s%s"
 )
 
-type CbcaResponse struct {
+type cbcaResponse struct {
     Observations []map[string]interface{} `json:"observations"`
 }
 
@@ -57,7 +57,7 @@ func (s *Service) RequestRatesCbca() error {
         return err
     }
 
-    res := &CbcaResponse{}
+    res := &cbcaResponse{}
     err = s.decodeJson(resp, res)
 
     if err != nil {
@@ -79,7 +79,7 @@ func (s *Service) RequestRatesCbca() error {
     return nil
 }
 
-func (s *Service) processRatesCbca(res *CbcaResponse) error {
+func (s *Service) processRatesCbca(res *cbcaResponse) error {
 
     if len(res.Observations) == 0 {
         return errors.New(errorCbcaNoResults)
@@ -89,7 +89,7 @@ func (s *Service) processRatesCbca(res *CbcaResponse) error {
 
     lastRates := res.Observations[len(res.Observations)-1]
 
-    for _, cFrom := range s.cfg.CbrfBaseCurrencies {
+    for _, cFrom := range s.cfg.CbcaBaseCurrencies {
         key := fmt.Sprintf(cbcaKeyMask, cFrom, cbcaTo)
 
         rateItem, ok := lastRates[key]
@@ -107,14 +107,14 @@ func (s *Service) processRatesCbca(res *CbcaResponse) error {
         // direct pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   cFrom + cbcaTo,
-            Rate:   rate,
+            Rate:   s.toPrecise(rate),
             Source: cbcaSource,
         })
 
         // inverse pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   cbcaTo + cFrom,
-            Rate:   1 / rate,
+            Rate:   s.toPrecise(1 / rate),
             Source: cbcaSource,
         })
     }

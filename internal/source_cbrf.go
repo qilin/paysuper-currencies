@@ -22,12 +22,12 @@ const (
     cbrfUrl    = "http://www.cbr.ru/scripts/XML_daily.asp"
 )
 
-type CbrfResponse struct {
-    XMLName xml.Name    `xml:"ValCurs"`
-    Rates   []CbrfRates `xml:"Valute"`
+type cbrfResponse struct {
+    XMLName xml.Name           `xml:"ValCurs"`
+    Rates   []cbrfResponseRate `xml:"Valute"`
 }
 
-type CbrfRates struct {
+type cbrfResponseRate struct {
     XMLName      xml.Name `xml:"Valute"`
     CurrencyCode string   `xml:"CharCode"`
     Value        string   `xml:"Value"`
@@ -50,7 +50,7 @@ func (s *Service) RequestRatesCbrf() error {
         return err
     }
 
-    res := &CbrfResponse{}
+    res := &cbrfResponse{}
     err = s.decodeXml(resp, res)
 
     if err != nil {
@@ -72,7 +72,7 @@ func (s *Service) RequestRatesCbrf() error {
     return nil
 }
 
-func (s *Service) processRatesCbrf(res *CbrfResponse) error {
+func (s *Service) processRatesCbrf(res *cbrfResponse) error {
 
     if len(res.Rates) == 0 {
         return errors.New(errorCbrfNoResults)
@@ -99,14 +99,14 @@ func (s *Service) processRatesCbrf(res *CbrfResponse) error {
         // direct pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   rateItem.CurrencyCode + cbrfTo,
-            Rate:   rate,
+            Rate:   s.toPrecise(rate),
             Source: cbrfSource,
         })
 
         // inverse pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   cbrfTo + rateItem.CurrencyCode,
-            Rate:   1 / rate,
+            Rate:   s.toPrecise(1 / rate),
             Source: cbrfSource,
         })
 

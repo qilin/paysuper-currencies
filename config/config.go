@@ -21,6 +21,9 @@ type Config struct {
 
     CbrfBaseCurrencies []string `envconfig:"CBRF_BASE_CURRENCIES" default:"EUR,USD"`
     CbeuBaseCurrencies []string `envconfig:"CBEU_BASE_CURRENCIES" default:"USD"`
+    CbcaBaseCurrencies []string `envconfig:"CBCA_BASE_CURRENCIES" default:"EUR,USD"`
+    CbauBaseCurrencies []string `envconfig:"CBAU_BASE_CURRENCIES" default:"EUR,USD"`
+    CbplBaseCurrencies []string `envconfig:"CBPL_BASE_CURRENCIES" default:"EUR,USD"`
 
     BollingerDays   int `envconfig:"BOLLINGER_DAYS" default:"7"`
     BollingerPeriod int `envconfig:"BOLLINGER_PERIOD" default:"21"`

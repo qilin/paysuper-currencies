@@ -19,14 +19,14 @@ const (
     cbplUrl    = "https://www.nbp.pl/kursy/xml/en/19a092en.xml"
 )
 
-type CbplResponse struct {
-    XMLName xml.Name `xml:"exchange_rates"`
-    Rates    []Rate    `xml:"mid-rate"`
+type cbplResponse struct {
+    XMLName xml.Name           `xml:"exchange_rates"`
+    Rates   []cbplResponseRate `xml:"mid-rate"`
 }
 
-type Rate struct {
-    CurrencyCode string   `xml:"code,attr"`
-    Value        float64  `xml:",chardata"`
+type cbplResponseRate struct {
+    CurrencyCode string  `xml:"code,attr"`
+    Value        float64 `xml:",chardata"`
 }
 
 func (s *Service) RequestRatesCbpl() error {
@@ -45,7 +45,7 @@ func (s *Service) RequestRatesCbpl() error {
         return err
     }
 
-    res := &CbplResponse{}
+    res := &cbplResponse{}
     err = s.decodeXml(resp, res)
 
     if err != nil {
@@ -67,7 +67,7 @@ func (s *Service) RequestRatesCbpl() error {
     return nil
 }
 
-func (s *Service) processRatesCbpl(res *CbplResponse) error {
+func (s *Service) processRatesCbpl(res *cbplResponse) error {
 
     if len(res.Rates) == 0 {
         return errors.New(errorCbplNoResults)
@@ -75,12 +75,12 @@ func (s *Service) processRatesCbpl(res *CbplResponse) error {
 
     rates := []*currencyrates.RateData{}
 
-    l := len(s.cfg.OxrBaseCurrencies)
+    l := len(s.cfg.CbplBaseCurrencies)
     c := 0
 
     for _, rateItem := range res.Rates {
 
-        if !s.contains(s.cfg.OxrBaseCurrencies, rateItem.CurrencyCode) {
+        if !s.contains(s.cfg.CbplBaseCurrencies, rateItem.CurrencyCode) {
             continue
         }
 
@@ -89,14 +89,14 @@ func (s *Service) processRatesCbpl(res *CbplResponse) error {
         // direct pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   rateItem.CurrencyCode + cbplTo,
-            Rate:   rate,
+            Rate:   s.toPrecise(rate),
             Source: cbplSource,
         })
 
         // inverse pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   cbplTo + rateItem.CurrencyCode,
-            Rate:   1 / rate,
+            Rate:   s.toPrecise(1 / rate),
             Source: cbplSource,
         })
 

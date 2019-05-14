@@ -10,14 +10,14 @@ import (
 var usdrate = float64(1.440881)
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed() {
-    oxrr := &oxrRatesResponse{}
+    oxrr := &oxrResponse{}
     err := suite.service.processRatesOxr(oxrr)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorOxrInvalidFrom)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed2() {
-    oxrr := &oxrRatesResponse{
+    oxrr := &oxrResponse{
         Base: "USD",
     }
     err := suite.service.processRatesOxr(oxrr)
@@ -45,7 +45,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 
-    oxrr := &oxrRatesResponse{
+    oxrr := &oxrResponse{
         Base: "USD",
         Rates: map[string]float64{
             "AUD": usdrate,

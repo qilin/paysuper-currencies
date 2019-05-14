@@ -21,22 +21,22 @@ const (
     cbeuUrlTemplate = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?%s"
 )
 
-type CbeuResponse struct {
-    XMLName xml.Name `xml:"http://www.gesmes.org/xml/2002-08-01 Envelope"`
-    Data    Cube1    `xml:"Cube"`
+type cbeuResponse struct {
+    XMLName xml.Name          `xml:"http://www.gesmes.org/xml/2002-08-01 Envelope"`
+    Data    cbeuResponseCube1 `xml:"Cube"`
 }
 
-type Cube1 struct {
-    XMLName xml.Name `xml:"Cube"`
-    Rates   Cube2    `xml:"Cube"`
+type cbeuResponseCube1 struct {
+    XMLName xml.Name          `xml:"Cube"`
+    Rates   cbeuResponseCube2 `xml:"Cube"`
 }
 
-type Cube2 struct {
-    XMLName xml.Name `xml:"Cube"`
-    Rates   []Cube3  `xml:"Cube"`
+type cbeuResponseCube2 struct {
+    XMLName xml.Name            `xml:"Cube"`
+    Rates   []cbeuResponseCube3 `xml:"Cube"`
 }
 
-type Cube3 struct {
+type cbeuResponseCube3 struct {
     XMLName      xml.Name `xml:"Cube"`
     CurrencyCode string   `xml:"currency,attr"`
     Value        float64  `xml:"rate,attr"`
@@ -66,7 +66,7 @@ func (s *Service) RequestRatesCbeu() error {
         return err
     }
 
-    res := &CbeuResponse{}
+    res := &cbeuResponse{}
     err = s.decodeXml(resp, res)
 
     if err != nil {
@@ -88,7 +88,7 @@ func (s *Service) RequestRatesCbeu() error {
     return nil
 }
 
-func (s *Service) processRatesCbeu(res *CbeuResponse) error {
+func (s *Service) processRatesCbeu(res *cbeuResponse) error {
 
     if len(res.Data.Rates.Rates) == 0 {
         return errors.New(errorCbeuNoResults)
@@ -108,14 +108,14 @@ func (s *Service) processRatesCbeu(res *CbeuResponse) error {
         // direct pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   rateItem.CurrencyCode + cbeuTo,
-            Rate:   rateItem.Value,
+            Rate:   s.toPrecise(rateItem.Value),
             Source: cbeuSource,
         })
 
         // inverse pair
         rates = append(rates, &currencyrates.RateData{
             Pair:   cbeuTo + rateItem.CurrencyCode,
-            Rate:   1 / rateItem.Value,
+            Rate:   s.toPrecise(1 / rateItem.Value),
             Source: cbeuSource,
         })
 
