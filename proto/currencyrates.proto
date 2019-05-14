@@ -15,6 +15,9 @@ service currencyratesService {
     }
     rpc GetCardpayRate (GetRateRequest) returns (RateData) {
     }
+
+    rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
+    }
 }
 
 message GetRateRequest {
@@ -44,4 +47,12 @@ message RateData {
     double rate = 4;
     //@inject_tag: validate:"required,alpha" json:"source" bson:"source"
     string source = 5;
+}
+
+message EmptyResponse {
+}
+
+message CorrectionCorridor {
+    //@inject_tag: validate:"required,numeric,gte=0,lte=1"
+    double value = 1;
 }

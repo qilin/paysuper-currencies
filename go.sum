@@ -976,6 +976,8 @@ github.com/technoweenie/multipartstreamer v1.0.1/go.mod h1:jNVxdtShOxzAsukZwTSw6
 github.com/tent/http-link-go v0.0.0-20130702225549-ac974c61c2f9 h1:/Bsw4C+DEdqPjt8vAqaC9LAqpAQnaCQQqmolqq3S1T4=
 github.com/tent/http-link-go v0.0.0-20130702225549-ac974c61c2f9/go.mod h1:RHkNRtSLfOK7qBTHaeSX1D6BNpI3qw7NTxsmNr4RvN8=
 github.com/testcontainers/testcontainer-go v0.0.0-20181115231424-8e868ca12c0f/go.mod h1:SrG3IY071gtmZJjGbKO+POJ57a/MMESerYNWt6ZRtKs=
+github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9 h1:7lej2RJmma5WV47QbETZmXxJvo98HC9o2uGn/+J1MI8=
+github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9/go.mod h1:EniyEfgCUM2WlvP9MQzop1DWPpQrbndrSo0njzSQoK4=
 github.com/tidwall/pretty v0.0.0-20180105212114-65a9db5fad51/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tinylib/msgp v1.0.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/tinylib/msgp v1.1.0/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=

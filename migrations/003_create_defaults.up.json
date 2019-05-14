@@ -1,0 +1,19 @@
+[
+  {
+    "insert": "paysuper_corridors",
+    "documents": [
+      {
+        "value": 0.5
+      }
+    ]
+  },
+  {
+    "findAndModify": "paysuper_corridors",
+    "update": {
+      "$currentDate": {
+        "created_at": true
+      }
+    },
+    "upsert": true
+  }
+]

@@ -13,5 +13,11 @@
   },
   {
     "create": "currency_rates_cardpay"
+  },
+  {
+    "create": "paysuper_corrections"
+  },
+  {
+    "create": "paysuper_corridors"
   }
 ]

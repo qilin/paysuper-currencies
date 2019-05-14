@@ -7,7 +7,7 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-var usdrate = float64(64.6314)
+var usdrate = float64(1.440881)
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed() {
     oxrr := &oxrRatesResponse{}
@@ -29,10 +29,10 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 
     req1 := &currencyrates.GetRateRequest{
         From: "USD",
-        To:   "RUB",
+        To:   "AUD",
     }
     req2 := &currencyrates.GetRateRequest{
-        From: "RUB",
+        From: "AUD",
         To:   "USD",
     }
     res := &currencyrates.RateData{}
@@ -48,7 +48,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
     oxrr := &oxrRatesResponse{
         Base: "USD",
         Rates: map[string]float64{
-            "RUB": usdrate,
+            "AUD": usdrate,
         },
     }
     err = suite.service.processRatesOxr(oxrr)
@@ -56,12 +56,12 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 
     err = suite.service.GetOxrRate(context.TODO(), req1, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Pair, "USDRUB")
+    assert.Equal(suite.T(), res.Pair, "USDAUD")
     assert.Equal(suite.T(), res.Rate, usdrate)
     assert.Equal(suite.T(), res.Source, oxrSource)
 
     err = suite.service.GetOxrRate(context.TODO(), req2, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Pair, "RUBUSD")
+    assert.Equal(suite.T(), res.Pair, "AUDUSD")
     assert.Equal(suite.T(), res.Rate, 1/usdrate)
 }

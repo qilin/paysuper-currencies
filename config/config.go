@@ -19,9 +19,11 @@ type Config struct {
     OxrBaseCurrencies      []string `envconfig:"OXR_BASE_CURRENCIES" default:"EUR,USD"`
     OxrAppId               string   `envconfig:"OXR_APP_ID" required:"true"`
 
-    CbrfBaseCurrencies      []string `envconfig:"CBRF_BASE_CURRENCIES" default:"EUR,USD"`
+    CbrfBaseCurrencies []string `envconfig:"CBRF_BASE_CURRENCIES" default:"EUR,USD"`
+    CbeuBaseCurrencies []string `envconfig:"CBEU_BASE_CURRENCIES" default:"USD"`
 
-    CbeuBaseCurrencies      []string `envconfig:"CBEU_BASE_CURRENCIES" default:"USD"`
+    BollingerDays   int `envconfig:"BOLLINGER_DAYS" default:"7"`
+    BollingerPeriod int `envconfig:"BOLLINGER_PERIOD" default:"21"`
 }
 
 func NewConfig() (*Config, error) {

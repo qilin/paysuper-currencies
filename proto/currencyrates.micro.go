@@ -11,6 +11,8 @@ It has these top-level messages:
 	GetRateRequest
 	GetCentralBankRateRequest
 	RateData
+	EmptyResponse
+	CorrectionCorridor
 */
 package currencyrates
 
@@ -49,6 +51,7 @@ type CurrencyratesService interface {
 	GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, opts ...client.CallOption) (*RateData, error)
 	GetStockRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
 	GetCardpayRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
+	SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, opts ...client.CallOption) (*EmptyResponse, error)
 }
 
 type currencyratesService struct {
@@ -119,6 +122,16 @@ func (c *currencyratesService) GetCardpayRate(ctx context.Context, in *GetRateRe
 	return out, nil
 }
 
+func (c *currencyratesService) SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, opts ...client.CallOption) (*EmptyResponse, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.SetPaysuperCorrectionCorridor", in)
+	out := new(EmptyResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for CurrencyratesService service
 
 type CurrencyratesServiceHandler interface {
@@ -127,6 +140,7 @@ type CurrencyratesServiceHandler interface {
 	GetCentralBankRateForDate(context.Context, *GetCentralBankRateRequest, *RateData) error
 	GetStockRate(context.Context, *GetRateRequest, *RateData) error
 	GetCardpayRate(context.Context, *GetRateRequest, *RateData) error
+	SetPaysuperCorrectionCorridor(context.Context, *CorrectionCorridor, *EmptyResponse) error
 }
 
 func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServiceHandler, opts ...server.HandlerOption) error {
@@ -136,6 +150,7 @@ func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServ
 		GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, out *RateData) error
 		GetStockRate(ctx context.Context, in *GetRateRequest, out *RateData) error
 		GetCardpayRate(ctx context.Context, in *GetRateRequest, out *RateData) error
+		SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error
 	}
 	type CurrencyratesService struct {
 		currencyratesService
@@ -166,4 +181,8 @@ func (h *currencyratesServiceHandler) GetStockRate(ctx context.Context, in *GetR
 
 func (h *currencyratesServiceHandler) GetCardpayRate(ctx context.Context, in *GetRateRequest, out *RateData) error {
 	return h.CurrencyratesServiceHandler.GetCardpayRate(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error {
+	return h.CurrencyratesServiceHandler.SetPaysuperCorrectionCorridor(ctx, in, out)
 }

@@ -7,6 +7,12 @@
           "pair": 1
         },
         "name": "pair"
+      },
+      {
+        "key": {
+          "create_date": 1
+        },
+        "name": "create_date"
       }
     ]
   },
@@ -52,6 +58,12 @@
           "pair": 1
         },
         "name": "pair"
+      },
+      {
+        "key": {
+          "create_date": 1
+        },
+        "name": "create_date"
       }
     ]
   }

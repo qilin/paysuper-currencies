@@ -15,13 +15,17 @@ import (
     currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/tools"
+    "github.com/thetruetrade/gotrade"
+    "github.com/thetruetrade/gotrade/indicators"
     "go.uber.org/zap"
     "golang.org/x/net/html/charset"
     "gopkg.in/go-playground/validator.v9"
     "io/ioutil"
+    "math"
     "net/http"
     "net/url"
     "strings"
+    "time"
 )
 
 const (
@@ -55,6 +59,13 @@ const (
     collectionSuffixPaysuper = "paysuper"
     collectionSuffixStock    = "stock"
     collectionSuffixCardpay  = "cardpay"
+
+    collectionNamePaysuperCorrections = "paysuper_corrections"
+    collectionNamePaysuperCorridors   = "paysuper_corridors"
+
+    ratesPrecision = 4
+
+    dateFormatLayout = "2006-01-02"
 )
 
 // Service is application entry point.
@@ -204,7 +215,7 @@ func (s *Service) saveRates(collectionSuffix string, rds []*currencyrates.RateDa
         data = append(data, rd)
     }
 
-    cName := fmt.Sprintf(collectionNameTemplate, pkg.CollectionRate, collectionSuffix)
+    cName := s.getCollectionName(collectionSuffix)
 
     err := s.db.Collection(cName).Insert(data...)
 
@@ -234,6 +245,26 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
     }
 }
 
+func (s *Service) SetPaysuperCorrectionCorridor(
+    ctx context.Context,
+    req *currencyrates.CorrectionCorridor,
+    res *currencyrates.EmptyResponse,
+) error {
+
+    corridor := PaysuperCorridor{
+        Value:     req.Value,
+        CreatedAt: time.Now(),
+    }
+
+    err := s.db.Collection(collectionNamePaysuperCorridors).Insert(corridor)
+    if err != nil {
+        zap.S().Errorw(errorDbInsertFailed, "error", err, "data", corridor)
+        return err
+    }
+
+    return nil
+}
+
 func (s *Service) GetOxrRate(
     ctx context.Context,
     req *currencyrates.GetRateRequest,
@@ -259,7 +290,7 @@ func (s *Service) GetCentralBankRateForDate(
         return err
     }
 
-    query := bson.M{"created_at": bson.M{"$lte": dt}}
+    query := bson.M{"created_at": bson.M{"$lte": s.Eod(dt)}}
     err = s.getRate(collectionSuffixCb, req.From, req.To, query, res)
     if err != nil {
         zap.S().Errorw(errorCentralBankRateRequest, "error", err, "req", req)
@@ -318,7 +349,7 @@ func (s *Service) getRate(collectionSuffix string, from string, to string, query
 
     query["pair"] = from + to
 
-    cName := fmt.Sprintf(collectionNameTemplate, pkg.CollectionRate, strings.ToLower(collectionSuffix))
+    cName := s.getCollectionName(collectionSuffix)
 
     err := s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
     if err != nil {
@@ -326,4 +357,67 @@ func (s *Service) getRate(collectionSuffix string, from string, to string, query
     }
 
     return nil
+}
+
+func (s *Service) GetRatesForBollinger(collectionSuffix string, pair string, dateFrom time.Time) (res []float64, err error) {
+    if !s.isPairExists(pair) {
+        return nil, errors.New(errorCurrencyPairNotExists)
+    }
+
+    cName := s.getCollectionName(collectionSuffix)
+
+    q := []bson.M{
+        {"$match": bson.M{"pair": pair, "created_at": bson.M{"$gte": s.Bod(dateFrom)}}},
+        {"$group": bson.M{
+            "_id":  bson.M{"create_date": "$create_date"},
+            "last": bson.M{"$last": "$rate"},
+        }},
+    }
+
+    var resp []map[string]interface{}
+    err = s.db.Collection(cName).Pipe(q).All(&resp)
+
+    if err != nil {
+        return nil, err
+    }
+
+    for _, val := range resp {
+        res = append(res, val["last"].(float64))
+    }
+
+    return res, nil
+}
+
+func (s *Service) Bollinger(rates []float64, timePeriod int) ([]float64, []float64, []float64) {
+
+    priceStream := gotrade.NewDailyDOHLCVStream()
+    bb, _ := indicators.NewBollingerBandsForStream(priceStream, timePeriod, gotrade.UseClosePrice)
+
+    for _, val := range rates {
+        dohlcv := gotrade.NewDOHLCVDataItem(time.Now(), 0, 0, 0, val, 0)
+        priceStream.ReceiveTick(dohlcv)
+    }
+
+    return bb.LowerBand, bb.MiddleBand, bb.UpperBand
+}
+
+// returns begin-of-day for passed date
+func (s *Service) Bod(t time.Time) time.Time {
+    year, month, day := t.Date()
+    return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
+}
+
+// returns end-of-day for passed date
+func (s *Service) Eod(t time.Time) time.Time {
+    year, month, day := t.Date()
+    return time.Date(year, month, day, 23, 59, 59, 999999999, t.Location())
+}
+
+func (s *Service) getCollectionName(suffix string) string {
+    return fmt.Sprintf(collectionNameTemplate, pkg.CollectionRate, strings.ToLower(suffix))
+}
+
+func (s *Service) toPrecise(val float64) float64 {
+    p := math.Pow(10, ratesPrecision)
+    return math.Round(val*p) / p
 }

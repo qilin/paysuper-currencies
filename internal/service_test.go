@@ -14,7 +14,7 @@ import (
 )
 
 var (
-    r = float64(72.3096)
+    r = float64(64.6314)
 )
 
 type CurrenciesratesServiceTestSuite struct {
@@ -51,12 +51,12 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 
     rates := []*currencyrates.RateData{
         {
-            Pair:   "EURRUB",
+            Pair:   "USDRUB",
             Rate:   r - 1,
             Source: "TEST",
         },
         {
-            Pair:   "EURRUB",
+            Pair:   "USDRUB",
             Rate:   r,
             Source: "TEST",
         },
@@ -79,7 +79,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestService_CreatedOk() {
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsCurrencySupported_Ok() {
-    assert.True(suite.T(), suite.service.isCurrencySupported("EUR"))
+    assert.True(suite.T(), suite.service.isCurrencySupported("USD"))
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsCurrencySupported_Fail() {
@@ -87,7 +87,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestIsCurrencySupported_Fail() {
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsPairExists_Ok() {
-    assert.True(suite.T(), suite.service.isPairExists("EURRUB"))
+    assert.True(suite.T(), suite.service.isPairExists("USDRUB"))
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsPairExists_Fail() {
@@ -101,7 +101,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestIsPairExists_Fail() {
 
 func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Ok() {
     rd := &currencyrates.RateData{
-        Pair:   "EURRUB",
+        Pair:   "USDRUB",
         Rate:   r + 1,
         Source: "TEST",
     }
@@ -117,7 +117,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Failed() {
     assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
 
     rd = &currencyrates.RateData{
-        Pair:   "USDEUR",
+        Pair:   "USDUSD",
         Source: "TEST",
     }
     err = suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
@@ -136,7 +136,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Failed() {
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Ok() {
     req := &currencyrates.GetRateRequest{
-        From: "EUR",
+        From: "USD",
         To:   "RUB",
     }
 
@@ -145,7 +145,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Ok() {
     err := suite.service.GetOxrRate(context.TODO(), req, res)
 
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Pair, "EURRUB")
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
 }
@@ -174,7 +174,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Fail() {
     assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
     req = &currencyrates.GetRateRequest{
-        From: "EUR",
+        From: "USD",
         To:   "JPY",
     }
     err = suite.service.GetOxrRate(context.TODO(), req, res)
@@ -184,7 +184,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Fail() {
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetCentralBankRateForDate_Ok() {
     req := &currencyrates.GetCentralBankRateRequest{
-        From:     "EUR",
+        From:     "USD",
         To:       "RUB",
         Datetime: ptypes.TimestampNow(),
     }
@@ -194,26 +194,26 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetCentralBankRateForDate_Ok()
     err := suite.service.GetCentralBankRateForDate(context.TODO(), req, res)
 
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Pair, "EURRUB")
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestUpdateRateOk() {
     req := &currencyrates.GetRateRequest{
-        From: "EUR",
+        From: "USD",
         To:   "RUB",
     }
     res := &currencyrates.RateData{}
 
     err := suite.service.GetOxrRate(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Pair, "EURRUB")
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
 
     rd := &currencyrates.RateData{
-        Pair:          "EURRUB",
+        Pair:          "USDRUB",
         Rate:          r + 1,
         Source:        "TEST",
     }

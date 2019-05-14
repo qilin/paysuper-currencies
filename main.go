@@ -60,11 +60,10 @@ func main() {
         case "oxr":
             err = cs.RequestRatesOxr()
             if err == nil {
-                // todo: enable paysuper recalc
-                // err = cs.RequestRatesPaysuper()
+                err = cs.SetRatesPaysuper()
             }
         case "paysuper":
-            err = cs.RequestRatesPaysuper()
+            err = cs.SetRatesPaysuper()
         case "centralbank":
             err = cs.RequestRatesCbrf()
             if err == nil {
@@ -74,6 +73,9 @@ func main() {
             err = cs.RequestRatesStock()
         case "cardpay":
             err = cs.RequestRatesCardpay()
+            if err == nil {
+                err = cs.CalculatePaysuperCorrections()
+            }
         default:
             logger.Fatal("Source is unknown, exiting")
         }

@@ -29,6 +29,7 @@ require (
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/stretchr/testify v1.3.0
+	github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9
 	go.uber.org/zap v1.9.1
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

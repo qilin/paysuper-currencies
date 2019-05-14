@@ -14,6 +14,7 @@ const (
 type MgoRateData struct {
     Id            bson.ObjectId `bson:"_id"`
     CreatedAt     time.Time     `bson:"created_at"`
+    CreateDate    string        `bson:"create_date"`
     Pair          string        `bson:"pair"`
     Rate          float64       `bson:"rate"`
     Source        string        `bson:"source"`
@@ -68,5 +69,8 @@ func (p *RateData) GetBSON() (interface{}, error) {
     } else {
         st.CreatedAt = time.Now()
     }
+
+    st.CreateDate = st.CreatedAt.Format("2006-01-02")
+
     return st, nil
 }
