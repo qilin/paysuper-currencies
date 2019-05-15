@@ -3,6 +3,8 @@ package internal
 import (
     "errors"
     "github.com/globalsign/mgo/bson"
+    "github.com/thetruetrade/gotrade"
+    "github.com/thetruetrade/gotrade/indicators"
     "go.uber.org/zap"
     "time"
 )
@@ -137,11 +139,11 @@ func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corr
 func (s *Service) getBollingerBands(collectionSuffix string, pair string, days int, timePeriod int) ([]float64, []float64, []float64, error) {
     today := time.Now()
     startDate := today.AddDate(0, 0, -1*(days+timePeriod))
-    oxrRates, err := s.GetRatesForBollinger(collectionSuffix, pair, startDate)
+    oxrRates, err := s.getRatesForBollinger(collectionSuffix, pair, startDate)
     if err != nil {
         return nil, nil, nil, err
     }
-    oxrL, oxrM, oxrU := s.Bollinger(oxrRates, timePeriod)
+    oxrL, oxrM, oxrU := s.bollinger(oxrRates, timePeriod)
     return oxrL, oxrM, oxrU, nil
 }
 
@@ -159,4 +161,46 @@ func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
     }
 
     return value, nil
+}
+
+func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dateFrom time.Time) (res []float64, err error) {
+    if !s.isPairExists(pair) {
+        return nil, errors.New(errorCurrencyPairNotExists)
+    }
+
+    cName := s.getCollectionName(collectionSuffix)
+
+    q := []bson.M{
+        {"$match": bson.M{"pair": pair, "created_at": bson.M{"$gte": s.Bod(dateFrom)}}},
+        {"$group": bson.M{
+            "_id":  bson.M{"create_date": "$create_date"},
+            "last": bson.M{"$last": "$rate"},
+        }},
+    }
+
+    var resp []map[string]interface{}
+    err = s.db.Collection(cName).Pipe(q).All(&resp)
+
+    if err != nil {
+        return nil, err
+    }
+
+    for _, val := range resp {
+        res = append(res, val["last"].(float64))
+    }
+
+    return res, nil
+}
+
+func (s *Service) bollinger(rates []float64, timePeriod int) ([]float64, []float64, []float64) {
+
+    priceStream := gotrade.NewDailyDOHLCVStream()
+    bb, _ := indicators.NewBollingerBandsForStream(priceStream, timePeriod, gotrade.UseClosePrice)
+
+    for _, val := range rates {
+        dohlcv := gotrade.NewDOHLCVDataItem(time.Now(), 0, 0, 0, val, 0)
+        priceStream.ReceiveTick(dohlcv)
+    }
+
+    return bb.LowerBand, bb.MiddleBand, bb.UpperBand
 }
