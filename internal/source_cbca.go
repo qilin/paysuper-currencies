@@ -47,8 +47,6 @@ func (s *Service) RequestRatesCbca() error {
         return err
     }
 
-    println("blah reqUrl.String()", reqUrl.String())
-
     resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
     if err != nil {

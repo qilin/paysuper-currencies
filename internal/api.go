@@ -2,10 +2,12 @@ package internal
 
 import (
     "context"
+    "errors"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
     currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
     "go.uber.org/zap"
+    "strings"
     "time"
 )
 
@@ -108,7 +110,7 @@ func (s *Service) SetPaysuperCorrectionCorridor(
     return nil
 }
 
-func (s *Service) AddCurrencyCorrectionRule(
+func (s *Service) AddRateCorrectionRule(
     ctx context.Context,
     req *currencyrates.CorrectionRule,
     res *currencyrates.EmptyResponse,
@@ -116,10 +118,20 @@ func (s *Service) AddCurrencyCorrectionRule(
 
     req.Id = bson.NewObjectId().Hex()
     req.CreatedAt = ptypes.TimestampNow()
+    req.RateType = strings.ToLower(req.RateType)
 
     if err := s.validateReq(req); err != nil {
         zap.S().Errorw(errorDbReqInvalid, "error", err, "req", req)
         return err
+    }
+
+    if len(req.PairCorrection) > 0 {
+        for pair := range req.PairCorrection {
+            if !s.isPairExists(pair) {
+                zap.S().Errorw(errorCurrencyPairNotExists, "req", req, "pair", pair)
+                return errors.New(errorCurrencyPairNotExists)
+            }
+        }
     }
 
     err := s.db.Collection(collectionNameCorrectionRules).Insert(req)
@@ -131,11 +143,16 @@ func (s *Service) AddCurrencyCorrectionRule(
     return nil
 }
 
-func (s *Service) GetCorrectionRule(
+func (s *Service) GetRateCorrectionRule(
     ctx context.Context,
-    req *currencyrates.GetCorrectionRuleRequest,
+    req *currencyrates.CorrectionRuleRequest,
     res *currencyrates.CorrectionRule,
 ) error {
+    if err := s.validateReq(req); err != nil {
+        zap.S().Errorw(errorCorrectionRuleRequestInvalid, "error", err, "req", req)
+        return err
+    }
+
     err := s.getCorrectionRule(req.RateType, req.MerchantId, res)
     if err != nil {
         zap.S().Errorw(errorCorrectionRuleNotFound, "error", err, "req", req)

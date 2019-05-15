@@ -14,7 +14,7 @@ It has these top-level messages:
 	EmptyResponse
 	CorrectionCorridor
 	CorrectionRule
-	GetCorrectionRuleRequest
+	CorrectionRuleRequest
 */
 package currencyrates
 
@@ -53,9 +53,9 @@ type CurrencyratesService interface {
 	GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, opts ...client.CallOption) (*RateData, error)
 	GetStockRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
 	GetCardpayRate(ctx context.Context, in *GetRateRequest, opts ...client.CallOption) (*RateData, error)
-	GetCorrectionRule(ctx context.Context, in *GetCorrectionRuleRequest, opts ...client.CallOption) (*CorrectionRule, error)
+	GetRateCorrectionRule(ctx context.Context, in *CorrectionRuleRequest, opts ...client.CallOption) (*CorrectionRule, error)
 	SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, opts ...client.CallOption) (*EmptyResponse, error)
-	AddCurrencyCorrectionRule(ctx context.Context, in *CorrectionRule, opts ...client.CallOption) (*EmptyResponse, error)
+	AddRateCorrectionRule(ctx context.Context, in *CorrectionRule, opts ...client.CallOption) (*EmptyResponse, error)
 }
 
 type currencyratesService struct {
@@ -126,8 +126,8 @@ func (c *currencyratesService) GetCardpayRate(ctx context.Context, in *GetRateRe
 	return out, nil
 }
 
-func (c *currencyratesService) GetCorrectionRule(ctx context.Context, in *GetCorrectionRuleRequest, opts ...client.CallOption) (*CorrectionRule, error) {
-	req := c.c.NewRequest(c.name, "CurrencyratesService.GetCorrectionRule", in)
+func (c *currencyratesService) GetRateCorrectionRule(ctx context.Context, in *CorrectionRuleRequest, opts ...client.CallOption) (*CorrectionRule, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetRateCorrectionRule", in)
 	out := new(CorrectionRule)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -146,8 +146,8 @@ func (c *currencyratesService) SetPaysuperCorrectionCorridor(ctx context.Context
 	return out, nil
 }
 
-func (c *currencyratesService) AddCurrencyCorrectionRule(ctx context.Context, in *CorrectionRule, opts ...client.CallOption) (*EmptyResponse, error) {
-	req := c.c.NewRequest(c.name, "CurrencyratesService.AddCurrencyCorrectionRule", in)
+func (c *currencyratesService) AddRateCorrectionRule(ctx context.Context, in *CorrectionRule, opts ...client.CallOption) (*EmptyResponse, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.AddRateCorrectionRule", in)
 	out := new(EmptyResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -164,9 +164,9 @@ type CurrencyratesServiceHandler interface {
 	GetCentralBankRateForDate(context.Context, *GetCentralBankRateRequest, *RateData) error
 	GetStockRate(context.Context, *GetRateRequest, *RateData) error
 	GetCardpayRate(context.Context, *GetRateRequest, *RateData) error
-	GetCorrectionRule(context.Context, *GetCorrectionRuleRequest, *CorrectionRule) error
+	GetRateCorrectionRule(context.Context, *CorrectionRuleRequest, *CorrectionRule) error
 	SetPaysuperCorrectionCorridor(context.Context, *CorrectionCorridor, *EmptyResponse) error
-	AddCurrencyCorrectionRule(context.Context, *CorrectionRule, *EmptyResponse) error
+	AddRateCorrectionRule(context.Context, *CorrectionRule, *EmptyResponse) error
 }
 
 func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServiceHandler, opts ...server.HandlerOption) error {
@@ -176,9 +176,9 @@ func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServ
 		GetCentralBankRateForDate(ctx context.Context, in *GetCentralBankRateRequest, out *RateData) error
 		GetStockRate(ctx context.Context, in *GetRateRequest, out *RateData) error
 		GetCardpayRate(ctx context.Context, in *GetRateRequest, out *RateData) error
-		GetCorrectionRule(ctx context.Context, in *GetCorrectionRuleRequest, out *CorrectionRule) error
+		GetRateCorrectionRule(ctx context.Context, in *CorrectionRuleRequest, out *CorrectionRule) error
 		SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error
-		AddCurrencyCorrectionRule(ctx context.Context, in *CorrectionRule, out *EmptyResponse) error
+		AddRateCorrectionRule(ctx context.Context, in *CorrectionRule, out *EmptyResponse) error
 	}
 	type CurrencyratesService struct {
 		currencyratesService
@@ -211,14 +211,14 @@ func (h *currencyratesServiceHandler) GetCardpayRate(ctx context.Context, in *Ge
 	return h.CurrencyratesServiceHandler.GetCardpayRate(ctx, in, out)
 }
 
-func (h *currencyratesServiceHandler) GetCorrectionRule(ctx context.Context, in *GetCorrectionRuleRequest, out *CorrectionRule) error {
-	return h.CurrencyratesServiceHandler.GetCorrectionRule(ctx, in, out)
+func (h *currencyratesServiceHandler) GetRateCorrectionRule(ctx context.Context, in *CorrectionRuleRequest, out *CorrectionRule) error {
+	return h.CurrencyratesServiceHandler.GetRateCorrectionRule(ctx, in, out)
 }
 
 func (h *currencyratesServiceHandler) SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error {
 	return h.CurrencyratesServiceHandler.SetPaysuperCorrectionCorridor(ctx, in, out)
 }
 
-func (h *currencyratesServiceHandler) AddCurrencyCorrectionRule(ctx context.Context, in *CorrectionRule, out *EmptyResponse) error {
-	return h.CurrencyratesServiceHandler.AddCurrencyCorrectionRule(ctx, in, out)
+func (h *currencyratesServiceHandler) AddRateCorrectionRule(ctx context.Context, in *CorrectionRule, out *EmptyResponse) error {
+	return h.CurrencyratesServiceHandler.AddRateCorrectionRule(ctx, in, out)
 }

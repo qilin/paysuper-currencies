@@ -15,12 +15,12 @@ service currencyratesService {
     }
     rpc GetCardpayRate (GetRateRequest) returns (RateData) {
     }
-    rpc GetCorrectionRule (GetCorrectionRuleRequest) returns (CorrectionRule) {
+    rpc GetRateCorrectionRule (CorrectionRuleRequest) returns (CorrectionRule) {
     }
 
     rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
     }
-    rpc AddCurrencyCorrectionRule (CorrectionRule) returns (EmptyResponse) {
+    rpc AddRateCorrectionRule (CorrectionRule) returns (EmptyResponse) {
     }
 }
 
@@ -74,13 +74,13 @@ message CorrectionRule {
     string rate_type = 3;
     // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
     double common_correction = 4;
-    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=3,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
+    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
     map<string, double> pair_correction = 5;
     // @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
     google.protobuf.Timestamp created_at = 6;
 }
 
-message GetCorrectionRuleRequest {
+message CorrectionRuleRequest {
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
     string merchant_id = 1;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"

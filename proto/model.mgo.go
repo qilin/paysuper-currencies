@@ -22,7 +22,7 @@ type MgoRateData struct {
 
 type MgoCorrectionRule struct {
     Id               bson.ObjectId      `bson:"_id"`
-    MerchantId       bson.ObjectId      `bson:"merchant_id"`
+    MerchantId       string             `bson:"merchant_id"`
     RateType         string             `bson:"rate_type"`
     CommonCorrection float64            `bson:"common_correction"`
     PairCorrection   map[string]float64 `bson:"pair_correction"`
@@ -93,7 +93,7 @@ func (p *CorrectionRule) SetBSON(raw bson.Raw) error {
     }
 
     p.Id = decoded.Id.Hex()
-    p.MerchantId = decoded.MerchantId.Hex()
+    p.MerchantId = decoded.MerchantId
     p.RateType = decoded.RateType
     p.CommonCorrection = decoded.CommonCorrection
     p.PairCorrection = decoded.PairCorrection
@@ -111,6 +111,7 @@ func (p *CorrectionRule) GetBSON() (interface{}, error) {
         RateType:         p.RateType,
         CommonCorrection: p.CommonCorrection,
         PairCorrection:   p.PairCorrection,
+        MerchantId:   p.MerchantId,
     }
 
     if len(p.Id) <= 0 {
@@ -120,13 +121,6 @@ func (p *CorrectionRule) GetBSON() (interface{}, error) {
             return nil, errors.New(errorInvalidObjectId)
         }
 
-        st.Id = bson.ObjectIdHex(p.Id)
-    }
-
-    if len(p.MerchantId) > 0 {
-        if bson.IsObjectIdHex(p.Id) == false {
-            return nil, errors.New(errorInvalidObjectId)
-        }
         st.Id = bson.ObjectIdHex(p.Id)
     }
 
