@@ -15,5 +15,25 @@
       }
     },
     "upsert": true
+  },
+  {
+    "insert": "correction_rules",
+    "documents": [
+      {
+        "rate_type": "stock",
+        "merchant_id": "",
+        "common_correction": 0,
+        "pair_correction": null
+      }
+    ]
+  },
+  {
+    "findAndModify": "correction_rules",
+    "update": {
+      "$currentDate": {
+        "created_at": true
+      }
+    },
+    "upsert": true
   }
 ]

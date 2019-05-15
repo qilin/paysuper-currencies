@@ -66,7 +66,7 @@ const (
     collectionNamePaysuperCorridors   = "paysuper_corridors"
     collectionNameCorrectionRules     = "correction_rules"
 
-    ratesPrecision = 4
+    ratesPrecision = 8
 
     dateFormatLayout = "2006-01-02"
 )
@@ -307,12 +307,21 @@ func (s *Service) toPrecise(val float64) float64 {
     return math.Round(val*p) / p
 }
 
-func (s *Service) applyCorrectionRule(rd *currencyrates.RateData, rateType string, merchantId string) {
+func (s *Service) applyCorrection(rd *currencyrates.RateData, rateType string, merchantId string) {
     rule := &currencyrates.CorrectionRule{}
     err := s.getCorrectionRule(rateType, merchantId, rule)
     if err != nil {
+        // here is simple return, no error report need
         return
     }
+
+    s.applyCorrectionRule(rd, rule)
+}
+
+func (s *Service) applyCorrectionRule(rd *currencyrates.RateData, rule *currencyrates.CorrectionRule) {
     value := rule.GetCorrectionValue(rd.Pair)
+    if value == 0 {
+        return
+    }
     rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
 }

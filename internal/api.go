@@ -21,7 +21,7 @@ func (s *Service) GetOxrRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
-    s.applyCorrectionRule(res, collectionSuffixOxr, req.MerchantId)
+    s.applyCorrection(res, collectionSuffixOxr, req.MerchantId)
     return nil
 }
 
@@ -44,7 +44,7 @@ func (s *Service) GetCentralBankRateForDate(
         return err
     }
 
-    s.applyCorrectionRule(res, collectionSuffixCb, req.MerchantId)
+    s.applyCorrection(res, collectionSuffixCb, req.MerchantId)
     return nil
 }
 
@@ -58,7 +58,7 @@ func (s *Service) GetPaysuperRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
-    s.applyCorrectionRule(res, collectionSuffixPaysuper, req.MerchantId)
+    s.applyCorrection(res, collectionSuffixPaysuper, req.MerchantId)
     return nil
 }
 
@@ -72,7 +72,7 @@ func (s *Service) GetStockRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
-    s.applyCorrectionRule(res, collectionSuffixStock, req.MerchantId)
+    s.applyCorrection(res, collectionSuffixStock, req.MerchantId)
     return nil
 }
 
@@ -86,7 +86,7 @@ func (s *Service) GetCardpayRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
-    s.applyCorrectionRule(res, collectionSuffixCardpay, req.MerchantId)
+    s.applyCorrection(res, collectionSuffixCardpay, req.MerchantId)
     return nil
 }
 

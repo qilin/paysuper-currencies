@@ -38,8 +38,8 @@ var (
     oxrBUCtrl = []float64{72.90984911739135, 73.0376451238368, 73.1565858085217, 73.2620399813312,
         73.44794409195622, 73.57029700078446, 73.65804378947364}
 
-    corrEurRubCtrl = float64(0.3380)
-    corrRubEurCtrl = float64(0)
+    corrEurRubCtrl = float64(0.33797418)
+    corrRubEurCtrl = float64(0.00001073)
 )
 
 func (suite *CurrenciesratesServiceTestSuite) reverse(numbers []float64) []float64 {
