@@ -19,6 +19,7 @@ func (s *Service) GetOxrRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
+    s.applyCorrectionRule(res, collectionSuffixOxr, req.MerchantId)
     return nil
 }
 
@@ -41,6 +42,7 @@ func (s *Service) GetCentralBankRateForDate(
         return err
     }
 
+    s.applyCorrectionRule(res, collectionSuffixCb, req.MerchantId)
     return nil
 }
 
@@ -54,6 +56,7 @@ func (s *Service) GetPaysuperRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
+    s.applyCorrectionRule(res, collectionSuffixPaysuper, req.MerchantId)
     return nil
 }
 
@@ -67,6 +70,7 @@ func (s *Service) GetStockRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
+    s.applyCorrectionRule(res, collectionSuffixStock, req.MerchantId)
     return nil
 }
 
@@ -80,6 +84,7 @@ func (s *Service) GetCardpayRate(
         zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
         return err
     }
+    s.applyCorrectionRule(res, collectionSuffixCardpay, req.MerchantId)
     return nil
 }
 
@@ -100,5 +105,41 @@ func (s *Service) SetPaysuperCorrectionCorridor(
         return err
     }
 
+    return nil
+}
+
+func (s *Service) AddCurrencyCorrectionRule(
+    ctx context.Context,
+    req *currencyrates.CorrectionRule,
+    res *currencyrates.EmptyResponse,
+) error {
+
+    req.Id = bson.NewObjectId().Hex()
+    req.CreatedAt = ptypes.TimestampNow()
+
+    if err := s.validateReq(req); err != nil {
+        zap.S().Errorw(errorDbReqInvalid, "error", err, "req", req)
+        return err
+    }
+
+    err := s.db.Collection(collectionNameCorrectionRules).Insert(req)
+    if err != nil {
+        zap.S().Errorw(errorDbInsertFailed, "error", err, "req", req)
+        return err
+    }
+
+    return nil
+}
+
+func (s *Service) GetCorrectionRule(
+    ctx context.Context,
+    req *currencyrates.GetCorrectionRuleRequest,
+    res *currencyrates.CorrectionRule,
+) error {
+    err := s.getCorrectionRule(req.RateType, req.MerchantId, res)
+    if err != nil {
+        zap.S().Errorw(errorCorrectionRuleNotFound, "error", err, "req", req)
+        return err
+    }
     return nil
 }

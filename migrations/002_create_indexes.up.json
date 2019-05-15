@@ -66,5 +66,17 @@
         "name": "create_date"
       }
     ]
+  },
+  {
+    "createIndexes": "correction_rules",
+    "indexes": [
+      {
+        "key": {
+          "merchant_id": 1,
+          "rate_type": 1
+        },
+        "name": "merchant_rate_type"
+      }
+    ]
   }
 ]

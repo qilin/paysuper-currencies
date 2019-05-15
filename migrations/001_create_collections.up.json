@@ -19,5 +19,8 @@
   },
   {
     "create": "paysuper_corridors"
+  },
+  {
+    "create": "correction_rules"
   }
 ]

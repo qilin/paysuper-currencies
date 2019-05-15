@@ -64,7 +64,7 @@ func main() {
             }
         case "paysuper":
             err = cs.SetRatesPaysuper()
-        case "centralbank":
+        case "centralbanks":
             err = cs.RequestRatesCbrf()
             if err == nil {
                 err = cs.RequestRatesCbeu()

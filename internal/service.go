@@ -8,6 +8,7 @@ import (
     "errors"
     "fmt"
     "github.com/centrifugal/gocent"
+    "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/config"
@@ -43,6 +44,7 @@ const (
     errorCurrentRateRequest       = "current rate request error"
     errorCentralBankRateRequest   = "central bank rate request error"
     errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
+    errorCorrectionRuleNotFound   = "correction rule not found"
 
     MIMEApplicationJSON = "application/json"
     MIMEApplicationXML  = "application/xml"
@@ -61,6 +63,7 @@ const (
 
     collectionNamePaysuperCorrections = "paysuper_corrections"
     collectionNamePaysuperCorridors   = "paysuper_corridors"
+    collectionNameCorrectionRules     = "correction_rules"
 
     ratesPrecision = 4
 
@@ -246,6 +249,24 @@ func (s *Service) saveRates(collectionSuffix string, rds []*currencyrates.RateDa
     return nil
 }
 
+func (s *Service) getCorrectionRule(rateType string, merchantId string, r *currencyrates.CorrectionRule) error {
+
+    query := bson.M{"rate_type": rateType, "merchant_id": merchantId}
+    err := s.db.Collection(collectionNameCorrectionRules).Find(query).Sort("-_id").Limit(1).One(&r)
+
+    if err == mgo.ErrNotFound && merchantId != "" {
+        query = bson.M{"rate_type": rateType, "merchant_id": ""}
+        err = s.db.Collection(collectionNameCorrectionRules).Find(query).Sort("-_id").Limit(1).One(&r)
+    }
+
+    if err != nil {
+        zap.S().Warnw(errorCorrectionRuleNotFound, "error", err, "rateType", rateType, "merchantId", merchantId)
+        return err
+    }
+
+    return nil
+}
+
 func (s *Service) sendCentrifugoMessage(message string, error error) {
     msg := map[string]interface{}{
         centrifugoErrorMessage: message,
@@ -283,4 +304,14 @@ func (s *Service) getCollectionName(suffix string) string {
 func (s *Service) toPrecise(val float64) float64 {
     p := math.Pow(10, ratesPrecision)
     return math.Round(val*p) / p
+}
+
+func (s *Service) applyCorrectionRule(rd *currencyrates.RateData, rateType string, merchantId string) {
+    rule := &currencyrates.CorrectionRule{}
+    err := s.getCorrectionRule(rateType, merchantId, rule)
+    if err != nil {
+        return
+    }
+    value := rule.GetCorrectionValue(rd.Pair)
+    rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
 }

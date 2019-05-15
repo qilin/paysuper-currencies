@@ -44,7 +44,7 @@ To start app in console mode you must set `-source` flag in command line to one 
 
 - `oxr` - to get rates from openexchangerates.org and recalculate paysuper prediction rates
 - `paysuper` - to recalculate paysuper prediction rates only
-- `centralbank` - to get rates from central banks (currently from cbr.ru and ecb.europa.eu)
+- `centralbanks` - to get rates from central banks (currently from cbr.ru and ecb.europa.eu)
 - `stock` - to get stock rates (currently not implemented)
 - `cardpay` - to get cardpay rates (currently not implemented)
 

@@ -15,8 +15,12 @@ service currencyratesService {
     }
     rpc GetCardpayRate (GetRateRequest) returns (RateData) {
     }
+    rpc GetCorrectionRule (GetCorrectionRuleRequest) returns (CorrectionRule) {
+    }
 
     rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
+    }
+    rpc AddCurrencyCorrectionRule (CorrectionRule) returns (EmptyResponse) {
     }
 }
 
@@ -25,6 +29,8 @@ message GetRateRequest {
     string from = 1;
     //@inject_tag: validate:"required,alpha,len=3"
     string to = 2;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 3;
 }
 
 message GetCentralBankRateRequest {
@@ -34,6 +40,8 @@ message GetCentralBankRateRequest {
     string to = 2;
     //@inject_tag: validate:"required"
     google.protobuf.Timestamp datetime = 3;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 4;
 }
 
 message RateData {
@@ -55,4 +63,26 @@ message EmptyResponse {
 message CorrectionCorridor {
     //@inject_tag: validate:"required,numeric,gte=0,lte=1"
     double value = 1;
+}
+
+message CorrectionRule {
+    // @inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
+    string id = 1;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24" json:"merchant_id" bson:"merchant_id"
+    string merchant_id = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay" json:"rate_type" bson:"rate_type"
+    string rate_type = 3;
+    // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
+    double common_correction = 4;
+    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=3,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
+    map<string, double> pair_correction = 5;
+    // @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message GetCorrectionRuleRequest {
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 1;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 2;
 }
