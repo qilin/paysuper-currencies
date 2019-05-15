@@ -7,7 +7,7 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-var usdrate = float64(1.440881)
+var usdrate = float64(1.4408801)
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed() {
     oxrr := &oxrResponse{}
@@ -57,11 +57,11 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
     err = suite.service.GetOxrRate(context.TODO(), req1, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "USDAUD")
-    assert.Equal(suite.T(), res.Rate, usdrate)
+    assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(usdrate))
     assert.Equal(suite.T(), res.Source, oxrSource)
 
     err = suite.service.GetOxrRate(context.TODO(), req2, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "AUDUSD")
-    assert.Equal(suite.T(), res.Rate, 1/usdrate)
+    assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(1/usdrate))
 }

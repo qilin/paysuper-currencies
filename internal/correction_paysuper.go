@@ -13,9 +13,13 @@ const (
     corridorMin = float64(0)
     corridorMax = float64(1)
 
-    errorInvalidCorrectionCoridor = "invalid correction corridor value"
-    errorCalculateCorrection      = "can't calculate correction"
-    errorGetCorrection            = "can't get correction value"
+    errorNotEnoughRatesDataForBollinger = "not enough rates data for Bollinger"
+    errorInvalidBollingerBandsLength    = "invalid bollinger bands length"
+    errorInvalidCorrectionCoridor       = "invalid correction corridor value"
+    errorInvalidBollingerDays           = "invalid Bollinger days"
+    errorInvalidBollingerPeriod         = "invalid Bollinger period"
+    errorCalculateCorrection            = "can't calculate correction"
+    errorGetCorrection                  = "can't get correction value"
 )
 
 type PaysuperCorrection struct {
@@ -49,7 +53,17 @@ func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 
 func (s *Service) CalculatePaysuperCorrections() error {
     days := s.cfg.BollingerDays
+    if days < 1 {
+        zap.S().Errorw(errorInvalidBollingerDays, "days", days)
+        return errors.New(errorInvalidBollingerDays)
+    }
+
     timePeriod := s.cfg.BollingerPeriod
+    if timePeriod < 2 {
+        zap.S().Errorw(errorInvalidBollingerPeriod, "timePeriod", timePeriod)
+        return errors.New(errorInvalidBollingerPeriod)
+    }
+
     corridorWidth, err := s.getPaysuperCorrectionCorridorWidth()
     if err != nil {
         zap.S().Errorw(errorCalculateCorrection, "error", err)
@@ -137,14 +151,18 @@ func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corr
 }
 
 func (s *Service) getBollingerBands(collectionSuffix string, pair string, days int, timePeriod int) ([]float64, []float64, []float64, error) {
-    today := time.Now()
-    startDate := today.AddDate(0, 0, -1*(days+timePeriod))
-    oxrRates, err := s.getRatesForBollinger(collectionSuffix, pair, startDate)
+    today := s.Bod(time.Now())
+    totalDays := days + timePeriod - 1
+    startDate := today.AddDate(0, 0, -1*totalDays)
+    rates, err := s.getRatesForBollinger(collectionSuffix, pair, startDate, totalDays)
     if err != nil {
         return nil, nil, nil, err
     }
-    oxrL, oxrM, oxrU := s.bollinger(oxrRates, timePeriod)
-    return oxrL, oxrM, oxrU, nil
+    l, m, u := s.bollinger(rates, timePeriod)
+    if len(l) != days || len(m) != days || len(u) != days {
+        return nil, nil, nil, errors.New(errorInvalidBollingerBandsLength)
+    }
+    return l, m, u, nil
 }
 
 func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
@@ -163,7 +181,7 @@ func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
     return value, nil
 }
 
-func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dateFrom time.Time) (res []float64, err error) {
+func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dateFrom time.Time, limit int) (res []float64, err error) {
     if !s.isPairExists(pair) {
         return nil, errors.New(errorCurrencyPairNotExists)
     }
@@ -176,6 +194,7 @@ func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dat
             "_id":  bson.M{"create_date": "$create_date"},
             "last": bson.M{"$last": "$rate"},
         }},
+        {"$sort": bson.M{"_id": 1}},
     }
 
     var resp []map[string]interface{}
@@ -185,7 +204,11 @@ func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dat
         return nil, err
     }
 
-    for _, val := range resp {
+    if len(resp) < limit {
+        return nil, errors.New(errorNotEnoughRatesDataForBollinger)
+    }
+
+    for _, val := range resp[len(resp)-limit:] {
         res = append(res, val["last"].(float64))
     }
 
