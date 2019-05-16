@@ -4,7 +4,7 @@ import (
     "context"
     "github.com/globalsign/mgo/bson"
     "github.com/paysuper/paysuper-currencies-rates/config"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/suite"

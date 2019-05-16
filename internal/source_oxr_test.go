@@ -3,7 +3,7 @@ package internal
 import (
     "context"
     "github.com/globalsign/mgo"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/stretchr/testify/assert"
 )
 

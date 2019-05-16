@@ -2,7 +2,7 @@ package internal
 
 import (
     "github.com/globalsign/mgo/bson"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "go.uber.org/zap"
 )
 

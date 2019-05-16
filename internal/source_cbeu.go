@@ -4,13 +4,14 @@ import (
     "encoding/xml"
     "errors"
     "fmt"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/satori/go.uuid"
     "go.uber.org/zap"
     "net/http"
 )
 
 const (
+    errorCbeuUrlValidationFailed   = "CBEU Rates url validation failed"
     errorCbeuRequestFailed         = "CBEU Rates request failed"
     errorCbeuResponseParsingFailed = "CBEU Rates response parsing failed"
     errorCbeuSaveRatesFailed       = "CBEU Rates save data failed"
@@ -53,8 +54,8 @@ func (s *Service) RequestRatesCbeu() error {
     reqUrl, err := s.validateUrl(fmt.Sprintf(cbeuUrlTemplate, uuid.NewV4().String()))
 
     if err != nil {
-        zap.S().Errorw(errorOxrUrlValidationFailed, "error", err)
-        s.sendCentrifugoMessage(errorOxrUrlValidationFailed, err)
+        zap.S().Errorw(errorCbeuUrlValidationFailed, "error", err)
+        s.sendCentrifugoMessage(errorCbeuUrlValidationFailed, err)
         return err
     }
 

@@ -5,7 +5,7 @@ import (
     "errors"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "go.uber.org/zap"
     "strings"
     "time"

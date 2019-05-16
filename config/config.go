@@ -10,8 +10,9 @@ type Config struct {
 
     MetricsPort int `envconfig:"METRICS_PORT" required:"false" default:"80"`
 
-    CentrifugoSecret string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
-    CentrifugoURL    string `envconfig:"CENTRIFUGO_URL" required:"false" default:"http://127.0.0.1:8000"`
+    CentrifugoSecret  string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
+    CentrifugoURL     string `envconfig:"CENTRIFUGO_URL" required:"false" default:"http://127.0.0.1:8000"`
+    CentrifugoChannel string `envconfig:"CENTRIFUGO_CHANNEL" default:"paysuper:admin"`
 
     MicroRegistry string `envconfig:"MICRO_REGISTRY" required:"false"`
 

@@ -3,7 +3,7 @@ package internal
 import (
     "errors"
     "fmt"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "go.uber.org/zap"
     "net/http"
     "time"

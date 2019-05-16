@@ -13,7 +13,7 @@ import (
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/config"
     "github.com/paysuper/paysuper-currencies-rates/pkg"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/tools"
     "go.uber.org/zap"
@@ -28,7 +28,6 @@ import (
 )
 
 const (
-    centrifugoChannel      = "currency_rates-failed"
     centrifugoErrorMessage = "currency_rates_message"
     centrifugoErrorError   = "currency_rates_error"
 
@@ -281,7 +280,7 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
         return
     }
 
-    if err = s.centrifugoClient.Publish(context.Background(), centrifugoChannel, b); err != nil {
+    if err = s.centrifugoClient.Publish(context.Background(), s.cfg.CentrifugoChannel, b); err != nil {
         zap.S().Errorw(errorCentrifugoSendMessage, "error", err, "message", message, "original_error", error)
     }
 }

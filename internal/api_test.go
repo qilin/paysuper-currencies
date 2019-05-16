@@ -5,7 +5,7 @@ import (
     "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/stretchr/testify/assert"
 )
 

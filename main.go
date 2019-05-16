@@ -11,7 +11,7 @@ import (
     "github.com/paysuper/paysuper-currencies-rates/config"
     "github.com/paysuper/paysuper-currencies-rates/internal"
     "github.com/paysuper/paysuper-currencies-rates/pkg"
-    currencyrates "github.com/paysuper/paysuper-currencies-rates/proto"
+    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/pkg/constant"
     "github.com/prometheus/client_golang/prometheus/promhttp"
