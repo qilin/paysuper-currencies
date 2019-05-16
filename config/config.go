@@ -28,11 +28,42 @@ type Config struct {
 
     BollingerDays   int `envconfig:"BOLLINGER_DAYS" default:"7"`
     BollingerPeriod int `envconfig:"BOLLINGER_PERIOD" default:"21"`
+
+    OxrSupportedCurrenciesParsed map[string]bool
+    CbrfBaseCurrenciesParsed     map[string]bool
+    CbeuBaseCurrenciesParsed     map[string]bool
+    CbauBaseCurrenciesParsed     map[string]bool
+    CbplBaseCurrenciesParsed     map[string]bool
 }
 
 func NewConfig() (*Config, error) {
     cfg := &Config{}
     err := envconfig.Process("", cfg)
+
+    cfg.OxrSupportedCurrenciesParsed = make(map[string]bool, len(cfg.OxrSupportedCurrencies))
+    for _, v := range cfg.OxrSupportedCurrencies {
+        cfg.OxrSupportedCurrenciesParsed[v] = true
+    }
+
+    cfg.CbrfBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbrfBaseCurrencies))
+    for _, v := range cfg.CbrfBaseCurrencies {
+        cfg.CbrfBaseCurrenciesParsed[v] = true
+    }
+
+    cfg.CbeuBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbeuBaseCurrencies))
+    for _, v := range cfg.CbeuBaseCurrencies {
+        cfg.CbeuBaseCurrenciesParsed[v] = true
+    }
+
+    cfg.CbauBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbauBaseCurrencies))
+    for _, v := range cfg.CbauBaseCurrencies {
+        cfg.CbauBaseCurrenciesParsed[v] = true
+    }
+
+    cfg.CbplBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbplBaseCurrencies))
+    for _, v := range cfg.CbplBaseCurrencies {
+        cfg.CbplBaseCurrenciesParsed[v] = true
+    }
 
     return cfg, err
 }

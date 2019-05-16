@@ -178,16 +178,11 @@ func (s *Service) isPairExists(pair string) bool {
 }
 
 func (s *Service) isCurrencySupported(cur string) bool {
-    return s.contains(s.cfg.OxrSupportedCurrencies, cur)
+    return s.contains(s.cfg.OxrSupportedCurrenciesParsed, cur)
 }
 
-func (s *Service) contains(slice []string, item string) bool {
-    set := make(map[string]struct{}, len(slice))
-    for _, s := range slice {
-        set[s] = struct{}{}
-    }
-
-    _, ok := set[item]
+func (s *Service) contains(slice map[string]bool, item string) bool {
+    _, ok := slice[item]
     return ok
 }
 

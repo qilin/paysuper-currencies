@@ -102,7 +102,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
 
     for _, rateItem := range res.Data.Rates.Rates {
 
-        if !s.contains(s.cfg.CbeuBaseCurrencies, rateItem.CurrencyCode) {
+        if !s.contains(s.cfg.CbeuBaseCurrenciesParsed, rateItem.CurrencyCode) {
             continue
         }
 

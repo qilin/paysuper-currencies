@@ -85,7 +85,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) error {
 
     for _, rateItem := range res.Rates {
 
-        if !s.contains(s.cfg.CbrfBaseCurrencies, rateItem.CurrencyCode) {
+        if !s.contains(s.cfg.CbrfBaseCurrenciesParsed, rateItem.CurrencyCode) {
             continue
         }
 

@@ -94,7 +94,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
 
         cFrom := rateItem.Statistics.ExchangeRate.TargetCurrency
 
-        if !s.contains(s.cfg.CbauBaseCurrencies, cFrom) {
+        if !s.contains(s.cfg.CbauBaseCurrenciesParsed, cFrom) {
             continue
         }
 
