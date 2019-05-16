@@ -251,9 +251,9 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
 
     // adding default correction rule with old date
     reqAdd := &currencyrates.CorrectionRule{
-        RateType: "oxr",
+        RateType:         "oxr",
         CommonCorrection: 1,
-        CreatedAt: created,
+        CreatedAt:        created,
     }
     resAdd := &currencyrates.EmptyResponse{}
     err := suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
@@ -274,10 +274,10 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
 
     // adding special correction rule for merchant
     reqAdd = &currencyrates.CorrectionRule{
-        RateType:   "oxr",
+        RateType:         "oxr",
         CommonCorrection: 2,
-        MerchantId: merchantId,
-        CreatedAt: created,
+        MerchantId:       merchantId,
+        CreatedAt:        created,
     }
     err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
     assert.NoError(suite.T(), err)
@@ -302,7 +302,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
 
     // add more fresh default correction rule
     reqAdd = &currencyrates.CorrectionRule{
-        RateType: "oxr",
+        RateType:         "oxr",
         CommonCorrection: 3,
     }
     err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
@@ -324,9 +324,9 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
 
     // updating special correction rule for merchant
     reqAdd = &currencyrates.CorrectionRule{
-        RateType:   "oxr",
+        RateType:         "oxr",
         CommonCorrection: 4,
-        MerchantId: merchantId,
+        MerchantId:       merchantId,
     }
     err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
     assert.NoError(suite.T(), err)
@@ -345,4 +345,59 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
     assert.Equal(suite.T(), res3.MerchantId, "")
     assert.Equal(suite.T(), res3.CommonCorrection, float64(3))
 
+}
+
+func (suite *CurrenciesratesServiceTestSuite) TestExchangeCurrency_Ok() {
+    merchantId := bson.NewObjectId().Hex()
+
+    req := &currencyrates.ExchangeCurrencyRequest{
+        From:       "USD",
+        To:         "RUB",
+        MerchantId: merchantId,
+        Amount:     100,
+        RateType:   collectionSuffixOxr,
+    }
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    // requesting exchange
+    err := suite.service.ExchangeCurrency(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
+    assert.Equal(suite.T(), res.Correction, float64(0))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+
+    // adding default correction rule with old date
+    reqAdd := &currencyrates.CorrectionRule{
+        RateType:         "oxr",
+        CommonCorrection: 1,
+    }
+    resAdd := &currencyrates.EmptyResponse{}
+    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    assert.NoError(suite.T(), err)
+
+    // requesting exchange again
+    err = suite.service.ExchangeCurrency(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6528.424242))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(65.28424242))
+    assert.Equal(suite.T(), res.Correction, float64(1))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+
+    // adding special correction rule for merchant
+    reqAdd = &currencyrates.CorrectionRule{
+        RateType:         "oxr",
+        CommonCorrection: -2,
+        MerchantId:       merchantId,
+    }
+    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    assert.NoError(suite.T(), err)
+
+    // requesting exchange ones more
+    err = suite.service.ExchangeCurrency(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6336.411765))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(63.36411765))
+    assert.Equal(suite.T(), res.Correction, float64(-2))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
 }

@@ -18,6 +18,9 @@ service currencyratesService {
     rpc GetRateCorrectionRule (CorrectionRuleRequest) returns (CorrectionRule) {
     }
 
+    rpc ExchangeCurrency (ExchangeCurrencyRequest) returns (ExchangeCurrencyResponse) {
+    }
+
     rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
     }
     rpc AddRateCorrectionRule (CorrectionRule) returns (EmptyResponse) {
@@ -85,4 +88,28 @@ message CorrectionRuleRequest {
     string merchant_id = 1;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 2;
+}
+
+message ExchangeCurrencyRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 3;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+    string rate_type = 4;
+    // @inject_tag: validate:"numeric,gte=0"
+    double amount = 5;
+}
+
+message ExchangeCurrencyResponse {
+    // @inject_tag: validate:"numeric,gte=0"
+    double exchanged_amount = 1;
+    //@inject_tag: validate:"required,numeric,gt=0" json:"rate" bson:"exchange_rate"
+    double exchange_rate = 2;
+    // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"correction"
+    double correction = 3;
+    //@inject_tag: validate:"required,numeric,gt=0" json:"original_rate"
+    double original_rate = 4;
 }

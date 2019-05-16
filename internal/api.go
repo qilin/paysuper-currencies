@@ -160,3 +160,37 @@ func (s *Service) GetRateCorrectionRule(
     }
     return nil
 }
+
+func (s *Service) ExchangeCurrency(
+    ctx context.Context,
+    req *currencyrates.ExchangeCurrencyRequest,
+    res *currencyrates.ExchangeCurrencyResponse,
+) error {
+    rd := &currencyrates.RateData{}
+    err := s.getRate(req.RateType, req.From, req.To, bson.M{}, rd)
+    if err != nil {
+        zap.S().Errorw(errorCurrentRateRequest, "error", err, "req", req)
+        return err
+    }
+
+    rule := &currencyrates.CorrectionRule{}
+    err = s.getCorrectionRule(req.RateType, req.MerchantId, rule)
+    if err != nil {
+        zap.S().Warnw(errorCorrectionRuleNotFound, "error", err, "req", req)
+        s.sendCentrifugoMessage(errorCorrectionRuleNotFound, err)
+    }
+
+    res.Correction = rule.GetCorrectionValue(rd.Pair)
+
+    // applyCorrectionRule mutate rd object!
+    // so, firstly save original rate to response,
+    // than apply correction rule
+    // and after that save corrected rate to response
+    res.OriginalRate = rd.Rate
+    s.applyCorrectionRule(rd, rule)
+    res.ExchangeRate = rd.Rate
+
+    res.ExchangedAmount = s.toPrecise(req.Amount * res.ExchangeRate)
+
+    return nil
+}
