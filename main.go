@@ -1,6 +1,7 @@
 package main
 
 import (
+    "context"
     "flag"
     "fmt"
     "github.com/InVisionApp/go-health"
@@ -99,8 +100,27 @@ func main() {
         return
     }
 
-    initHealth(cs, cfg.MetricsPort)
-    initPrometheus()
+    router := http.NewServeMux()
+    router.Handle("/metrics", promhttp.Handler())
+
+    h := health.New()
+    err = h.AddChecks([]*health.Config{
+        {
+            Name:     "health-check",
+            Checker:  cs,
+            Interval: time.Duration(1) * time.Second,
+            Fatal:    true,
+        },
+    })
+    if err != nil {
+        logger.Fatal("Health check register failed", zap.Error(err))
+    }
+    router.HandleFunc("/health", handlers.NewJSONHandlerFunc(h, nil))
+
+    httpServer := &http.Server{
+        Addr:    fmt.Sprintf(":%d", cfg.MetricsPort),
+        Handler: router,
+    }
 
     var ms micro.Service
     options := []micro.Option{
@@ -109,14 +129,30 @@ func main() {
         micro.WrapHandler(prometheus.NewHandlerWrapper()),
         micro.BeforeStart(func() error {
             go func() {
-                if err = http.ListenAndServe(fmt.Sprintf(":%d", cfg.MetricsPort), nil); err != nil {
-                    logger.Fatal("Metrics listen failed", zap.Error(err))
+                logger.Info("Metrics and health check listening", zap.Int("port", cfg.MetricsPort))
+                if err = httpServer.ListenAndServe(); err != nil {
+                    logger.Error("Metrics and health check listen failed", zap.Error(err))
                 }
             }()
             return nil
         }),
         micro.AfterStop(func() error {
+            ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+            defer cancel()
+
+            if err := httpServer.Shutdown(ctx); err != nil {
+                logger.Fatal("Http server shutdown failed", zap.Error(err))
+            }
+            logger.Info("Http server stopped")
+
             db.Close()
+            logger.Info("Db closed")
+
+            if err := logger.Sync(); err != nil {
+                logger.Fatal("Logger sync failed", zap.Error(err))
+            } else {
+                logger.Info("Logger synced")
+            }
             return nil
         }),
     }
@@ -139,32 +175,4 @@ func main() {
     if err := ms.Run(); err != nil {
         logger.Fatal("Can`t run service", zap.Error(err))
     }
-}
-
-func initHealth(checker health.ICheckable, port int) {
-    h := health.New()
-    err := h.AddChecks([]*health.Config{
-        {
-            Name:     "health-check",
-            Checker:  checker,
-            Interval: time.Duration(1) * time.Second,
-            Fatal:    true,
-        },
-    })
-
-    if err != nil {
-        zap.L().Fatal("Health check register failed", zap.Error(err))
-    }
-
-    zap.L().Info("Health check listening port", zap.Int("port", port))
-
-    if err = h.Start(); err != nil {
-        zap.L().Fatal("Health check start failed", zap.Error(err))
-    }
-
-    http.HandleFunc("/health", handlers.NewJSONHandlerFunc(h, nil))
-}
-
-func initPrometheus() {
-    http.Handle("/metrics", promhttp.Handler())
 }
