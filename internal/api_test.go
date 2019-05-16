@@ -92,7 +92,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestUpdateRateOk() {
         Rate:   r + 1,
         Source: "TEST",
     }
-    err = suite.service.saveRates(collectionSuffixOxr, []*currencyrates.RateData{rd})
+    err = suite.service.saveRates(collectionSuffixOxr, []interface{}{rd})
     assert.NoError(suite.T(), err)
 
     err = suite.service.GetOxrRate(context.TODO(), req, res)

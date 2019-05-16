@@ -78,7 +78,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) error {
         return errors.New(errorCbrfNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     l := len(s.cfg.CbrfBaseCurrencies)
     c := 0

@@ -48,13 +48,13 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
     suite.service, err = NewService(suite.config, db)
     assert.NoError(suite.T(), err, "Service creation failed")
 
-    rates := []*currencyrates.RateData{
-        {
+    rates := []interface{}{
+        &currencyrates.RateData{
             Pair:   "USDRUB",
             Rate:   r - 1,
             Source: "TEST",
         },
-        {
+        &currencyrates.RateData{
             Pair:   "USDRUB",
             Rate:   r,
             Source: "TEST",
@@ -104,33 +104,8 @@ func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Ok() {
         Rate:   r + 1,
         Source: "TEST",
     }
-    err := suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
+    err := suite.service.saveRates(oxrSource, []interface{}{rd})
     assert.NoError(suite.T(), err)
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Failed() {
-
-    rd := &currencyrates.RateData{}
-    err := suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
-    assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
-
-    rd = &currencyrates.RateData{
-        Pair:   "USDUSD",
-        Source: "TEST",
-    }
-    err = suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
-    assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), "Key: 'RateData.Rate' Error:Field validation for 'Rate' failed on the 'required' tag")
-
-    rd = &currencyrates.RateData{
-        Pair:   "USDZWD",
-        Rate:   r,
-        Source: "TEST",
-    }
-    err = suite.service.saveRates(oxrSource, []*currencyrates.RateData{rd})
-    assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleValue() {

@@ -57,16 +57,7 @@ func (p *RateData) GetBSON() (interface{}, error) {
         Source: p.Source,
     }
 
-    if len(p.Id) <= 0 {
-        st.Id = bson.NewObjectId()
-    } else {
-        if bson.IsObjectIdHex(p.Id) == false {
-            return nil, errors.New(errorInvalidObjectId)
-        }
-
-        st.Id = bson.ObjectIdHex(p.Id)
-    }
-
+    st.Id = bson.NewObjectId()
     if p.CreatedAt != nil {
         t, err := ptypes.Timestamp(p.CreatedAt)
 
@@ -78,7 +69,6 @@ func (p *RateData) GetBSON() (interface{}, error) {
     } else {
         st.CreatedAt = time.Now()
     }
-
     st.CreateDate = st.CreatedAt.Format("2006-01-02")
 
     return st, nil

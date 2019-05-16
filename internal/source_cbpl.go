@@ -73,7 +73,7 @@ func (s *Service) processRatesCbpl(res *cbplResponse) error {
         return errors.New(errorCbplNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     l := len(s.cfg.CbplBaseCurrencies)
     c := 0

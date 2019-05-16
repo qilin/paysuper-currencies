@@ -95,7 +95,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
         return errors.New(errorCbeuNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     l := len(s.cfg.CbrfBaseCurrencies)
     c := 0

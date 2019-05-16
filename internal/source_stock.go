@@ -28,7 +28,7 @@ func (s *Service) SetRatesStock() error {
     var (
         cFrom string
         cTo   string
-        rates = []*currencyrates.RateData{}
+        rates []interface{}
     )
 
     for _, cFrom = range s.cfg.OxrBaseCurrencies {

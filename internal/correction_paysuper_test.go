@@ -51,7 +51,7 @@ func (suite *CurrenciesratesServiceTestSuite) reverse(numbers []float64) []float
 }
 
 func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFrom string, cTo string, collectionSuffux string) error {
-    fakes := []interface{}{}
+    var fakes []interface{}
     startDate := today.AddDate(0, 0, -1*len(fakerates))
     for day, rate := range fakerates {
         date := startDate.AddDate(0, 0, day)

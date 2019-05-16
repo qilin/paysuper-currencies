@@ -10,7 +10,6 @@ import (
     "github.com/centrifugal/gocent"
     "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
-    "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/config"
     "github.com/paysuper/paysuper-currencies-rates/pkg"
     "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
@@ -212,29 +211,9 @@ func (s *Service) getRate(collectionSuffix string, from string, to string, query
     return nil
 }
 
-func (s *Service) saveRates(collectionSuffix string, rds []*currencyrates.RateData) error {
+func (s *Service) saveRates(collectionSuffix string, data []interface{}) error {
     if collectionSuffix == "" {
         return errors.New(errorCollectionSuffixEmpty)
-    }
-
-    data := []interface{}{}
-
-    for _, rd := range rds {
-
-        if !s.isPairExists(rd.Pair) {
-            zap.S().Errorw(errorCurrencyPairNotExists, "req", rd)
-            return errors.New(errorCurrencyPairNotExists)
-        }
-
-        rd.Id = bson.NewObjectId().Hex()
-        rd.CreatedAt = ptypes.TimestampNow()
-
-        if err := s.validateReq(rd); err != nil {
-            zap.S().Errorw(errorDbReqInvalid, "error", err, "data", rd)
-            return err
-        }
-
-        data = append(data, rd)
     }
 
     cName := s.getCollectionName(collectionSuffix)
@@ -242,7 +221,7 @@ func (s *Service) saveRates(collectionSuffix string, rds []*currencyrates.RateDa
     err := s.db.Collection(cName).Insert(data...)
 
     if err != nil {
-        zap.S().Errorw(errorDbInsertFailed, "error", err, "data", rds)
+        zap.S().Errorw(errorDbInsertFailed, "error", err, "data", data)
         return err
     }
 

@@ -83,7 +83,7 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
         return errors.New(errorCbcaNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     lastRates := res.Observations[len(res.Observations)-1]
 

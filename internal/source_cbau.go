@@ -85,7 +85,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
         return errors.New(errorCbauNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     l := len(s.cfg.CbauBaseCurrencies)
     c := 0

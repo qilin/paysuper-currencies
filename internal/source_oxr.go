@@ -98,7 +98,7 @@ func (s *Service) processRatesOxr(res *oxrResponse) error {
         return errors.New(errorOxrNoResults)
     }
 
-    rates := []*currencyrates.RateData{}
+    var rates []interface{}
 
     for to, rate := range res.Rates {
 
