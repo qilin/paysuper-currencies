@@ -8,7 +8,6 @@ import (
     "errors"
     "fmt"
     "github.com/centrifugal/gocent"
-    "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
     "github.com/paysuper/paysuper-currencies-rates/config"
     "github.com/paysuper/paysuper-currencies-rates/pkg"
@@ -225,13 +224,17 @@ func (s *Service) saveRates(collectionSuffix string, data []interface{}) error {
 
 func (s *Service) getCorrectionRule(rateType string, merchantId string, r *currencyrates.CorrectionRule) error {
 
-    query := bson.M{"rate_type": rateType, "merchant_id": merchantId}
-    err := s.db.Collection(collectionNameCorrectionRules).Find(query).Sort("-_id").Limit(1).One(&r)
-
-    if err == mgo.ErrNotFound && merchantId != "" {
-        query = bson.M{"rate_type": rateType, "merchant_id": ""}
-        err = s.db.Collection(collectionNameCorrectionRules).Find(query).Sort("-_id").Limit(1).One(&r)
+    var sort []string
+    query := bson.M{"rate_type": rateType}
+    if merchantId == "" {
+        query["merchant_id"] = ""
+    } else {
+        query["$or"] = []bson.M{{"merchant_id": merchantId}, {"merchant_id": ""}}
+        sort = append(sort, "-merchant_id")
     }
+    sort = append(sort, "-_id")
+
+    err := s.db.Collection(collectionNameCorrectionRules).Find(query).Sort(sort...).Limit(1).One(&r)
 
     if err != nil {
         zap.S().Warnw(errorCorrectionRuleNotFound, "error", err, "rateType", rateType, "merchantId", merchantId)

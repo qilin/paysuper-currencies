@@ -7,6 +7,7 @@ import (
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/stretchr/testify/assert"
+    "time"
 )
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Ok() {
@@ -245,13 +246,17 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleOk() {
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallback() {
     merchantId := bson.NewObjectId().Hex()
+    date := time.Now().AddDate(0, 0, -1)
+    created, _ := ptypes.TimestampProto(suite.service.Bod(date))
 
-    // adding default correction rule
-    req1 := &currencyrates.CorrectionRule{
+    // adding default correction rule with old date
+    reqAdd := &currencyrates.CorrectionRule{
         RateType: "oxr",
+        CommonCorrection: 1,
+        CreatedAt: created,
     }
-    res1 := &currencyrates.EmptyResponse{}
-    err := suite.service.AddRateCorrectionRule(context.TODO(), req1, res1)
+    resAdd := &currencyrates.EmptyResponse{}
+    err := suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
     assert.NoError(suite.T(), err)
 
     // falling back to default correction rule, while requesting it for merchant,
@@ -265,13 +270,16 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res2.RateType, "oxr")
     assert.Equal(suite.T(), res2.MerchantId, "")
+    assert.Equal(suite.T(), res2.CommonCorrection, float64(1))
 
     // adding special correction rule for merchant
-    req1 = &currencyrates.CorrectionRule{
+    reqAdd = &currencyrates.CorrectionRule{
         RateType:   "oxr",
+        CommonCorrection: 2,
         MerchantId: merchantId,
+        CreatedAt: created,
     }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req1, res1)
+    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
     assert.NoError(suite.T(), err)
 
     // and return merchant's correction rule for the same request, because it now exists
@@ -279,6 +287,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res2.RateType, "oxr")
     assert.Equal(suite.T(), res2.MerchantId, merchantId)
+    assert.Equal(suite.T(), res2.CommonCorrection, float64(2))
 
     // but still returns default rule if no merchant specified in rule request
     req3 := &currencyrates.CorrectionRuleRequest{
@@ -289,4 +298,51 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallb
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res3.RateType, "oxr")
     assert.Equal(suite.T(), res3.MerchantId, "")
+    assert.Equal(suite.T(), res3.CommonCorrection, float64(1))
+
+    // add more fresh default correction rule
+    reqAdd = &currencyrates.CorrectionRule{
+        RateType: "oxr",
+        CommonCorrection: 3,
+    }
+    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    assert.NoError(suite.T(), err)
+
+    // and returns old but still actual merchant's correction rule for the merchant-specified request
+    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res2.RateType, "oxr")
+    assert.Equal(suite.T(), res2.MerchantId, merchantId)
+    assert.Equal(suite.T(), res2.CommonCorrection, float64(2))
+
+    // but returns updated default rule if no merchant specified in rule request
+    err = suite.service.GetRateCorrectionRule(context.TODO(), req3, res3)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res3.RateType, "oxr")
+    assert.Equal(suite.T(), res3.MerchantId, "")
+    assert.Equal(suite.T(), res3.CommonCorrection, float64(3))
+
+    // updating special correction rule for merchant
+    reqAdd = &currencyrates.CorrectionRule{
+        RateType:   "oxr",
+        CommonCorrection: 4,
+        MerchantId: merchantId,
+    }
+    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    assert.NoError(suite.T(), err)
+
+    // and returns updatedactual merchant's correction rule for the merchant-specified request
+    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res2.RateType, "oxr")
+    assert.Equal(suite.T(), res2.MerchantId, merchantId)
+    assert.Equal(suite.T(), res2.CommonCorrection, float64(4))
+
+    // and updated default rule if no merchant specified in rule request
+    err = suite.service.GetRateCorrectionRule(context.TODO(), req3, res3)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res3.RateType, "oxr")
+    assert.Equal(suite.T(), res3.MerchantId, "")
+    assert.Equal(suite.T(), res3.CommonCorrection, float64(3))
+
 }
