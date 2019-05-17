@@ -184,7 +184,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestApplyCorrection() {
     suite.service.applyCorrection(rd2, collectionSuffixOxr, merchantId)
     assert.Equal(suite.T(), req1.GetCorrectionValue("USDEUR"), float64(1))
     assert.Equal(suite.T(), rd2.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(1)/100))))
-    assert.Equal(suite.T(), rd2.Rate, float64(0.8989899))
+    assert.Equal(suite.T(), rd2.Rate, float64(0.898989899))
 
     // adding merchant correction rule
     req1 = &currencyrates.CorrectionRule{
@@ -210,7 +210,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestApplyCorrection() {
     assert.Equal(suite.T(), req1.GetCorrectionValue("USDEUR"), float64(-3))
     assert.Equal(suite.T(), req1.GetCorrectionValue(rd3.Pair), float64(-3))
     assert.Equal(suite.T(), rd3.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(-3)/100))))
-    assert.Equal(suite.T(), rd3.Rate, float64(0.86407767))
+    assert.Equal(suite.T(), rd3.Rate, float64(0.8640776699))
 
     rd4 := &currencyrates.RateData{
         Pair:   "EURUSD",

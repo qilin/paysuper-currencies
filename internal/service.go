@@ -63,7 +63,7 @@ const (
     collectionNamePaysuperCorridors   = "paysuper_corridors"
     collectionNameCorrectionRules     = "correction_rules"
 
-    ratesPrecision = 8
+    ratesPrecision = 10
 
     dateFormatLayout = "2006-01-02"
 )

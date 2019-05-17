@@ -379,8 +379,8 @@ func (suite *CurrenciesratesServiceTestSuite) TestExchangeCurrency_Ok() {
     // requesting exchange again
     err = suite.service.ExchangeCurrency(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(6528.424242))
-    assert.Equal(suite.T(), res.ExchangeRate, float64(65.28424242))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6528.42424242))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(65.2842424242))
     assert.Equal(suite.T(), res.Correction, float64(1))
     assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
 
@@ -396,8 +396,8 @@ func (suite *CurrenciesratesServiceTestSuite) TestExchangeCurrency_Ok() {
     // requesting exchange ones more
     err = suite.service.ExchangeCurrency(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(6336.411765))
-    assert.Equal(suite.T(), res.ExchangeRate, float64(63.36411765))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6336.41176471))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(63.3641176471))
     assert.Equal(suite.T(), res.Correction, float64(-2))
     assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
 }
