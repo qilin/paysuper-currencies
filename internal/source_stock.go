@@ -18,7 +18,7 @@ func (s *Service) SetRatesStock() error {
     zap.S().Info("Start calculation rates for Stock")
 
     rule := &currencyrates.CorrectionRule{}
-    err := s.getCorrectionRule(collectionSuffixStock, "", rule)
+    err := s.getCorrectionRule(collectionRatesNameSuffixStock, "", rule)
     if err != nil {
         zap.S().Errorw(errorCorrectionRuleNotFound, "error", err)
         s.sendCentrifugoMessage(errorCorrectionRuleNotFound, err)
@@ -56,7 +56,7 @@ func (s *Service) SetRatesStock() error {
         }
     }
 
-    err = s.saveRates(collectionSuffixStock, rates)
+    err = s.saveRates(collectionRatesNameSuffixStock, rates)
     if err != nil {
         zap.S().Errorw(errorStockRateSave, "error", err)
         s.sendCentrifugoMessage(errorStockRateSave, err)
@@ -71,7 +71,7 @@ func (s *Service) SetRatesStock() error {
 func (s *Service) getRateStock(cFrom string, cTo string, rule *currencyrates.CorrectionRule) (*currencyrates.RateData, error) {
     res := &currencyrates.RateData{}
 
-    err := s.getRate(collectionSuffixOxr, cFrom, cTo, bson.M{}, res)
+    err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
     if err != nil {
         return nil, err
     }

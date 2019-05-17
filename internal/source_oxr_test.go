@@ -3,6 +3,7 @@ package internal
 import (
     "context"
     "github.com/globalsign/mgo"
+    "github.com/paysuper/paysuper-currencies-rates/pkg"
     "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/stretchr/testify/assert"
 )
@@ -27,21 +28,23 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed2(
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 
-    req1 := &currencyrates.GetRateRequest{
+    req1 := &currencyrates.GetRateCurrentCommonRequest{
         From: "USD",
         To:   "AUD",
+        RateType: pkg.RateTypeOxr,
     }
-    req2 := &currencyrates.GetRateRequest{
+    req2 := &currencyrates.GetRateCurrentCommonRequest{
         From: "AUD",
         To:   "USD",
+        RateType: pkg.RateTypeOxr,
     }
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetOxrRate(context.TODO(), req1, res)
+    err := suite.service.GetRateCurrentCommon(context.TODO(), req1, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 
-    err = suite.service.GetOxrRate(context.TODO(), req2, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req2, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 
@@ -54,13 +57,13 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
     err = suite.service.processRatesOxr(oxrr)
     assert.NoError(suite.T(), err)
 
-    err = suite.service.GetOxrRate(context.TODO(), req1, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req1, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "USDAUD")
     assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(usdrate))
     assert.Equal(suite.T(), res.Source, oxrSource)
 
-    err = suite.service.GetOxrRate(context.TODO(), req2, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req2, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "AUDUSD")
     assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(1/usdrate))

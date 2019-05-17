@@ -126,7 +126,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
         }
     }
 
-    err := s.saveRates(collectionSuffixCb, rates)
+    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
     if err != nil {
         return err
     }

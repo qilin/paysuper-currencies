@@ -117,7 +117,7 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
         })
     }
 
-    err := s.saveRates(collectionSuffixCb, rates)
+    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
     if err != nil {
         return err
     }

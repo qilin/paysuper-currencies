@@ -121,7 +121,7 @@ func (s *Service) processRatesOxr(res *oxrResponse) error {
         })
     }
 
-    err := s.saveRates(collectionSuffixOxr, rates)
+    err := s.saveRates(collectionRatesNameSuffixOxr, rates)
     if err != nil {
         return err
     }

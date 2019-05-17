@@ -1,6 +1,9 @@
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+    "github.com/kelseyhightower/envconfig"
+    "github.com/paysuper/paysuper-currencies-rates/pkg"
+)
 
 type Config struct {
     MongoHost     string `envconfig:"MONGO_HOST" required:"true"`
@@ -34,6 +37,8 @@ type Config struct {
     CbeuBaseCurrenciesParsed     map[string]bool
     CbauBaseCurrenciesParsed     map[string]bool
     CbplBaseCurrenciesParsed     map[string]bool
+
+    RatesTypes map[string]bool
 }
 
 func NewConfig() (*Config, error) {
@@ -64,6 +69,13 @@ func NewConfig() (*Config, error) {
     for _, v := range cfg.CbplBaseCurrencies {
         cfg.CbplBaseCurrenciesParsed[v] = true
     }
+
+    cfg.RatesTypes = make(map[string]bool, 5)
+    cfg.RatesTypes[pkg.RateTypeOxr] = true
+    cfg.RatesTypes[pkg.RateTypeCentralbanks] = true
+    cfg.RatesTypes[pkg.RateTypePaysuper] = true
+    cfg.RatesTypes[pkg.RateTypeStock] = true
+    cfg.RatesTypes[pkg.RateTypeCardpay] = true
 
     return cfg, err
 }

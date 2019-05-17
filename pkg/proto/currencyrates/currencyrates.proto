@@ -5,46 +5,82 @@ package currencyrates;
 import "google/protobuf/timestamp.proto";
 
 service currencyratesService {
-    rpc GetOxrRate (GetRateRequest) returns (RateData) {
+    rpc GetRateCurrentCommon (GetRateCurrentCommonRequest) returns (RateData) {
     }
-    rpc GetPaysuperRate (GetRateRequest) returns (RateData) {
-    }
-    rpc GetCentralBankRateForDate (GetCentralBankRateRequest) returns (RateData) {
-    }
-    rpc GetStockRate (GetRateRequest) returns (RateData) {
-    }
-    rpc GetCardpayRate (GetRateRequest) returns (RateData) {
-    }
-    rpc GetRateCorrectionRule (CorrectionRuleRequest) returns (CorrectionRule) {
+    rpc GetRateByDateCommon (GetRateByDateCommonRequest) returns (RateData) {
     }
 
-    rpc ExchangeCurrency (ExchangeCurrencyRequest) returns (ExchangeCurrencyResponse) {
+    rpc GetRateCurrentForMerchant (GetRateCurrentForMerchantRequest) returns (RateData) {
+    }
+    rpc GetRateByDateForMerchant (GetRateByDateForMerchantRequest) returns (RateData) {
+    }
+
+    rpc ExchangeCurrencyCurrentCommon (ExchangeCurrencyCurrentCommonRequest) returns (ExchangeCurrencyResponse) {
+    }
+    rpc ExchangeCurrencyCurrentForMerchant (ExchangeCurrencyCurrentForMerchantRequest) returns (ExchangeCurrencyResponse) {
+    }
+
+    rpc ExchangeCurrencyByDateCommon (ExchangeCurrencyByDateCommonRequest) returns (ExchangeCurrencyResponse) {
+    }
+    rpc ExchangeCurrencyByDateForMerchant (ExchangeCurrencyByDateForMerchantRequest) returns (ExchangeCurrencyResponse) {
+    }
+
+    rpc GetCommonRateCorrectionRule (CommonCorrectionRuleRequest) returns (CorrectionRule) {
+    }
+    rpc GetMerchantRateCorrectionRule (MerchantCorrectionRuleRequest) returns (CorrectionRule) {
+    }
+
+    rpc AddCommonRateCorrectionRule (CommonCorrectionRule) returns (EmptyResponse) {
+    }
+    rpc AddMerchantRateCorrectionRule (CorrectionRule) returns (EmptyResponse) {
     }
 
     rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
     }
-    rpc AddRateCorrectionRule (CorrectionRule) returns (EmptyResponse) {
-    }
 }
 
-message GetRateRequest {
+message GetRateCurrentCommonRequest {
     //@inject_tag: validate:"required,alpha,len=3"
     string from = 1;
     //@inject_tag: validate:"required,alpha,len=3"
     string to = 2;
-    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 3;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 3;
 }
 
-message GetCentralBankRateRequest {
+message GetRateByDateCommonRequest {
     //@inject_tag: validate:"required,alpha,len=3"
     string from = 1;
     //@inject_tag: validate:"required,alpha,len=3"
     string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 3;
     //@inject_tag: validate:"required"
-    google.protobuf.Timestamp datetime = 3;
+    google.protobuf.Timestamp datetime = 4;
+}
+
+message GetRateCurrentForMerchantRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 3;
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
     string merchant_id = 4;
+}
+
+message GetRateByDateForMerchantRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 3;
+    //@inject_tag: validate:"required"
+    google.protobuf.Timestamp datetime = 4;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 5;
 }
 
 message RateData {
@@ -71,36 +107,93 @@ message CorrectionCorridor {
 message CorrectionRule {
     // @inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
     string id = 1;
-    //@inject_tag: validate:"omitempty,hexadecimal,len=24" json:"merchant_id" bson:"merchant_id"
-    string merchant_id = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay" json:"rate_type" bson:"rate_type"
-    string rate_type = 3;
-    // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
-    double common_correction = 4;
-    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
-    map<string, double> pair_correction = 5;
-    // @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
-    google.protobuf.Timestamp created_at = 6;
-}
-
-message CorrectionRuleRequest {
-    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 1;
-    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 2;
+    // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
+    double common_correction = 3;
+    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
+    map<string, double> pair_correction = 4;
+    // @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
+    google.protobuf.Timestamp created_at = 5;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24" json:"merchant_id" bson:"merchant_id"
+    string merchant_id = 6;
 }
 
-message ExchangeCurrencyRequest {
+message CommonCorrectionRule {
+    // @inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
+    string id = 1;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay" json:"rate_type" bson:"rate_type"
+    string rate_type = 2;
+    // @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
+    double common_correction = 3;
+    // @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
+    map<string, double> pair_correction = 4;
+    // @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message CommonCorrectionRuleRequest {
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 1;
+}
+
+message MerchantCorrectionRuleRequest {
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+    string rate_type = 1;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 2;
+}
+
+message ExchangeCurrencyCurrentCommonRequest {
     //@inject_tag: validate:"required,alpha,len=3"
     string from = 1;
     //@inject_tag: validate:"required,alpha,len=3"
     string to = 2;
-    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 3;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
-    string rate_type = 4;
+    string rate_type = 3;
     // @inject_tag: validate:"numeric,gte=0"
-    double amount = 5;
+    double amount = 4;
+}
+
+message ExchangeCurrencyCurrentForMerchantRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+    string rate_type = 3;
+    // @inject_tag: validate:"numeric,gte=0"
+    double amount = 4;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 5;
+}
+
+message ExchangeCurrencyByDateCommonRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+    string rate_type = 3;
+    // @inject_tag: validate:"numeric,gte=0"
+    double amount = 4;
+    //@inject_tag: validate:"required"
+    google.protobuf.Timestamp datetime = 5;
+}
+
+message ExchangeCurrencyByDateForMerchantRequest {
+    //@inject_tag: validate:"required,alpha,len=3"
+    string from = 1;
+    //@inject_tag: validate:"required,alpha,len=3"
+    string to = 2;
+    //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+    string rate_type = 3;
+    // @inject_tag: validate:"numeric,gte=0"
+    double amount = 4;
+    //@inject_tag: validate:"omitempty,hexadecimal,len=24"
+    string merchant_id = 5;
+    //@inject_tag: validate:"required"
+    google.protobuf.Timestamp datetime = 6;
 }
 
 message ExchangeCurrencyResponse {

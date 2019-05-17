@@ -121,12 +121,12 @@ func (s *Service) CalculatePaysuperCorrections() error {
 
 func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corridorWidth float64) (float64, error) {
 
-    oxrL, oxrM, oxrU, err := s.getBollingerBands(collectionSuffixOxr, pair, days, timePeriod)
+    oxrL, oxrM, oxrU, err := s.getBollingerBands(collectionRatesNameSuffixOxr, pair, days, timePeriod)
     if err != nil {
         return 0, err
     }
 
-    cpL, cpM, cpU, err := s.getBollingerBands(collectionSuffixCardpay, pair, days, timePeriod)
+    cpL, cpM, cpU, err := s.getBollingerBands(collectionRatesNameSuffixCardpay, pair, days, timePeriod)
     if err != nil {
         return 0, err
     }
@@ -150,11 +150,11 @@ func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corr
     return s.toPrecise(max), nil
 }
 
-func (s *Service) getBollingerBands(collectionSuffix string, pair string, days int, timePeriod int) ([]float64, []float64, []float64, error) {
+func (s *Service) getBollingerBands(collectionRatesNameSuffix string, pair string, days int, timePeriod int) ([]float64, []float64, []float64, error) {
     today := s.Bod(time.Now())
     totalDays := days + timePeriod - 1
     startDate := today.AddDate(0, 0, -1*totalDays)
-    rates, err := s.getRatesForBollinger(collectionSuffix, pair, startDate, totalDays)
+    rates, err := s.getRatesForBollinger(collectionRatesNameSuffix, pair, startDate, totalDays)
     if err != nil {
         return nil, nil, nil, err
     }
@@ -181,12 +181,15 @@ func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
     return value, nil
 }
 
-func (s *Service) getRatesForBollinger(collectionSuffix string, pair string, dateFrom time.Time, limit int) (res []float64, err error) {
+func (s *Service) getRatesForBollinger(collectionRatesNameSuffix string, pair string, dateFrom time.Time, limit int) (res []float64, err error) {
     if !s.isPairExists(pair) {
         return nil, errors.New(errorCurrencyPairNotExists)
     }
 
-    cName := s.getCollectionName(collectionSuffix)
+    cName, err := s.getCollectionName(collectionRatesNameSuffix)
+    if err != nil {
+        return nil, err
+    }
 
     q := []bson.M{
         {"$match": bson.M{"pair": pair, "created_at": bson.M{"$gte": s.Bod(dateFrom)}}},

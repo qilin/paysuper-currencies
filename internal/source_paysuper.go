@@ -48,7 +48,7 @@ func (s *Service) SetRatesPaysuper() error {
         }
     }
 
-    err := s.saveRates(collectionSuffixPaysuper, rates)
+    err := s.saveRates(collectionRatesNameSuffixPaysuper, rates)
     if err != nil {
         zap.S().Errorw(errorPaysuperRateSave, "error", err)
         s.sendCentrifugoMessage(errorPaysuperRateSave, err)
@@ -63,7 +63,7 @@ func (s *Service) SetRatesPaysuper() error {
 func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencyrates.RateData, error) {
     res := &currencyrates.RateData{}
 
-    err := s.getRate(collectionSuffixOxr, cFrom, cTo, bson.M{}, res)
+    err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
     if err != nil {
         return nil, err
     }

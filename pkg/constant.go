@@ -1,11 +1,15 @@
 package pkg
 
-var (
+const (
     // ServiceName - name of microservice
     ServiceName = "paysupercurrencyrates"
 
     // Version - version of service
     Version = "latest"
 
-    CollectionRate = "currency_rates"
+    RateTypeOxr          = "oxr"
+    RateTypeCentralbanks = "centralbanks"
+    RateTypePaysuper     = "paysuper"
+    RateTypeStock        = "stock"
+    RateTypeCardpay      = "cardpay"
 )

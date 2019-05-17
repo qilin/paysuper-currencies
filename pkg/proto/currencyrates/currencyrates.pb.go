@@ -21,71 +21,138 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type GetRateRequest struct {
+type GetRateCurrentCommonRequest struct {
 	//@inject_tag: validate:"required,alpha,len=3"
 	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
 	//@inject_tag: validate:"required,alpha,len=3"
 	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
-	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
-	MerchantId           string   `protobuf:"bytes,3,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType             string   `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
 	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
 	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
 }
 
-func (m *GetRateRequest) Reset()         { *m = GetRateRequest{} }
-func (m *GetRateRequest) String() string { return proto.CompactTextString(m) }
-func (*GetRateRequest) ProtoMessage()    {}
-func (*GetRateRequest) Descriptor() ([]byte, []int) {
+func (m *GetRateCurrentCommonRequest) Reset()         { *m = GetRateCurrentCommonRequest{} }
+func (m *GetRateCurrentCommonRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRateCurrentCommonRequest) ProtoMessage()    {}
+func (*GetRateCurrentCommonRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d90eccbc6e715cb5, []int{0}
 }
 
-func (m *GetRateRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetRateRequest.Unmarshal(m, b)
+func (m *GetRateCurrentCommonRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRateCurrentCommonRequest.Unmarshal(m, b)
 }
-func (m *GetRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetRateRequest.Marshal(b, m, deterministic)
+func (m *GetRateCurrentCommonRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRateCurrentCommonRequest.Marshal(b, m, deterministic)
 }
-func (m *GetRateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetRateRequest.Merge(m, src)
+func (m *GetRateCurrentCommonRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRateCurrentCommonRequest.Merge(m, src)
 }
-func (m *GetRateRequest) XXX_Size() int {
-	return xxx_messageInfo_GetRateRequest.Size(m)
+func (m *GetRateCurrentCommonRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRateCurrentCommonRequest.Size(m)
 }
-func (m *GetRateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetRateRequest.DiscardUnknown(m)
+func (m *GetRateCurrentCommonRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRateCurrentCommonRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetRateRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetRateCurrentCommonRequest proto.InternalMessageInfo
 
-func (m *GetRateRequest) GetFrom() string {
+func (m *GetRateCurrentCommonRequest) GetFrom() string {
 	if m != nil {
 		return m.From
 	}
 	return ""
 }
 
-func (m *GetRateRequest) GetTo() string {
+func (m *GetRateCurrentCommonRequest) GetTo() string {
 	if m != nil {
 		return m.To
 	}
 	return ""
 }
 
-func (m *GetRateRequest) GetMerchantId() string {
+func (m *GetRateCurrentCommonRequest) GetRateType() string {
 	if m != nil {
-		return m.MerchantId
+		return m.RateType
 	}
 	return ""
 }
 
-type GetCentralBankRateRequest struct {
+type GetRateByDateCommonRequest struct {
 	//@inject_tag: validate:"required,alpha,len=3"
 	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
 	//@inject_tag: validate:"required,alpha,len=3"
 	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
 	//@inject_tag: validate:"required"
-	Datetime *timestamp.Timestamp `protobuf:"bytes,3,opt,name=datetime,proto3" json:"datetime,omitempty" validate:"required"`
+	Datetime             *timestamp.Timestamp `protobuf:"bytes,4,opt,name=datetime,proto3" json:"datetime,omitempty" validate:"required"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte               `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32                `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *GetRateByDateCommonRequest) Reset()         { *m = GetRateByDateCommonRequest{} }
+func (m *GetRateByDateCommonRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRateByDateCommonRequest) ProtoMessage()    {}
+func (*GetRateByDateCommonRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{1}
+}
+
+func (m *GetRateByDateCommonRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRateByDateCommonRequest.Unmarshal(m, b)
+}
+func (m *GetRateByDateCommonRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRateByDateCommonRequest.Marshal(b, m, deterministic)
+}
+func (m *GetRateByDateCommonRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRateByDateCommonRequest.Merge(m, src)
+}
+func (m *GetRateByDateCommonRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRateByDateCommonRequest.Size(m)
+}
+func (m *GetRateByDateCommonRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRateByDateCommonRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRateByDateCommonRequest proto.InternalMessageInfo
+
+func (m *GetRateByDateCommonRequest) GetFrom() string {
+	if m != nil {
+		return m.From
+	}
+	return ""
+}
+
+func (m *GetRateByDateCommonRequest) GetTo() string {
+	if m != nil {
+		return m.To
+	}
+	return ""
+}
+
+func (m *GetRateByDateCommonRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *GetRateByDateCommonRequest) GetDatetime() *timestamp.Timestamp {
+	if m != nil {
+		return m.Datetime
+	}
+	return nil
+}
+
+type GetRateCurrentForMerchantRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
 	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
 	MerchantId           string   `protobuf:"bytes,4,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
@@ -93,53 +160,129 @@ type GetCentralBankRateRequest struct {
 	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
 }
 
-func (m *GetCentralBankRateRequest) Reset()         { *m = GetCentralBankRateRequest{} }
-func (m *GetCentralBankRateRequest) String() string { return proto.CompactTextString(m) }
-func (*GetCentralBankRateRequest) ProtoMessage()    {}
-func (*GetCentralBankRateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{1}
+func (m *GetRateCurrentForMerchantRequest) Reset()         { *m = GetRateCurrentForMerchantRequest{} }
+func (m *GetRateCurrentForMerchantRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRateCurrentForMerchantRequest) ProtoMessage()    {}
+func (*GetRateCurrentForMerchantRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{2}
 }
 
-func (m *GetCentralBankRateRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetCentralBankRateRequest.Unmarshal(m, b)
+func (m *GetRateCurrentForMerchantRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRateCurrentForMerchantRequest.Unmarshal(m, b)
 }
-func (m *GetCentralBankRateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetCentralBankRateRequest.Marshal(b, m, deterministic)
+func (m *GetRateCurrentForMerchantRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRateCurrentForMerchantRequest.Marshal(b, m, deterministic)
 }
-func (m *GetCentralBankRateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetCentralBankRateRequest.Merge(m, src)
+func (m *GetRateCurrentForMerchantRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRateCurrentForMerchantRequest.Merge(m, src)
 }
-func (m *GetCentralBankRateRequest) XXX_Size() int {
-	return xxx_messageInfo_GetCentralBankRateRequest.Size(m)
+func (m *GetRateCurrentForMerchantRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRateCurrentForMerchantRequest.Size(m)
 }
-func (m *GetCentralBankRateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetCentralBankRateRequest.DiscardUnknown(m)
+func (m *GetRateCurrentForMerchantRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRateCurrentForMerchantRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetCentralBankRateRequest proto.InternalMessageInfo
+var xxx_messageInfo_GetRateCurrentForMerchantRequest proto.InternalMessageInfo
 
-func (m *GetCentralBankRateRequest) GetFrom() string {
+func (m *GetRateCurrentForMerchantRequest) GetFrom() string {
 	if m != nil {
 		return m.From
 	}
 	return ""
 }
 
-func (m *GetCentralBankRateRequest) GetTo() string {
+func (m *GetRateCurrentForMerchantRequest) GetTo() string {
 	if m != nil {
 		return m.To
 	}
 	return ""
 }
 
-func (m *GetCentralBankRateRequest) GetDatetime() *timestamp.Timestamp {
+func (m *GetRateCurrentForMerchantRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *GetRateCurrentForMerchantRequest) GetMerchantId() string {
+	if m != nil {
+		return m.MerchantId
+	}
+	return ""
+}
+
+type GetRateByDateForMerchantRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
+	//@inject_tag: validate:"required"
+	Datetime *timestamp.Timestamp `protobuf:"bytes,4,opt,name=datetime,proto3" json:"datetime,omitempty" validate:"required"`
+	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
+	MerchantId           string   `protobuf:"bytes,5,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *GetRateByDateForMerchantRequest) Reset()         { *m = GetRateByDateForMerchantRequest{} }
+func (m *GetRateByDateForMerchantRequest) String() string { return proto.CompactTextString(m) }
+func (*GetRateByDateForMerchantRequest) ProtoMessage()    {}
+func (*GetRateByDateForMerchantRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{3}
+}
+
+func (m *GetRateByDateForMerchantRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetRateByDateForMerchantRequest.Unmarshal(m, b)
+}
+func (m *GetRateByDateForMerchantRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetRateByDateForMerchantRequest.Marshal(b, m, deterministic)
+}
+func (m *GetRateByDateForMerchantRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetRateByDateForMerchantRequest.Merge(m, src)
+}
+func (m *GetRateByDateForMerchantRequest) XXX_Size() int {
+	return xxx_messageInfo_GetRateByDateForMerchantRequest.Size(m)
+}
+func (m *GetRateByDateForMerchantRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetRateByDateForMerchantRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetRateByDateForMerchantRequest proto.InternalMessageInfo
+
+func (m *GetRateByDateForMerchantRequest) GetFrom() string {
+	if m != nil {
+		return m.From
+	}
+	return ""
+}
+
+func (m *GetRateByDateForMerchantRequest) GetTo() string {
+	if m != nil {
+		return m.To
+	}
+	return ""
+}
+
+func (m *GetRateByDateForMerchantRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *GetRateByDateForMerchantRequest) GetDatetime() *timestamp.Timestamp {
 	if m != nil {
 		return m.Datetime
 	}
 	return nil
 }
 
-func (m *GetCentralBankRateRequest) GetMerchantId() string {
+func (m *GetRateByDateForMerchantRequest) GetMerchantId() string {
 	if m != nil {
 		return m.MerchantId
 	}
@@ -166,7 +309,7 @@ func (m *RateData) Reset()         { *m = RateData{} }
 func (m *RateData) String() string { return proto.CompactTextString(m) }
 func (*RateData) ProtoMessage()    {}
 func (*RateData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{2}
+	return fileDescriptor_d90eccbc6e715cb5, []int{4}
 }
 
 func (m *RateData) XXX_Unmarshal(b []byte) error {
@@ -232,7 +375,7 @@ func (m *EmptyResponse) Reset()         { *m = EmptyResponse{} }
 func (m *EmptyResponse) String() string { return proto.CompactTextString(m) }
 func (*EmptyResponse) ProtoMessage()    {}
 func (*EmptyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{3}
+	return fileDescriptor_d90eccbc6e715cb5, []int{5}
 }
 
 func (m *EmptyResponse) XXX_Unmarshal(b []byte) error {
@@ -265,7 +408,7 @@ func (m *CorrectionCorridor) Reset()         { *m = CorrectionCorridor{} }
 func (m *CorrectionCorridor) String() string { return proto.CompactTextString(m) }
 func (*CorrectionCorridor) ProtoMessage()    {}
 func (*CorrectionCorridor) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{4}
+	return fileDescriptor_d90eccbc6e715cb5, []int{6}
 }
 
 func (m *CorrectionCorridor) XXX_Unmarshal(b []byte) error {
@@ -296,26 +439,26 @@ func (m *CorrectionCorridor) GetValue() float64 {
 type CorrectionRule struct {
 	// @inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id" validate:"required,hexadecimal,len=24" bson:"_id"`
-	//@inject_tag: validate:"omitempty,hexadecimal,len=24" json:"merchant_id" bson:"merchant_id"
-	MerchantId string `protobuf:"bytes,2,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id" validate:"omitempty,hexadecimal,len=24" bson:"merchant_id"`
 	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay" json:"rate_type" bson:"rate_type"
-	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type" validate:"required,oneof=oxr paysuper centralbanks stock cardpay" bson:"rate_type"`
+	RateType string `protobuf:"bytes,2,opt,name=rate_type,json=rateType,proto3" json:"rate_type" validate:"required,oneof=oxr paysuper centralbanks stock cardpay" bson:"rate_type"`
 	// @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
-	CommonCorrection float64 `protobuf:"fixed64,4,opt,name=common_correction,json=commonCorrection,proto3" json:"common_correction" validate:"omitempty,numeric,gte=-100,lte=100" bson:"common_correction"`
+	CommonCorrection float64 `protobuf:"fixed64,3,opt,name=common_correction,json=commonCorrection,proto3" json:"common_correction" validate:"omitempty,numeric,gte=-100,lte=100" bson:"common_correction"`
 	// @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
-	PairCorrection map[string]float64 `protobuf:"bytes,5,rep,name=pair_correction,json=pairCorrection,proto3" json:"pair_correction" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"fixed64,2,opt,name=value,proto3" validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" bson:"pair_correction"`
+	PairCorrection map[string]float64 `protobuf:"bytes,4,rep,name=pair_correction,json=pairCorrection,proto3" json:"pair_correction" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"fixed64,2,opt,name=value,proto3" validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" bson:"pair_correction"`
 	// @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
-	CreatedAt            *timestamp.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at" validate:"required" bson:"created_at"`
-	XXX_NoUnkeyedLiteral struct{}             `json:"-" bson:"-" structure:"-" validate:"-"`
-	XXX_unrecognized     []byte               `json:"-" bson:"-" structure:"-" validate:"-"`
-	XXX_sizecache        int32                `json:"-" bson:"-" structure:"-" validate:"-"`
+	CreatedAt *timestamp.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at" validate:"required" bson:"created_at"`
+	//@inject_tag: validate:"omitempty,hexadecimal,len=24" json:"merchant_id" bson:"merchant_id"
+	MerchantId           string   `protobuf:"bytes,6,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id" validate:"omitempty,hexadecimal,len=24" bson:"merchant_id"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
 }
 
 func (m *CorrectionRule) Reset()         { *m = CorrectionRule{} }
 func (m *CorrectionRule) String() string { return proto.CompactTextString(m) }
 func (*CorrectionRule) ProtoMessage()    {}
 func (*CorrectionRule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{5}
+	return fileDescriptor_d90eccbc6e715cb5, []int{7}
 }
 
 func (m *CorrectionRule) XXX_Unmarshal(b []byte) error {
@@ -339,13 +482,6 @@ var xxx_messageInfo_CorrectionRule proto.InternalMessageInfo
 func (m *CorrectionRule) GetId() string {
 	if m != nil {
 		return m.Id
-	}
-	return ""
-}
-
-func (m *CorrectionRule) GetMerchantId() string {
-	if m != nil {
-		return m.MerchantId
 	}
 	return ""
 }
@@ -378,129 +514,484 @@ func (m *CorrectionRule) GetCreatedAt() *timestamp.Timestamp {
 	return nil
 }
 
-type CorrectionRuleRequest struct {
-	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
-	MerchantId string `protobuf:"bytes,1,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
-	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
-	RateType             string   `protobuf:"bytes,2,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
-	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
-	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
-}
-
-func (m *CorrectionRuleRequest) Reset()         { *m = CorrectionRuleRequest{} }
-func (m *CorrectionRuleRequest) String() string { return proto.CompactTextString(m) }
-func (*CorrectionRuleRequest) ProtoMessage()    {}
-func (*CorrectionRuleRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{6}
-}
-
-func (m *CorrectionRuleRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CorrectionRuleRequest.Unmarshal(m, b)
-}
-func (m *CorrectionRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CorrectionRuleRequest.Marshal(b, m, deterministic)
-}
-func (m *CorrectionRuleRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CorrectionRuleRequest.Merge(m, src)
-}
-func (m *CorrectionRuleRequest) XXX_Size() int {
-	return xxx_messageInfo_CorrectionRuleRequest.Size(m)
-}
-func (m *CorrectionRuleRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_CorrectionRuleRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CorrectionRuleRequest proto.InternalMessageInfo
-
-func (m *CorrectionRuleRequest) GetMerchantId() string {
+func (m *CorrectionRule) GetMerchantId() string {
 	if m != nil {
 		return m.MerchantId
 	}
 	return ""
 }
 
-func (m *CorrectionRuleRequest) GetRateType() string {
+type CommonCorrectionRule struct {
+	// @inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id" validate:"required,hexadecimal,len=24" bson:"_id"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay" json:"rate_type" bson:"rate_type"
+	RateType string `protobuf:"bytes,2,opt,name=rate_type,json=rateType,proto3" json:"rate_type" validate:"required,oneof=oxr paysuper centralbanks stock cardpay" bson:"rate_type"`
+	// @inject_tag: validate:"omitempty,numeric,gte=-100,lte=100" json:"common_correction" bson:"common_correction"
+	CommonCorrection float64 `protobuf:"fixed64,3,opt,name=common_correction,json=commonCorrection,proto3" json:"common_correction" validate:"omitempty,numeric,gte=-100,lte=100" bson:"common_correction"`
+	// @inject_tag: validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" json:"pair_correction" bson:"pair_correction"
+	PairCorrection map[string]float64 `protobuf:"bytes,4,rep,name=pair_correction,json=pairCorrection,proto3" json:"pair_correction" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"fixed64,2,opt,name=value,proto3" validate:"omitempty,dive,keys,alpha,len=6,endkeys,gte=-100,lte=100" bson:"pair_correction"`
+	// @inject_tag: validate:"required" json:"created_at"  bson:"created_at"
+	CreatedAt            *timestamp.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at" validate:"required" bson:"created_at"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte               `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32                `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *CommonCorrectionRule) Reset()         { *m = CommonCorrectionRule{} }
+func (m *CommonCorrectionRule) String() string { return proto.CompactTextString(m) }
+func (*CommonCorrectionRule) ProtoMessage()    {}
+func (*CommonCorrectionRule) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{8}
+}
+
+func (m *CommonCorrectionRule) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CommonCorrectionRule.Unmarshal(m, b)
+}
+func (m *CommonCorrectionRule) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CommonCorrectionRule.Marshal(b, m, deterministic)
+}
+func (m *CommonCorrectionRule) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommonCorrectionRule.Merge(m, src)
+}
+func (m *CommonCorrectionRule) XXX_Size() int {
+	return xxx_messageInfo_CommonCorrectionRule.Size(m)
+}
+func (m *CommonCorrectionRule) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommonCorrectionRule.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CommonCorrectionRule proto.InternalMessageInfo
+
+func (m *CommonCorrectionRule) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *CommonCorrectionRule) GetRateType() string {
 	if m != nil {
 		return m.RateType
 	}
 	return ""
 }
 
-type ExchangeCurrencyRequest struct {
-	//@inject_tag: validate:"required,alpha,len=3"
-	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
-	//@inject_tag: validate:"required,alpha,len=3"
-	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
-	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
-	MerchantId string `protobuf:"bytes,3,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
-	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
-	RateType string `protobuf:"bytes,4,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
-	// @inject_tag: validate:"numeric,gte=0"
-	Amount               float64  `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
+func (m *CommonCorrectionRule) GetCommonCorrection() float64 {
+	if m != nil {
+		return m.CommonCorrection
+	}
+	return 0
+}
+
+func (m *CommonCorrectionRule) GetPairCorrection() map[string]float64 {
+	if m != nil {
+		return m.PairCorrection
+	}
+	return nil
+}
+
+func (m *CommonCorrectionRule) GetCreatedAt() *timestamp.Timestamp {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+type CommonCorrectionRuleRequest struct {
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType             string   `protobuf:"bytes,1,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
 	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
 	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
 }
 
-func (m *ExchangeCurrencyRequest) Reset()         { *m = ExchangeCurrencyRequest{} }
-func (m *ExchangeCurrencyRequest) String() string { return proto.CompactTextString(m) }
-func (*ExchangeCurrencyRequest) ProtoMessage()    {}
-func (*ExchangeCurrencyRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{7}
+func (m *CommonCorrectionRuleRequest) Reset()         { *m = CommonCorrectionRuleRequest{} }
+func (m *CommonCorrectionRuleRequest) String() string { return proto.CompactTextString(m) }
+func (*CommonCorrectionRuleRequest) ProtoMessage()    {}
+func (*CommonCorrectionRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{9}
 }
 
-func (m *ExchangeCurrencyRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ExchangeCurrencyRequest.Unmarshal(m, b)
+func (m *CommonCorrectionRuleRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CommonCorrectionRuleRequest.Unmarshal(m, b)
 }
-func (m *ExchangeCurrencyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ExchangeCurrencyRequest.Marshal(b, m, deterministic)
+func (m *CommonCorrectionRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CommonCorrectionRuleRequest.Marshal(b, m, deterministic)
 }
-func (m *ExchangeCurrencyRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExchangeCurrencyRequest.Merge(m, src)
+func (m *CommonCorrectionRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommonCorrectionRuleRequest.Merge(m, src)
 }
-func (m *ExchangeCurrencyRequest) XXX_Size() int {
-	return xxx_messageInfo_ExchangeCurrencyRequest.Size(m)
+func (m *CommonCorrectionRuleRequest) XXX_Size() int {
+	return xxx_messageInfo_CommonCorrectionRuleRequest.Size(m)
 }
-func (m *ExchangeCurrencyRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_ExchangeCurrencyRequest.DiscardUnknown(m)
+func (m *CommonCorrectionRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommonCorrectionRuleRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ExchangeCurrencyRequest proto.InternalMessageInfo
+var xxx_messageInfo_CommonCorrectionRuleRequest proto.InternalMessageInfo
 
-func (m *ExchangeCurrencyRequest) GetFrom() string {
+func (m *CommonCorrectionRuleRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+type MerchantCorrectionRuleRequest struct {
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
+	RateType string `protobuf:"bytes,1,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbank stock cardpay"`
+	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
+	MerchantId           string   `protobuf:"bytes,2,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *MerchantCorrectionRuleRequest) Reset()         { *m = MerchantCorrectionRuleRequest{} }
+func (m *MerchantCorrectionRuleRequest) String() string { return proto.CompactTextString(m) }
+func (*MerchantCorrectionRuleRequest) ProtoMessage()    {}
+func (*MerchantCorrectionRuleRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{10}
+}
+
+func (m *MerchantCorrectionRuleRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MerchantCorrectionRuleRequest.Unmarshal(m, b)
+}
+func (m *MerchantCorrectionRuleRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MerchantCorrectionRuleRequest.Marshal(b, m, deterministic)
+}
+func (m *MerchantCorrectionRuleRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MerchantCorrectionRuleRequest.Merge(m, src)
+}
+func (m *MerchantCorrectionRuleRequest) XXX_Size() int {
+	return xxx_messageInfo_MerchantCorrectionRuleRequest.Size(m)
+}
+func (m *MerchantCorrectionRuleRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MerchantCorrectionRuleRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MerchantCorrectionRuleRequest proto.InternalMessageInfo
+
+func (m *MerchantCorrectionRuleRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *MerchantCorrectionRuleRequest) GetMerchantId() string {
+	if m != nil {
+		return m.MerchantId
+	}
+	return ""
+}
+
+type ExchangeCurrencyCurrentCommonRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
+	// @inject_tag: validate:"numeric,gte=0"
+	Amount               float64  `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *ExchangeCurrencyCurrentCommonRequest) Reset()         { *m = ExchangeCurrencyCurrentCommonRequest{} }
+func (m *ExchangeCurrencyCurrentCommonRequest) String() string { return proto.CompactTextString(m) }
+func (*ExchangeCurrencyCurrentCommonRequest) ProtoMessage()    {}
+func (*ExchangeCurrencyCurrentCommonRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{11}
+}
+
+func (m *ExchangeCurrencyCurrentCommonRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest.Unmarshal(m, b)
+}
+func (m *ExchangeCurrencyCurrentCommonRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest.Marshal(b, m, deterministic)
+}
+func (m *ExchangeCurrencyCurrentCommonRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest.Merge(m, src)
+}
+func (m *ExchangeCurrencyCurrentCommonRequest) XXX_Size() int {
+	return xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest.Size(m)
+}
+func (m *ExchangeCurrencyCurrentCommonRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExchangeCurrencyCurrentCommonRequest proto.InternalMessageInfo
+
+func (m *ExchangeCurrencyCurrentCommonRequest) GetFrom() string {
 	if m != nil {
 		return m.From
 	}
 	return ""
 }
 
-func (m *ExchangeCurrencyRequest) GetTo() string {
+func (m *ExchangeCurrencyCurrentCommonRequest) GetTo() string {
 	if m != nil {
 		return m.To
 	}
 	return ""
 }
 
-func (m *ExchangeCurrencyRequest) GetMerchantId() string {
-	if m != nil {
-		return m.MerchantId
-	}
-	return ""
-}
-
-func (m *ExchangeCurrencyRequest) GetRateType() string {
+func (m *ExchangeCurrencyCurrentCommonRequest) GetRateType() string {
 	if m != nil {
 		return m.RateType
 	}
 	return ""
 }
 
-func (m *ExchangeCurrencyRequest) GetAmount() float64 {
+func (m *ExchangeCurrencyCurrentCommonRequest) GetAmount() float64 {
 	if m != nil {
 		return m.Amount
 	}
 	return 0
+}
+
+type ExchangeCurrencyCurrentForMerchantRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
+	// @inject_tag: validate:"numeric,gte=0"
+	Amount float64 `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
+	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
+	MerchantId           string   `protobuf:"bytes,5,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte   `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32    `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) Reset() {
+	*m = ExchangeCurrencyCurrentForMerchantRequest{}
+}
+func (m *ExchangeCurrencyCurrentForMerchantRequest) String() string { return proto.CompactTextString(m) }
+func (*ExchangeCurrencyCurrentForMerchantRequest) ProtoMessage()    {}
+func (*ExchangeCurrencyCurrentForMerchantRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{12}
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest.Unmarshal(m, b)
+}
+func (m *ExchangeCurrencyCurrentForMerchantRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest.Marshal(b, m, deterministic)
+}
+func (m *ExchangeCurrencyCurrentForMerchantRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest.Merge(m, src)
+}
+func (m *ExchangeCurrencyCurrentForMerchantRequest) XXX_Size() int {
+	return xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest.Size(m)
+}
+func (m *ExchangeCurrencyCurrentForMerchantRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExchangeCurrencyCurrentForMerchantRequest proto.InternalMessageInfo
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) GetFrom() string {
+	if m != nil {
+		return m.From
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) GetTo() string {
+	if m != nil {
+		return m.To
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) GetAmount() float64 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
+}
+
+func (m *ExchangeCurrencyCurrentForMerchantRequest) GetMerchantId() string {
+	if m != nil {
+		return m.MerchantId
+	}
+	return ""
+}
+
+type ExchangeCurrencyByDateCommonRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
+	// @inject_tag: validate:"numeric,gte=0"
+	Amount float64 `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
+	//@inject_tag: validate:"required"
+	Datetime             *timestamp.Timestamp `protobuf:"bytes,5,opt,name=datetime,proto3" json:"datetime,omitempty" validate:"required"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte               `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32                `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) Reset()         { *m = ExchangeCurrencyByDateCommonRequest{} }
+func (m *ExchangeCurrencyByDateCommonRequest) String() string { return proto.CompactTextString(m) }
+func (*ExchangeCurrencyByDateCommonRequest) ProtoMessage()    {}
+func (*ExchangeCurrencyByDateCommonRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{13}
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExchangeCurrencyByDateCommonRequest.Unmarshal(m, b)
+}
+func (m *ExchangeCurrencyByDateCommonRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExchangeCurrencyByDateCommonRequest.Marshal(b, m, deterministic)
+}
+func (m *ExchangeCurrencyByDateCommonRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExchangeCurrencyByDateCommonRequest.Merge(m, src)
+}
+func (m *ExchangeCurrencyByDateCommonRequest) XXX_Size() int {
+	return xxx_messageInfo_ExchangeCurrencyByDateCommonRequest.Size(m)
+}
+func (m *ExchangeCurrencyByDateCommonRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExchangeCurrencyByDateCommonRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExchangeCurrencyByDateCommonRequest proto.InternalMessageInfo
+
+func (m *ExchangeCurrencyByDateCommonRequest) GetFrom() string {
+	if m != nil {
+		return m.From
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) GetTo() string {
+	if m != nil {
+		return m.To
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) GetAmount() float64 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
+}
+
+func (m *ExchangeCurrencyByDateCommonRequest) GetDatetime() *timestamp.Timestamp {
+	if m != nil {
+		return m.Datetime
+	}
+	return nil
+}
+
+type ExchangeCurrencyByDateForMerchantRequest struct {
+	//@inject_tag: validate:"required,alpha,len=3"
+	From string `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,alpha,len=3"
+	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
+	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
+	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
+	// @inject_tag: validate:"numeric,gte=0"
+	Amount float64 `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
+	//@inject_tag: validate:"omitempty,hexadecimal,len=24"
+	MerchantId string `protobuf:"bytes,5,opt,name=merchant_id,json=merchantId,proto3" json:"merchant_id,omitempty" validate:"omitempty,hexadecimal,len=24"`
+	//@inject_tag: validate:"required"
+	Datetime             *timestamp.Timestamp `protobuf:"bytes,6,opt,name=datetime,proto3" json:"datetime,omitempty" validate:"required"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_unrecognized     []byte               `json:"-" bson:"-" structure:"-" validate:"-"`
+	XXX_sizecache        int32                `json:"-" bson:"-" structure:"-" validate:"-"`
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) Reset() {
+	*m = ExchangeCurrencyByDateForMerchantRequest{}
+}
+func (m *ExchangeCurrencyByDateForMerchantRequest) String() string { return proto.CompactTextString(m) }
+func (*ExchangeCurrencyByDateForMerchantRequest) ProtoMessage()    {}
+func (*ExchangeCurrencyByDateForMerchantRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d90eccbc6e715cb5, []int{14}
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest.Unmarshal(m, b)
+}
+func (m *ExchangeCurrencyByDateForMerchantRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest.Marshal(b, m, deterministic)
+}
+func (m *ExchangeCurrencyByDateForMerchantRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest.Merge(m, src)
+}
+func (m *ExchangeCurrencyByDateForMerchantRequest) XXX_Size() int {
+	return xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest.Size(m)
+}
+func (m *ExchangeCurrencyByDateForMerchantRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExchangeCurrencyByDateForMerchantRequest proto.InternalMessageInfo
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetFrom() string {
+	if m != nil {
+		return m.From
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetTo() string {
+	if m != nil {
+		return m.To
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetRateType() string {
+	if m != nil {
+		return m.RateType
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetAmount() float64 {
+	if m != nil {
+		return m.Amount
+	}
+	return 0
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetMerchantId() string {
+	if m != nil {
+		return m.MerchantId
+	}
+	return ""
+}
+
+func (m *ExchangeCurrencyByDateForMerchantRequest) GetDatetime() *timestamp.Timestamp {
+	if m != nil {
+		return m.Datetime
+	}
+	return nil
 }
 
 type ExchangeCurrencyResponse struct {
@@ -521,7 +1012,7 @@ func (m *ExchangeCurrencyResponse) Reset()         { *m = ExchangeCurrencyRespon
 func (m *ExchangeCurrencyResponse) String() string { return proto.CompactTextString(m) }
 func (*ExchangeCurrencyResponse) ProtoMessage()    {}
 func (*ExchangeCurrencyResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d90eccbc6e715cb5, []int{8}
+	return fileDescriptor_d90eccbc6e715cb5, []int{15}
 }
 
 func (m *ExchangeCurrencyResponse) XXX_Unmarshal(b []byte) error {
@@ -571,66 +1062,85 @@ func (m *ExchangeCurrencyResponse) GetOriginalRate() float64 {
 }
 
 func init() {
-	proto.RegisterType((*GetRateRequest)(nil), "currencyrates.GetRateRequest")
-	proto.RegisterType((*GetCentralBankRateRequest)(nil), "currencyrates.GetCentralBankRateRequest")
+	proto.RegisterType((*GetRateCurrentCommonRequest)(nil), "currencyrates.GetRateCurrentCommonRequest")
+	proto.RegisterType((*GetRateByDateCommonRequest)(nil), "currencyrates.GetRateByDateCommonRequest")
+	proto.RegisterType((*GetRateCurrentForMerchantRequest)(nil), "currencyrates.GetRateCurrentForMerchantRequest")
+	proto.RegisterType((*GetRateByDateForMerchantRequest)(nil), "currencyrates.GetRateByDateForMerchantRequest")
 	proto.RegisterType((*RateData)(nil), "currencyrates.RateData")
 	proto.RegisterType((*EmptyResponse)(nil), "currencyrates.EmptyResponse")
 	proto.RegisterType((*CorrectionCorridor)(nil), "currencyrates.CorrectionCorridor")
 	proto.RegisterType((*CorrectionRule)(nil), "currencyrates.CorrectionRule")
 	proto.RegisterMapType((map[string]float64)(nil), "currencyrates.CorrectionRule.PairCorrectionEntry")
-	proto.RegisterType((*CorrectionRuleRequest)(nil), "currencyrates.CorrectionRuleRequest")
-	proto.RegisterType((*ExchangeCurrencyRequest)(nil), "currencyrates.ExchangeCurrencyRequest")
+	proto.RegisterType((*CommonCorrectionRule)(nil), "currencyrates.CommonCorrectionRule")
+	proto.RegisterMapType((map[string]float64)(nil), "currencyrates.CommonCorrectionRule.PairCorrectionEntry")
+	proto.RegisterType((*CommonCorrectionRuleRequest)(nil), "currencyrates.CommonCorrectionRuleRequest")
+	proto.RegisterType((*MerchantCorrectionRuleRequest)(nil), "currencyrates.MerchantCorrectionRuleRequest")
+	proto.RegisterType((*ExchangeCurrencyCurrentCommonRequest)(nil), "currencyrates.ExchangeCurrencyCurrentCommonRequest")
+	proto.RegisterType((*ExchangeCurrencyCurrentForMerchantRequest)(nil), "currencyrates.ExchangeCurrencyCurrentForMerchantRequest")
+	proto.RegisterType((*ExchangeCurrencyByDateCommonRequest)(nil), "currencyrates.ExchangeCurrencyByDateCommonRequest")
+	proto.RegisterType((*ExchangeCurrencyByDateForMerchantRequest)(nil), "currencyrates.ExchangeCurrencyByDateForMerchantRequest")
 	proto.RegisterType((*ExchangeCurrencyResponse)(nil), "currencyrates.ExchangeCurrencyResponse")
 }
 
 func init() { proto.RegisterFile("currencyrates.proto", fileDescriptor_d90eccbc6e715cb5) }
 
 var fileDescriptor_d90eccbc6e715cb5 = []byte{
-	// 722 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0xdd, 0x6e, 0xd3, 0x4c,
-	0x10, 0x8d, 0x9d, 0x36, 0x6a, 0xa7, 0x6d, 0x92, 0x6f, 0xfb, 0x97, 0x2f, 0x50, 0x5a, 0x0c, 0x82,
-	0x02, 0x52, 0x2a, 0x8a, 0x84, 0x80, 0xbb, 0x90, 0xb6, 0xe1, 0xe7, 0x82, 0xca, 0x6d, 0xb9, 0xe0,
-	0x02, 0xb3, 0xb5, 0xa7, 0xc1, 0x6a, 0xec, 0x35, 0xeb, 0x75, 0x55, 0x3f, 0x07, 0x42, 0xe2, 0x09,
-	0xb8, 0xe5, 0xa9, 0x78, 0x0f, 0xb4, 0x6b, 0xbb, 0x89, 0x9d, 0x34, 0x55, 0x55, 0xee, 0x76, 0xcf,
-	0x1e, 0xcf, 0x9c, 0x39, 0x3b, 0x3b, 0x86, 0x45, 0x3b, 0xe2, 0x1c, 0x7d, 0x3b, 0xe6, 0x54, 0x60,
-	0xd8, 0x0a, 0x38, 0x13, 0x8c, 0x2c, 0xe4, 0xc0, 0xe6, 0x7a, 0x8f, 0xb1, 0x5e, 0x1f, 0xb7, 0xd4,
-	0xe1, 0x71, 0x74, 0xb2, 0x25, 0x5c, 0x0f, 0x43, 0x41, 0xbd, 0x20, 0xe1, 0x1b, 0x47, 0x50, 0xed,
-	0xa2, 0x30, 0xa9, 0x40, 0x13, 0xbf, 0x45, 0x18, 0x0a, 0x42, 0x60, 0xea, 0x84, 0x33, 0xaf, 0xa1,
-	0x6d, 0x68, 0x9b, 0xb3, 0xa6, 0x5a, 0x93, 0x2a, 0xe8, 0x82, 0x35, 0x74, 0x85, 0xe8, 0x82, 0x91,
-	0x75, 0x98, 0xf3, 0x90, 0xdb, 0x5f, 0xa9, 0x2f, 0x2c, 0xd7, 0x69, 0x94, 0xd5, 0x01, 0x64, 0xd0,
-	0x5b, 0xc7, 0xf8, 0xa9, 0xc1, 0xff, 0x5d, 0x14, 0x1d, 0xf4, 0x05, 0xa7, 0xfd, 0xd7, 0xd4, 0x3f,
-	0xbd, 0x6e, 0x8a, 0xe7, 0x30, 0xe3, 0x50, 0x81, 0x52, 0xaf, 0x8a, 0x3f, 0xb7, 0xdd, 0x6c, 0x25,
-	0xc5, 0xb4, 0xb2, 0x62, 0x5a, 0x87, 0x59, 0x31, 0xe6, 0x05, 0xb7, 0x28, 0x6d, 0x6a, 0x44, 0xda,
-	0x0f, 0x0d, 0x66, 0xa4, 0x98, 0x1d, 0x2a, 0xa8, 0xcc, 0xea, 0x3a, 0xa9, 0x0e, 0xdd, 0x75, 0xc8,
-	0x4b, 0x00, 0x9b, 0x23, 0x15, 0xe8, 0x58, 0x54, 0x28, 0x35, 0x93, 0xf3, 0xce, 0xa6, 0xec, 0xb6,
-	0x2a, 0x2a, 0xa0, 0x2e, 0x4f, 0xcd, 0x50, 0x6b, 0x89, 0xc9, 0x7b, 0x50, 0x2a, 0x34, 0x53, 0xad,
-	0xc9, 0x0a, 0x54, 0x42, 0x16, 0x71, 0x1b, 0x1b, 0xd3, 0x8a, 0x99, 0xee, 0x8c, 0x1a, 0x2c, 0xec,
-	0x7a, 0x81, 0x88, 0x4d, 0x0c, 0x03, 0xe6, 0x87, 0x68, 0x3c, 0x06, 0xd2, 0x61, 0x9c, 0xa3, 0x2d,
-	0x5c, 0xe6, 0xcb, 0x95, 0xeb, 0x30, 0x4e, 0x96, 0x60, 0xfa, 0x8c, 0xf6, 0x23, 0x54, 0xa2, 0x35,
-	0x33, 0xd9, 0x18, 0x7f, 0x74, 0xa8, 0x0e, 0xc8, 0x66, 0xd4, 0xc7, 0x91, 0xd2, 0x0a, 0xc6, 0xe8,
-	0x45, 0x63, 0xc8, 0x2d, 0x98, 0x95, 0x02, 0x2d, 0x11, 0x07, 0x98, 0x56, 0x31, 0x23, 0x81, 0xc3,
-	0x38, 0x40, 0xf2, 0x04, 0xfe, 0xb3, 0x99, 0xe7, 0x31, 0xdf, 0xb2, 0x2f, 0xd2, 0xa4, 0x65, 0xd5,
-	0x93, 0x83, 0x41, 0x7a, 0xf2, 0x09, 0x6a, 0xb2, 0xfc, 0x61, 0xea, 0xf4, 0x46, 0x79, 0x73, 0x6e,
-	0xfb, 0x69, 0x2b, 0xdf, 0xb3, 0x79, 0xc9, 0xad, 0x7d, 0xea, 0xf2, 0x01, 0xb4, 0xeb, 0x0b, 0x1e,
-	0x9b, 0xd5, 0x20, 0x07, 0x16, 0x6e, 0xa8, 0x72, 0x8d, 0x1b, 0x6a, 0xb6, 0x61, 0x71, 0x4c, 0x06,
-	0x52, 0x87, 0xf2, 0x29, 0xc6, 0xa9, 0x53, 0x72, 0x39, 0xf0, 0x58, 0x1f, 0xf2, 0xf8, 0x95, 0xfe,
-	0x42, 0x33, 0x8e, 0x60, 0x39, 0xaf, 0x39, 0x6b, 0xe9, 0x82, 0xbb, 0xda, 0x64, 0x77, 0xf5, 0xbc,
-	0xbb, 0xc6, 0x77, 0x0d, 0x56, 0x77, 0xcf, 0x25, 0xb5, 0x87, 0x9d, 0xd4, 0xa1, 0x7f, 0xf9, 0x1e,
-	0xf3, 0xd9, 0xa7, 0x0a, 0x77, 0xbb, 0x02, 0x15, 0xea, 0xb1, 0xc8, 0x17, 0xaa, 0x23, 0x35, 0x33,
-	0xdd, 0x19, 0xbf, 0x35, 0x68, 0x8c, 0xaa, 0x4a, 0xba, 0x93, 0x3c, 0x82, 0x3a, 0xa6, 0x67, 0x8e,
-	0x95, 0x7e, 0x9e, 0xb4, 0x64, 0xed, 0x02, 0x6f, 0x2b, 0x98, 0xdc, 0x83, 0x85, 0x0c, 0xb2, 0xd4,
-	0x73, 0x48, 0x6c, 0x9d, 0xcf, 0x40, 0xf9, 0x1a, 0xc9, 0x1d, 0x80, 0xa1, 0x76, 0x29, 0x2b, 0xc6,
-	0x10, 0x22, 0x83, 0x30, 0xee, 0xf6, 0x5c, 0x9f, 0xf6, 0xad, 0xa1, 0x37, 0x35, 0x9f, 0x81, 0x32,
-	0xc8, 0xf6, 0xaf, 0x0a, 0x2c, 0xe5, 0x3a, 0xec, 0x00, 0xf9, 0x99, 0x6b, 0x23, 0xd9, 0x03, 0xe8,
-	0xa2, 0xf8, 0x70, 0xce, 0x55, 0xae, 0xb5, 0x42, 0x1b, 0xe6, 0x27, 0x60, 0x73, 0xb5, 0x70, 0x9c,
-	0x4d, 0x0b, 0xa3, 0x44, 0xde, 0x43, 0xad, 0x8b, 0x62, 0x9f, 0xc6, 0x61, 0x14, 0xe0, 0x4d, 0x83,
-	0x7d, 0x19, 0x37, 0x23, 0xf7, 0x18, 0xdf, 0x91, 0x61, 0x37, 0x47, 0xc3, 0x8e, 0x9f, 0xa6, 0x93,
-	0x32, 0xbc, 0x81, 0xf9, 0x2e, 0x8a, 0x03, 0xc1, 0xec, 0xd3, 0x1b, 0x6a, 0x7d, 0xa7, 0xfe, 0x13,
-	0x1d, 0xca, 0x9d, 0x80, 0xc6, 0x37, 0x8c, 0xf5, 0x19, 0x96, 0x53, 0x72, 0x61, 0x64, 0xdd, 0x9f,
-	0x38, 0x1e, 0xb2, 0xc8, 0x6b, 0x13, 0x59, 0x46, 0x89, 0x20, 0xd4, 0x8b, 0x6d, 0x4b, 0x1e, 0x14,
-	0x3e, 0xba, 0xe4, 0xb5, 0x35, 0x1f, 0x5e, 0xc9, 0x4b, 0xa7, 0x73, 0x89, 0x1c, 0xc3, 0xda, 0xc1,
-	0xa0, 0x17, 0xc6, 0x8c, 0xea, 0xbb, 0x97, 0x0a, 0xcd, 0x28, 0xcd, 0xdb, 0xc5, 0x74, 0xb9, 0x3f,
-	0x40, 0x89, 0x7c, 0x84, 0xe5, 0xb6, 0xe3, 0x8c, 0xb1, 0x6a, 0xb2, 0x09, 0x57, 0xc5, 0x3d, 0xae,
-	0xa8, 0x49, 0xf9, 0xec, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x3a, 0x86, 0x85, 0x75, 0x44, 0x08,
-	0x00, 0x00,
+	// 912 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0xdd, 0x6e, 0xe3, 0x44,
+	0x14, 0xce, 0xb8, 0x4d, 0xd4, 0x9c, 0x6c, 0x7f, 0x98, 0x46, 0x10, 0x92, 0x0d, 0xcd, 0xba, 0x48,
+	0xa4, 0x05, 0xa5, 0x22, 0x2b, 0xb1, 0xcb, 0xde, 0x85, 0x6c, 0x59, 0x71, 0x81, 0xb4, 0xf2, 0xee,
+	0x15, 0x68, 0x37, 0x38, 0xf6, 0x34, 0x18, 0x62, 0x8f, 0x99, 0x8c, 0x2b, 0x7c, 0x81, 0x7a, 0x83,
+	0x84, 0x78, 0x80, 0x3e, 0x02, 0xd7, 0xdc, 0x71, 0x03, 0x0f, 0xc1, 0x03, 0x70, 0xcb, 0x7b, 0xa0,
+	0x99, 0xd8, 0x49, 0xfc, 0x9f, 0x40, 0x23, 0x71, 0x37, 0x3e, 0x1e, 0x9f, 0xf3, 0x7d, 0xdf, 0x4c,
+	0xbe, 0x73, 0x02, 0xc7, 0x86, 0xc7, 0x18, 0x71, 0x0c, 0x9f, 0xe9, 0x9c, 0xcc, 0x7a, 0x2e, 0xa3,
+	0x9c, 0xe2, 0xfd, 0x48, 0xb0, 0x79, 0x32, 0xa1, 0x74, 0x32, 0x25, 0x17, 0xf2, 0xe5, 0xd8, 0xbb,
+	0xba, 0xe0, 0x96, 0x4d, 0x66, 0x5c, 0xb7, 0xdd, 0xf9, 0x7e, 0xf5, 0x35, 0xb4, 0x9e, 0x11, 0xae,
+	0xe9, 0x9c, 0x0c, 0xe5, 0x87, 0x7c, 0x48, 0x6d, 0x9b, 0x3a, 0x1a, 0xf9, 0xce, 0x23, 0x33, 0x8e,
+	0x31, 0xec, 0x5e, 0x31, 0x6a, 0x37, 0x50, 0x07, 0x75, 0xab, 0x9a, 0x5c, 0xe3, 0x03, 0x50, 0x38,
+	0x6d, 0x28, 0x32, 0xa2, 0x70, 0x8a, 0x5b, 0x50, 0x15, 0xc5, 0x46, 0xdc, 0x77, 0x49, 0x63, 0x47,
+	0x86, 0xf7, 0x44, 0xe0, 0xa5, 0xef, 0x12, 0xf5, 0x16, 0x41, 0x33, 0x28, 0xf0, 0x89, 0xff, 0x54,
+	0x94, 0xb9, 0xd3, 0xfc, 0xf8, 0x23, 0xd8, 0x33, 0x75, 0x4e, 0x04, 0xad, 0xc6, 0x6e, 0x07, 0x75,
+	0x6b, 0xfd, 0x66, 0x6f, 0xce, 0xb9, 0x17, 0x72, 0xee, 0xbd, 0x0c, 0x39, 0x6b, 0x8b, 0xbd, 0xea,
+	0x8f, 0x08, 0x3a, 0x51, 0xe2, 0x9f, 0x52, 0xf6, 0x39, 0x61, 0xc6, 0xd7, 0xba, 0xc3, 0xef, 0x0c,
+	0xdd, 0x09, 0xd4, 0xec, 0x20, 0xe7, 0xc8, 0x32, 0x25, 0xc0, 0xaa, 0x06, 0x61, 0xe8, 0x33, 0x53,
+	0xfd, 0x1d, 0xc1, 0x49, 0x44, 0x9e, 0x6d, 0xa0, 0xf8, 0x97, 0x1a, 0xc5, 0xd1, 0x97, 0x13, 0xe8,
+	0x6f, 0x11, 0xec, 0x09, 0xe8, 0x4f, 0x75, 0xae, 0x0b, 0x48, 0x96, 0x19, 0x80, 0x54, 0x2c, 0x13,
+	0x7f, 0x0c, 0x60, 0x30, 0xa2, 0x73, 0x62, 0x8e, 0x74, 0x2e, 0xa1, 0xe6, 0xd7, 0xad, 0x06, 0xbb,
+	0x07, 0x92, 0xb1, 0xab, 0x5b, 0x2c, 0x20, 0x22, 0xd7, 0x22, 0x26, 0x08, 0x49, 0x02, 0x48, 0x93,
+	0x6b, 0xfc, 0x26, 0x54, 0x66, 0xd4, 0x63, 0x06, 0x09, 0xb0, 0x05, 0x4f, 0xea, 0x21, 0xec, 0x5f,
+	0xda, 0x2e, 0xf7, 0x35, 0x32, 0x73, 0xa9, 0x33, 0x23, 0xea, 0x39, 0xe0, 0x21, 0x65, 0x8c, 0x18,
+	0xdc, 0xa2, 0x8e, 0x58, 0x59, 0x26, 0x65, 0xb8, 0x0e, 0xe5, 0x6b, 0x7d, 0xea, 0x11, 0x09, 0x1a,
+	0x69, 0xf3, 0x07, 0xf5, 0x6f, 0x05, 0x0e, 0x96, 0x9b, 0x35, 0x6f, 0x4a, 0x12, 0xd4, 0x22, 0x6a,
+	0x2b, 0x31, 0xb5, 0xdf, 0x87, 0x37, 0x0c, 0x79, 0xc7, 0x47, 0xc6, 0x22, 0x8b, 0x64, 0x82, 0xb4,
+	0xa3, 0xf9, 0x8b, 0x65, 0x76, 0xfc, 0x05, 0x1c, 0x0a, 0x76, 0xab, 0x5b, 0x77, 0x3b, 0x3b, 0xdd,
+	0x5a, 0xff, 0xc3, 0x5e, 0xf4, 0xd7, 0x1d, 0x45, 0xd4, 0x7b, 0xae, 0x5b, 0x6c, 0x19, 0xba, 0x74,
+	0x38, 0xf3, 0xb5, 0x03, 0x37, 0x12, 0x8c, 0x1d, 0x40, 0x79, 0x93, 0x03, 0x88, 0x9d, 0x7c, 0x25,
+	0x7e, 0xf2, 0xcd, 0x01, 0x1c, 0xa7, 0x40, 0xc0, 0x47, 0xb0, 0xf3, 0x2d, 0xf1, 0x03, 0xa5, 0xc4,
+	0x72, 0xa9, 0xb1, 0xb2, 0xa2, 0xf1, 0x13, 0xe5, 0x31, 0x52, 0xff, 0x54, 0xa0, 0x3e, 0x8c, 0xe9,
+	0xb1, 0x65, 0xb5, 0xbf, 0xca, 0x52, 0xfb, 0x51, 0x42, 0xed, 0x24, 0xae, 0x2d, 0x6b, 0x7e, 0x17,
+	0x92, 0x3e, 0x81, 0x56, 0x1a, 0xf2, 0xd0, 0x48, 0x22, 0x42, 0xa2, 0x98, 0x51, 0xbf, 0x82, 0x76,
+	0x68, 0x3c, 0x9b, 0x7f, 0x1d, 0xbf, 0x30, 0x4a, 0xc2, 0x2a, 0x6e, 0xe0, 0xdd, 0xcb, 0xef, 0xc5,
+	0xc3, 0x24, 0xf0, 0x5b, 0xc3, 0xdf, 0x4a, 0xc3, 0x11, 0x9e, 0xa0, 0xdb, 0xd4, 0x73, 0x78, 0xe0,
+	0x14, 0xc1, 0x93, 0xfa, 0x0b, 0x82, 0xb3, 0x0c, 0x04, 0xdb, 0xf0, 0xdc, 0x0c, 0x18, 0xc5, 0x9e,
+	0xfa, 0x1b, 0x82, 0xd3, 0x38, 0xce, 0xad, 0x74, 0xce, 0x2c, 0x84, 0xab, 0xdd, 0xa2, 0xbc, 0x41,
+	0x47, 0xfd, 0x0b, 0x41, 0x37, 0x1d, 0xf8, 0xff, 0x49, 0xdf, 0x08, 0xbd, 0xca, 0x06, 0xf4, 0x7e,
+	0x45, 0xd0, 0x88, 0xd3, 0x0b, 0xfb, 0x0b, 0x3e, 0x83, 0x23, 0x12, 0xbc, 0x33, 0x47, 0x01, 0xae,
+	0x79, 0x53, 0x39, 0x5c, 0xc4, 0x07, 0x73, 0x80, 0xa7, 0xb0, 0x1f, 0x86, 0x46, 0xb2, 0xa1, 0xcd,
+	0x7f, 0xc5, 0xf7, 0xc2, 0xa0, 0xe8, 0xa7, 0xf8, 0x1d, 0x80, 0x84, 0x9d, 0xad, 0x44, 0x44, 0x12,
+	0xca, 0xac, 0x89, 0xe5, 0xe8, 0xd3, 0xd1, 0x4a, 0x57, 0xbc, 0x17, 0x06, 0x45, 0x92, 0xfe, 0x1f,
+	0x35, 0xa8, 0x47, 0x6c, 0xed, 0x05, 0x61, 0xd7, 0x96, 0x41, 0xf0, 0x2b, 0xa8, 0xa7, 0xcd, 0x7c,
+	0xf8, 0x3c, 0xe6, 0x82, 0x39, 0x83, 0x61, 0xf3, 0xad, 0xd8, 0xde, 0x70, 0x0c, 0x50, 0x4b, 0xf8,
+	0x4b, 0x38, 0x4e, 0x99, 0xf8, 0xf0, 0x59, 0x7a, 0xf6, 0x94, 0xbb, 0x9d, 0x97, 0x7c, 0x02, 0x6f,
+	0x67, 0x8e, 0x6d, 0xf8, 0x22, 0x97, 0x40, 0xf2, 0x1a, 0xe6, 0x15, 0x22, 0xd0, 0xc8, 0x1a, 0xcc,
+	0x70, 0x2f, 0x8f, 0xca, 0x66, 0x65, 0x6e, 0xa0, 0x9d, 0xeb, 0x8b, 0xf8, 0x61, 0xec, 0xdb, 0x75,
+	0x5c, 0xb4, 0xf9, 0x5e, 0xc1, 0x47, 0x8b, 0xc1, 0xa8, 0x84, 0x7f, 0x46, 0xa0, 0x16, 0xfb, 0x22,
+	0x7e, 0xbc, 0x1e, 0x8c, 0x14, 0xf2, 0x1b, 0x60, 0xf9, 0x01, 0xee, 0xe7, 0x59, 0x1f, 0xee, 0x17,
+	0xa4, 0x4a, 0xbb, 0x4b, 0x1b, 0x94, 0xff, 0x09, 0xc1, 0x83, 0x42, 0x07, 0xc3, 0x8f, 0xd6, 0x02,
+	0xf1, 0xdf, 0x84, 0xf8, 0x46, 0xfe, 0x2b, 0x0b, 0x88, 0x48, 0x4a, 0x91, 0x09, 0xe9, 0x7c, 0x8d,
+	0x71, 0x25, 0xac, 0xda, 0xce, 0x1d, 0x24, 0xd5, 0x12, 0x76, 0xa0, 0xfd, 0x8c, 0xf0, 0x05, 0xd8,
+	0x64, 0xb5, 0x0f, 0x62, 0x19, 0x72, 0xc7, 0x84, 0xe2, 0x7a, 0x63, 0x68, 0x0d, 0x4c, 0x33, 0x93,
+	0xdb, 0xe9, 0x1a, 0xdc, 0x9a, 0xf7, 0xe3, 0x52, 0x46, 0xa6, 0xfd, 0x12, 0x7e, 0x0d, 0xed, 0x81,
+	0x69, 0xe6, 0x70, 0xca, 0x47, 0x59, 0x98, 0x7f, 0x0c, 0xed, 0x17, 0x84, 0x3f, 0xd7, 0xfd, 0x99,
+	0xe7, 0x12, 0x96, 0xf2, 0xd7, 0xe2, 0x41, 0x66, 0xfe, 0x70, 0x4b, 0x51, 0x8d, 0x71, 0x45, 0xb6,
+	0xa3, 0x87, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0xb7, 0xb4, 0xe5, 0x5a, 0xe7, 0x0f, 0x00, 0x00,
 }

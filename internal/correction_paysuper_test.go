@@ -77,18 +77,22 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
 
         fakes = append(fakes, rd2)
     }
-    cName := suite.service.getCollectionName(collectionSuffux)
+
+    cName, err := suite.service.getCollectionName(collectionSuffux)
+    if err != nil {
+        return err
+    }
     return suite.service.db.Collection(cName).Insert(fakes...)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getRatesForBollingerOk() {
 
-    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionSuffixOxr)
+    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionRatesNameSuffixOxr)
     assert.NoError(suite.T(), err)
 
     totalDays := days + timePeriod - 1
     startDate := today.AddDate(0, 0, -1*totalDays)
-    oxrRates, err := suite.service.getRatesForBollinger(collectionSuffixOxr, cFrom+cTo, startDate, totalDays)
+    oxrRates, err := suite.service.getRatesForBollinger(collectionRatesNameSuffixOxr, cFrom+cTo, startDate, totalDays)
     assert.NoError(suite.T(), err)
 
     assert.Equal(suite.T(), oxrRates, fakeratesOxr[len(fakeratesOxr)-totalDays:])
@@ -96,10 +100,10 @@ func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getRatesFor
 
 func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getBollingerBandsOk() {
 
-    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionSuffixOxr)
+    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionRatesNameSuffixOxr)
     assert.NoError(suite.T(), err)
 
-    oxrL, oxrM, oxrU, err := suite.service.getBollingerBands(collectionSuffixOxr, cFrom+cTo, days, timePeriod)
+    oxrL, oxrM, oxrU, err := suite.service.getBollingerBands(collectionRatesNameSuffixOxr, cFrom+cTo, days, timePeriod)
     assert.NoError(suite.T(), err)
 
     assert.Equal(suite.T(), len(oxrL), days)
@@ -113,10 +117,10 @@ func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getBollinge
 
 func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getCorrectionValueOk() {
 
-    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionSuffixOxr)
+    err := suite.fillFakes(fakeratesOxr, cFrom, cTo, collectionRatesNameSuffixOxr)
     assert.NoError(suite.T(), err)
 
-    err = suite.fillFakes(fakeratesCardpay, cFrom, cTo, collectionSuffixCardpay)
+    err = suite.fillFakes(fakeratesCardpay, cFrom, cTo, collectionRatesNameSuffixCardpay)
     assert.NoError(suite.T(), err)
 
     value1, err1 := suite.service.getCorrectionValue(cFrom+cTo, days, timePeriod, corridorWidth)

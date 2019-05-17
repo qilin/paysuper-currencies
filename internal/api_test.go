@@ -5,399 +5,399 @@ import (
     "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
+    "github.com/paysuper/paysuper-currencies-rates/pkg"
     "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
     "github.com/stretchr/testify/assert"
-    "time"
 )
 
-func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Ok() {
-    req := &currencyrates.GetRateRequest{
-        From: "USD",
-        To:   "RUB",
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Ok() {
+    req := &currencyrates.GetRateCurrentCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
     }
 
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetOxrRate(context.TODO(), req, res)
-
+    err := suite.service.GetRateCurrentCommon(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestGetOxrRate_Fail() {
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Fail() {
     res := &currencyrates.RateData{}
 
-    req := &currencyrates.GetRateRequest{}
-    err := suite.service.GetOxrRate(context.TODO(), req, res)
+    req := &currencyrates.GetRateCurrentCommonRequest{}
+    err := suite.service.GetRateCurrentCommon(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorFromCurrencyNotSupported)
 
-    req = &currencyrates.GetRateRequest{
+    req = &currencyrates.GetRateCurrentCommonRequest{
         From: "USD",
     }
-    err = suite.service.GetOxrRate(context.TODO(), req, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-    req = &currencyrates.GetRateRequest{
-        From: "USD",
-        To:   "ZWD",
+    req = &currencyrates.GetRateCurrentCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: "bla-bla",
     }
-    err = suite.service.GetOxrRate(context.TODO(), req, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
     assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
+    assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
 
-    req = &currencyrates.GetRateRequest{
-        From: "USD",
-        To:   "JPY",
+    req = &currencyrates.GetRateCurrentCommonRequest{
+        From:     "USD",
+        To:       "EUR",
+        RateType: pkg.RateTypeOxr,
     }
-    err = suite.service.GetOxrRate(context.TODO(), req, res)
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
     assert.Error(suite.T(), err)
     assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestGetCentralBankRateForDate_Ok() {
-    req := &currencyrates.GetCentralBankRateRequest{
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateCommon_Ok() {
+    req := &currencyrates.GetRateByDateCommonRequest{
         From:     "USD",
         To:       "RUB",
+        RateType: pkg.RateTypeOxr,
         Datetime: ptypes.TimestampNow(),
     }
 
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetCentralBankRateForDate(context.TODO(), req, res)
-
+    err := suite.service.GetRateByDateCommon(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestUpdateRateOk() {
-    req := &currencyrates.GetRateRequest{
-        From: "USD",
-        To:   "RUB",
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateCommon_Fail() {
+    req := &currencyrates.GetRateByDateCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
     }
+
     res := &currencyrates.RateData{}
 
-    err := suite.service.GetOxrRate(context.TODO(), req, res)
+    err := suite.service.GetRateByDateCommon(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorTimestampRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentForMerchant_Ok() {
+    req := &currencyrates.GetRateCurrentForMerchantRequest{
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeOxr,
+        MerchantId: bson.NewObjectId().Hex(),
+    }
+
+    res := &currencyrates.RateData{}
+
+    err := suite.service.GetRateCurrentForMerchant(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.Pair, "USDRUB")
     assert.Equal(suite.T(), res.Rate, r)
     assert.Equal(suite.T(), res.Source, "TEST")
-
-    rd := &currencyrates.RateData{
-        Pair:   "USDRUB",
-        Rate:   r + 1,
-        Source: "TEST",
-    }
-    err = suite.service.saveRates(collectionSuffixOxr, []interface{}{rd})
-    assert.NoError(suite.T(), err)
-
-    err = suite.service.GetOxrRate(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.Rate, r+1)
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestAddRateCorrectionRuleOk() {
-    res := &currencyrates.EmptyResponse{}
-
-    req := &currencyrates.CorrectionRule{
-        RateType: "oxr",
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentForMerchant_Fail() {
+    req := &currencyrates.GetRateCurrentForMerchantRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
     }
-    err := suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
 
-    req = &currencyrates.CorrectionRule{
-        RateType:   "oxr",
-        MerchantId: bson.NewObjectId().Hex(),
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
+    res := &currencyrates.RateData{}
 
-    req = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        MerchantId:       bson.NewObjectId().Hex(),
-        CommonCorrection: 1,
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        MerchantId:       bson.NewObjectId().Hex(),
-        CommonCorrection: 1,
-        PairCorrection: map[string]float64{
-            "USDEUR": -3,
-            "EURUSD": 3,
-        },
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType: "oxr",
-        PairCorrection: map[string]float64{
-            "USDEUR": -3,
-            "EURUSD": 3,
-        },
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
+    err := suite.service.GetRateCurrentForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
 }
 
-func (suite *CurrenciesratesServiceTestSuite) TestAddRateCorrectionRuleFail() {
-    res := &currencyrates.EmptyResponse{}
-
-    req := &currencyrates.CorrectionRule{}
-    err := suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType: "bla-bla-bla",
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType:   "oxr",
-        MerchantId: "bla-bla-bla",
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: 101,
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType: "oxr",
-        PairCorrection: map[string]float64{
-            "USDEUR": -101,
-        },
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRule{
-        RateType: "oxr",
-        PairCorrection: map[string]float64{
-            "USDEUR": -3,
-            "EURZWD": 3,
-        },
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleFail() {
-    res := &currencyrates.CorrectionRule{}
-
-    req := &currencyrates.CorrectionRuleRequest{}
-    err := suite.service.GetRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRuleRequest{
-        RateType: "bla-bla-bla",
-    }
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRuleRequest{
-        RateType:   "oxr",
-        MerchantId: "bla-bla-bla",
-    }
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-
-    req = &currencyrates.CorrectionRuleRequest{
-        RateType:   "oxr",
-        MerchantId: bson.NewObjectId().Hex(),
-    }
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req, res)
-    assert.Error(suite.T(), err)
-    assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleOk() {
-
-    req1 := &currencyrates.CorrectionRule{
-        RateType: "oxr",
-    }
-    res1 := &currencyrates.EmptyResponse{}
-    err := suite.service.AddRateCorrectionRule(context.TODO(), req1, res1)
-    assert.NoError(suite.T(), err)
-
-    req2 := &currencyrates.CorrectionRuleRequest{
-        RateType: "oxr",
-    }
-    res2 := &currencyrates.CorrectionRule{}
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
-    assert.NoError(suite.T(), err)
-
-    assert.Equal(suite.T(), res2.RateType, req1.RateType)
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleWithFallback() {
-    merchantId := bson.NewObjectId().Hex()
-    date := time.Now().AddDate(0, 0, -1)
-    created, _ := ptypes.TimestampProto(suite.service.Bod(date))
-
-    // adding default correction rule with old date
-    reqAdd := &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: 1,
-        CreatedAt:        created,
-    }
-    resAdd := &currencyrates.EmptyResponse{}
-    err := suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
-    assert.NoError(suite.T(), err)
-
-    // falling back to default correction rule, while requesting it for merchant,
-    // if no rule for merchant is specified
-    req2 := &currencyrates.CorrectionRuleRequest{
-        RateType:   "oxr",
-        MerchantId: merchantId,
-    }
-    res2 := &currencyrates.CorrectionRule{}
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res2.RateType, "oxr")
-    assert.Equal(suite.T(), res2.MerchantId, "")
-    assert.Equal(suite.T(), res2.CommonCorrection, float64(1))
-
-    // adding special correction rule for merchant
-    reqAdd = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: 2,
-        MerchantId:       merchantId,
-        CreatedAt:        created,
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
-    assert.NoError(suite.T(), err)
-
-    // and return merchant's correction rule for the same request, because it now exists
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res2.RateType, "oxr")
-    assert.Equal(suite.T(), res2.MerchantId, merchantId)
-    assert.Equal(suite.T(), res2.CommonCorrection, float64(2))
-
-    // but still returns default rule if no merchant specified in rule request
-    req3 := &currencyrates.CorrectionRuleRequest{
-        RateType: "oxr",
-    }
-    res3 := &currencyrates.CorrectionRule{}
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req3, res3)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res3.RateType, "oxr")
-    assert.Equal(suite.T(), res3.MerchantId, "")
-    assert.Equal(suite.T(), res3.CommonCorrection, float64(1))
-
-    // add more fresh default correction rule
-    reqAdd = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: 3,
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
-    assert.NoError(suite.T(), err)
-
-    // and returns old but still actual merchant's correction rule for the merchant-specified request
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res2.RateType, "oxr")
-    assert.Equal(suite.T(), res2.MerchantId, merchantId)
-    assert.Equal(suite.T(), res2.CommonCorrection, float64(2))
-
-    // but returns updated default rule if no merchant specified in rule request
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req3, res3)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res3.RateType, "oxr")
-    assert.Equal(suite.T(), res3.MerchantId, "")
-    assert.Equal(suite.T(), res3.CommonCorrection, float64(3))
-
-    // updating special correction rule for merchant
-    reqAdd = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: 4,
-        MerchantId:       merchantId,
-    }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
-    assert.NoError(suite.T(), err)
-
-    // and returns updatedactual merchant's correction rule for the merchant-specified request
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req2, res2)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res2.RateType, "oxr")
-    assert.Equal(suite.T(), res2.MerchantId, merchantId)
-    assert.Equal(suite.T(), res2.CommonCorrection, float64(4))
-
-    // and updated default rule if no merchant specified in rule request
-    err = suite.service.GetRateCorrectionRule(context.TODO(), req3, res3)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res3.RateType, "oxr")
-    assert.Equal(suite.T(), res3.MerchantId, "")
-    assert.Equal(suite.T(), res3.CommonCorrection, float64(3))
-
-}
-
-func (suite *CurrenciesratesServiceTestSuite) TestExchangeCurrency_Ok() {
-    merchantId := bson.NewObjectId().Hex()
-
-    req := &currencyrates.ExchangeCurrencyRequest{
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateForMerchant_Ok() {
+    req := &currencyrates.GetRateByDateForMerchantRequest{
         From:       "USD",
         To:         "RUB",
-        MerchantId: merchantId,
-        Amount:     100,
-        RateType:   collectionSuffixOxr,
+        RateType:   pkg.RateTypeOxr,
+        MerchantId: bson.NewObjectId().Hex(),
+        Datetime:   ptypes.TimestampNow(),
     }
+
+    res := &currencyrates.RateData{}
+
+    err := suite.service.GetRateByDateForMerchant(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
+    assert.Equal(suite.T(), res.Rate, r)
+    assert.Equal(suite.T(), res.Source, "TEST")
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateForMerchant_Fail() {
+    req := &currencyrates.GetRateByDateForMerchantRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+    }
+
+    res := &currencyrates.RateData{}
+
+    err := suite.service.GetRateByDateForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
+
+    req = &currencyrates.GetRateByDateForMerchantRequest{
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeOxr,
+        MerchantId: bson.NewObjectId().Hex(),
+    }
+
+    err = suite.service.GetRateByDateForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorTimestampRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentCommon_Ok() {
+    req := &currencyrates.ExchangeCurrencyCurrentCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+    }
+
     res := &currencyrates.ExchangeCurrencyResponse{}
 
-    // requesting exchange
-    err := suite.service.ExchangeCurrency(context.TODO(), req, res)
+    err := suite.service.ExchangeCurrencyCurrentCommon(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
     assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
     assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+}
 
-    // adding default correction rule with old date
-    reqAdd := &currencyrates.CorrectionRule{
-        RateType:         "oxr",
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentForMerchant_Ok() {
+    req := &currencyrates.ExchangeCurrencyCurrentForMerchantRequest{
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeOxr,
+        Amount:     100,
+        MerchantId: bson.NewObjectId().Hex(),
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyCurrentForMerchant(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
+    assert.Equal(suite.T(), res.Correction, float64(0))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentForMerchant_Fail() {
+    req := &currencyrates.ExchangeCurrencyCurrentForMerchantRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyCurrentForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateCommon_Ok() {
+    req := &currencyrates.ExchangeCurrencyByDateCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+        Datetime: ptypes.TimestampNow(),
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyByDateCommon(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
+    assert.Equal(suite.T(), res.Correction, float64(0))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateCommon_Fail() {
+    req := &currencyrates.ExchangeCurrencyByDateCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyByDateCommon(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorTimestampRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerchant_Ok() {
+    req := &currencyrates.ExchangeCurrencyByDateForMerchantRequest{
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeOxr,
+        Amount:     100,
+        MerchantId: bson.NewObjectId().Hex(),
+        Datetime:   ptypes.TimestampNow(),
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyByDateForMerchant(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
+    assert.Equal(suite.T(), res.Correction, float64(0))
+    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerchant_Fail() {
+    req := &currencyrates.ExchangeCurrencyByDateForMerchantRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+    }
+
+    res := &currencyrates.ExchangeCurrencyResponse{}
+
+    err := suite.service.ExchangeCurrencyByDateForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
+
+    req = &currencyrates.ExchangeCurrencyByDateForMerchantRequest{
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeOxr,
+        Amount:     100,
+        MerchantId: bson.NewObjectId().Hex(),
+    }
+
+    err = suite.service.ExchangeCurrencyByDateForMerchant(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorTimestampRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_SetPaysuperCorrectionCorridor_Ok() {
+    req := &currencyrates.CorrectionCorridor{
+        Value: 0.5,
+    }
+    res := &currencyrates.EmptyResponse{}
+    err := suite.service.SetPaysuperCorrectionCorridor(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_Ok() {
+    req1 := &currencyrates.CommonCorrectionRule{
+        RateType:         pkg.RateTypeOxr,
         CommonCorrection: 1,
     }
-    resAdd := &currencyrates.EmptyResponse{}
-    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddCommonRateCorrectionRule(context.TODO(), req1, res1)
+    assert.NoError(suite.T(), err)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule_Ok() {
+    req1 := &currencyrates.CorrectionRule{
+        RateType:         pkg.RateTypeOxr,
+        CommonCorrection: 1,
+        MerchantId:       bson.NewObjectId().Hex(),
+    }
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
+    assert.NoError(suite.T(), err)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule_Fail() {
+    req1 := &currencyrates.CorrectionRule{
+        RateType:         pkg.RateTypeOxr,
+        CommonCorrection: 1,
+    }
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetCommonRateCorrectionRule_Ok() {
+    req1 := &currencyrates.CorrectionRule{
+        RateType:         pkg.RateTypeOxr,
+        CommonCorrection: 1,
+        MerchantId:       bson.NewObjectId().Hex(),
+    }
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
     assert.NoError(suite.T(), err)
 
-    // requesting exchange again
-    err = suite.service.ExchangeCurrency(context.TODO(), req, res)
-    assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(6528.42424242))
-    assert.Equal(suite.T(), res.ExchangeRate, float64(65.2842424242))
-    assert.Equal(suite.T(), res.Correction, float64(1))
-    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+    req := &currencyrates.CommonCorrectionRuleRequest{
+        RateType: pkg.RateTypeOxr,
+    }
 
-    // adding special correction rule for merchant
-    reqAdd = &currencyrates.CorrectionRule{
-        RateType:         "oxr",
-        CommonCorrection: -2,
+    res := &currencyrates.CorrectionRule{}
+    err = suite.service.GetCommonRateCorrectionRule(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule_Ok() {
+    merchantId := bson.NewObjectId().Hex()
+
+    req1 := &currencyrates.CorrectionRule{
+        RateType:         pkg.RateTypeOxr,
+        CommonCorrection: 1,
         MerchantId:       merchantId,
     }
-    err = suite.service.AddRateCorrectionRule(context.TODO(), reqAdd, resAdd)
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
     assert.NoError(suite.T(), err)
 
-    // requesting exchange ones more
-    err = suite.service.ExchangeCurrency(context.TODO(), req, res)
+    req := &currencyrates.MerchantCorrectionRuleRequest{
+        RateType:   pkg.RateTypeOxr,
+        MerchantId: merchantId,
+    }
+
+    res := &currencyrates.CorrectionRule{}
+    err = suite.service.GetMerchantRateCorrectionRule(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(6336.41176471))
-    assert.Equal(suite.T(), res.ExchangeRate, float64(63.3641176471))
-    assert.Equal(suite.T(), res.Correction, float64(-2))
-    assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule_Fail() {
+    merchantId := bson.NewObjectId().Hex()
+
+    req1 := &currencyrates.CorrectionRule{
+        RateType:         pkg.RateTypeOxr,
+        CommonCorrection: 1,
+        MerchantId:       merchantId,
+    }
+    res1 := &currencyrates.EmptyResponse{}
+    err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
+    assert.NoError(suite.T(), err)
+
+    req := &currencyrates.MerchantCorrectionRuleRequest{
+        RateType: pkg.RateTypeOxr,
+    }
+
+    res := &currencyrates.CorrectionRule{}
+    err = suite.service.GetMerchantRateCorrectionRule(context.TODO(), req, res)
+    assert.Error(suite.T(), err)
+    assert.Equal(suite.T(), err.Error(), errorMerchantIdRequired)
 }
