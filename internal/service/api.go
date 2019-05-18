@@ -1,4 +1,4 @@
-package internal
+package service
 
 import (
     "context"
@@ -245,5 +245,61 @@ func (s *Service) SetPaysuperCorrectionCorridor(
         return err
     }
 
+    return nil
+}
+
+
+func (s *Service) GetSupportedCurrencies(
+    ctx context.Context,
+    req *currencies.EmptyRequest,
+    res *currencies.CurrenciesList,
+) error {
+    for _, v := range s.cfg.SupportedCurrencies {
+        res.Currencies = append(res.Currencies, v)
+    }
+    return nil
+}
+
+func (s *Service) GetSettlementCurrencies(
+    ctx context.Context,
+    req *currencies.EmptyRequest,
+    res *currencies.CurrenciesList,
+) error {
+    for _, v := range s.cfg.SettlementCurrencies {
+        res.Currencies = append(res.Currencies, v)
+    }
+    return nil
+}
+
+func (s *Service) GetPriceCurrencies(
+    ctx context.Context,
+    req *currencies.EmptyRequest,
+    res *currencies.CurrenciesList,
+) error {
+    for _, v := range s.cfg.PriceCurrencies {
+        res.Currencies = append(res.Currencies, v)
+    }
+    return nil
+}
+
+func (s *Service) GetVatCurrencies(
+    ctx context.Context,
+    req *currencies.EmptyRequest,
+    res *currencies.CurrenciesList,
+) error {
+    for _, v := range s.cfg.VatCurrencies {
+        res.Currencies = append(res.Currencies, v)
+    }
+    return nil
+}
+
+func (s *Service) GetAccountingCurrencies(
+    ctx context.Context,
+    req *currencies.EmptyRequest,
+    res *currencies.CurrenciesList,
+) error {
+    for _, v := range s.cfg.AccountingCurrencies {
+        res.Currencies = append(res.Currencies, v)
+    }
     return nil
 }

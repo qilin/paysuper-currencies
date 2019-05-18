@@ -1,4 +1,4 @@
-package internal
+package service
 
 import (
     "errors"
@@ -35,8 +35,8 @@ func (s *Service) RequestRatesOxr() error {
     zap.S().Info("Requesting rates from OXR")
 
     headers := map[string]string{
-        HeaderContentType:   MIMEApplicationJSON,
-        HeaderAccept:        MIMEApplicationJSON,
+        HeaderContentType: MIMEApplicationJSON,
+        HeaderAccept:      MIMEApplicationJSON,
     }
     
     queryParams := url.Values{

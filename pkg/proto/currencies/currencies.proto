@@ -37,6 +37,21 @@ service currencyratesService {
 
     rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
     }
+
+    rpc GetSupportedCurrencies (EmptyRequest) returns (CurrenciesList) {
+    }
+
+    rpc GetSettlementCurrencies (EmptyRequest) returns (CurrenciesList) {
+    }
+
+    rpc GetPriceCurrencies (EmptyRequest) returns (CurrenciesList) {
+    }
+
+    rpc GetVatCurrencies (EmptyRequest) returns (CurrenciesList) {
+    }
+
+    rpc GetAccountingCurrencies (EmptyRequest) returns (CurrenciesList) {
+    }
 }
 
 message GetRateCurrentCommonRequest {
@@ -97,6 +112,9 @@ message RateData {
 }
 
 message EmptyResponse {
+}
+
+message EmptyRequest {
 }
 
 message CorrectionCorridor {
@@ -205,4 +223,8 @@ message ExchangeCurrencyResponse {
     double correction = 3;
     //@inject_tag: validate:"required,numeric,gt=0" json:"original_rate"
     double original_rate = 4;
+}
+
+message CurrenciesList {
+    repeated string currencies = 1;
 }

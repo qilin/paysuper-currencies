@@ -2,6 +2,7 @@ package config
 
 import (
     "github.com/kelseyhightower/envconfig"
+    "github.com/paysuper/paysuper-currencies/internal/currency"
     "github.com/paysuper/paysuper-currencies/pkg"
 )
 
@@ -39,6 +40,15 @@ type Config struct {
     CbplBaseCurrenciesParsed     map[string]bool
 
     RatesTypes map[string]bool
+
+    Currencies map[string]currency.CurrencyProperties
+
+    SettlementCurrencies   []string
+    PriceCurrencies        []string
+    VatCurrencies          []string
+    AccountingCurrencies   []string
+    RatesRequestCurrencies []string
+    SupportedCurrencies    []string
 }
 
 func NewConfig() (*Config, error) {
@@ -76,6 +86,32 @@ func NewConfig() (*Config, error) {
     cfg.RatesTypes[pkg.RateTypePaysuper] = true
     cfg.RatesTypes[pkg.RateTypeStock] = true
     cfg.RatesTypes[pkg.RateTypeCardpay] = true
+
+    cfg.Currencies = currency.CurrencyDefinitions
+
+    for code, properties := range cfg.Currencies {
+        cfg.SupportedCurrencies = append(cfg.SupportedCurrencies, code)
+
+        if properties.Price || properties.Vat {
+            cfg.RatesRequestCurrencies = append(cfg.RatesRequestCurrencies, code)
+        }
+
+        if properties.Price {
+            cfg.PriceCurrencies = append(cfg.PriceCurrencies, code)
+        }
+
+        if properties.Vat {
+            cfg.VatCurrencies = append(cfg.VatCurrencies, code)
+        }
+
+        if properties.Settlement {
+            cfg.SettlementCurrencies = append(cfg.SettlementCurrencies, code)
+        }
+
+        if properties.Accounting {
+            cfg.AccountingCurrencies = append(cfg.AccountingCurrencies, code)
+        }
+    }
 
     return cfg, err
 }

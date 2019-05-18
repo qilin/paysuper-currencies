@@ -10,7 +10,7 @@ import (
     "github.com/micro/go-plugins/wrapper/monitoring/prometheus"
     k8s "github.com/micro/kubernetes/go/micro"
     "github.com/paysuper/paysuper-currencies/config"
-    "github.com/paysuper/paysuper-currencies/internal"
+    "github.com/paysuper/paysuper-currencies/internal/service"
     "github.com/paysuper/paysuper-currencies/pkg"
     "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/paysuper/paysuper-database-mongo"
@@ -41,7 +41,7 @@ func main() {
         logger.Fatal("Database connection failed", zap.Error(err), zap.String("connection_string", settings.String()))
     }
 
-    cs, err := internal.NewService(cfg, db)
+    cs, err := service.NewService(cfg, db)
     if err != nil {
         logger.Fatal("Can`t create currency rates service", zap.Error(err))
     }

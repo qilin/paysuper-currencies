@@ -14,6 +14,7 @@ It has these top-level messages:
 	GetRateByDateForMerchantRequest
 	RateData
 	EmptyResponse
+	EmptyRequest
 	CorrectionCorridor
 	CorrectionRule
 	CommonCorrectionRule
@@ -24,6 +25,7 @@ It has these top-level messages:
 	ExchangeCurrencyByDateCommonRequest
 	ExchangeCurrencyByDateForMerchantRequest
 	ExchangeCurrencyResponse
+	CurrenciesList
 */
 package currencies
 
@@ -70,6 +72,11 @@ type CurrencyratesService interface {
 	AddCommonRateCorrectionRule(ctx context.Context, in *CommonCorrectionRule, opts ...client.CallOption) (*EmptyResponse, error)
 	AddMerchantRateCorrectionRule(ctx context.Context, in *CorrectionRule, opts ...client.CallOption) (*EmptyResponse, error)
 	SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, opts ...client.CallOption) (*EmptyResponse, error)
+	GetSupportedCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
+	GetSettlementCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
+	GetPriceCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
+	GetVatCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
+	GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
 }
 
 type currencyratesService struct {
@@ -220,6 +227,56 @@ func (c *currencyratesService) SetPaysuperCorrectionCorridor(ctx context.Context
 	return out, nil
 }
 
+func (c *currencyratesService) GetSupportedCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetSupportedCurrencies", in)
+	out := new(CurrenciesList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetSettlementCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetSettlementCurrencies", in)
+	out := new(CurrenciesList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetPriceCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetPriceCurrencies", in)
+	out := new(CurrenciesList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetVatCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetVatCurrencies", in)
+	out := new(CurrenciesList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *currencyratesService) GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetAccountingCurrencies", in)
+	out := new(CurrenciesList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for CurrencyratesService service
 
 type CurrencyratesServiceHandler interface {
@@ -236,6 +293,11 @@ type CurrencyratesServiceHandler interface {
 	AddCommonRateCorrectionRule(context.Context, *CommonCorrectionRule, *EmptyResponse) error
 	AddMerchantRateCorrectionRule(context.Context, *CorrectionRule, *EmptyResponse) error
 	SetPaysuperCorrectionCorridor(context.Context, *CorrectionCorridor, *EmptyResponse) error
+	GetSupportedCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
+	GetSettlementCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
+	GetPriceCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
+	GetVatCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
+	GetAccountingCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
 }
 
 func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServiceHandler, opts ...server.HandlerOption) error {
@@ -253,6 +315,11 @@ func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServ
 		AddCommonRateCorrectionRule(ctx context.Context, in *CommonCorrectionRule, out *EmptyResponse) error
 		AddMerchantRateCorrectionRule(ctx context.Context, in *CorrectionRule, out *EmptyResponse) error
 		SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error
+		GetSupportedCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
+		GetSettlementCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
+		GetPriceCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
+		GetVatCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
+		GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
 	}
 	type CurrencyratesService struct {
 		currencyratesService
@@ -315,4 +382,24 @@ func (h *currencyratesServiceHandler) AddMerchantRateCorrectionRule(ctx context.
 
 func (h *currencyratesServiceHandler) SetPaysuperCorrectionCorridor(ctx context.Context, in *CorrectionCorridor, out *EmptyResponse) error {
 	return h.CurrencyratesServiceHandler.SetPaysuperCorrectionCorridor(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetSupportedCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
+	return h.CurrencyratesServiceHandler.GetSupportedCurrencies(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetSettlementCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
+	return h.CurrencyratesServiceHandler.GetSettlementCurrencies(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetPriceCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
+	return h.CurrencyratesServiceHandler.GetPriceCurrencies(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetVatCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
+	return h.CurrencyratesServiceHandler.GetVatCurrencies(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
+	return h.CurrencyratesServiceHandler.GetAccountingCurrencies(ctx, in, out)
 }
