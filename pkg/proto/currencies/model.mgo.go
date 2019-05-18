@@ -1,4 +1,4 @@
-package currencyrates
+package currencies
 
 import (
     "errors"

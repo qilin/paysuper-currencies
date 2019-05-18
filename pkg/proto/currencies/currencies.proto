@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package currencyrates;
+package currencies;
 
 import "google/protobuf/timestamp.proto";
 

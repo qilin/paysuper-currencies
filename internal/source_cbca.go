@@ -3,7 +3,7 @@ package internal
 import (
     "errors"
     "fmt"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
     "net/http"
     "time"
@@ -103,14 +103,14 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
         rate := rawRate.(float64)
 
         // direct pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   cFrom + cbcaTo,
             Rate:   s.toPrecise(rate),
             Source: cbcaSource,
         })
 
         // inverse pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   cbcaTo + cFrom,
             Rate:   s.toPrecise(1 / rate),
             Source: cbcaSource,

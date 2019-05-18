@@ -2,7 +2,7 @@ package config
 
 import (
     "github.com/kelseyhightower/envconfig"
-    "github.com/paysuper/paysuper-currencies-rates/pkg"
+    "github.com/paysuper/paysuper-currencies/pkg"
 )
 
 type Config struct {

@@ -2,7 +2,7 @@ package internal
 
 import (
     "github.com/globalsign/mgo/bson"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
 )
 
@@ -60,8 +60,8 @@ func (s *Service) SetRatesPaysuper() error {
     return nil
 }
 
-func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencyrates.RateData, error) {
-    res := &currencyrates.RateData{}
+func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateData, error) {
+    res := &currencies.RateData{}
 
     err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
     if err != nil {
@@ -73,7 +73,7 @@ func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencyrates.Rate
         return nil, err
     }
 
-    rd := &currencyrates.RateData{
+    rd := &currencies.RateData{
         Pair:   cFrom + cTo,
         Rate:   s.toPrecise(res.Rate + correction),
         Source: paysuperSource,

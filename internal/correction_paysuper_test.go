@@ -3,7 +3,7 @@ package internal
 import (
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/stretchr/testify/assert"
     "time"
 )
@@ -57,7 +57,7 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
         date := startDate.AddDate(0, 0, day)
         created, _ := ptypes.TimestampProto(suite.service.Bod(date))
 
-        rd1 := &currencyrates.RateData{
+        rd1 := &currencies.RateData{
             Id:        bson.NewObjectId().Hex(),
             CreatedAt: created,
             Rate:      suite.service.toPrecise(rate),
@@ -67,7 +67,7 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
 
         fakes = append(fakes, rd1)
 
-        rd2 := &currencyrates.RateData{
+        rd2 := &currencies.RateData{
             Id:        bson.NewObjectId().Hex(),
             CreatedAt: created,
             Rate:      suite.service.toPrecise(1 / rate),

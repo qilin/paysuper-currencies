@@ -9,10 +9,10 @@ import (
     "github.com/micro/go-micro"
     "github.com/micro/go-plugins/wrapper/monitoring/prometheus"
     k8s "github.com/micro/kubernetes/go/micro"
-    "github.com/paysuper/paysuper-currencies-rates/config"
-    "github.com/paysuper/paysuper-currencies-rates/internal"
-    "github.com/paysuper/paysuper-currencies-rates/pkg"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/config"
+    "github.com/paysuper/paysuper-currencies/internal"
+    "github.com/paysuper/paysuper-currencies/pkg"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/pkg/constant"
     "github.com/prometheus/client_golang/prometheus/promhttp"
@@ -167,7 +167,7 @@ func main() {
 
     ms.Init()
 
-    err = currencyrates.RegisterCurrencyratesServiceHandler(ms.Server(), cs)
+    err = currencies.RegisterCurrencyratesServiceHandler(ms.Server(), cs)
     if err != nil {
         logger.Fatal("Can`t register service in micro", zap.Error(err))
     }

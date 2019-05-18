@@ -1,4 +1,4 @@
-module github.com/paysuper/paysuper-currencies-rates
+module github.com/paysuper/paysuper-currencies
 
 require (
 	github.com/InVisionApp/go-health v2.1.0+incompatible

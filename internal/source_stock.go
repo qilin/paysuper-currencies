@@ -2,7 +2,7 @@ package internal
 
 import (
     "github.com/globalsign/mgo/bson"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
 )
 
@@ -17,7 +17,7 @@ func (s *Service) SetRatesStock() error {
 
     zap.S().Info("Start calculation rates for Stock")
 
-    rule := &currencyrates.CorrectionRule{}
+    rule := &currencies.CorrectionRule{}
     err := s.getCorrectionRule(collectionRatesNameSuffixStock, "", rule)
     if err != nil {
         zap.S().Errorw(errorCorrectionRuleNotFound, "error", err)
@@ -68,8 +68,8 @@ func (s *Service) SetRatesStock() error {
     return nil
 }
 
-func (s *Service) getRateStock(cFrom string, cTo string, rule *currencyrates.CorrectionRule) (*currencyrates.RateData, error) {
-    res := &currencyrates.RateData{}
+func (s *Service) getRateStock(cFrom string, cTo string, rule *currencies.CorrectionRule) (*currencies.RateData, error) {
+    res := &currencies.RateData{}
 
     err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
     if err != nil {
@@ -81,7 +81,7 @@ func (s *Service) getRateStock(cFrom string, cTo string, rule *currencyrates.Cor
     res.Id = bson.NewObjectId().Hex()
     res.Source = stockSource
 
-    rd := &currencyrates.RateData{
+    rd := &currencies.RateData{
         Pair: res.Pair,
         Rate: res.Rate,
         Source: stockSource,

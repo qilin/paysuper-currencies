@@ -3,7 +3,7 @@ package internal
 import (
     "errors"
     "fmt"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
     "net/http"
     "net/url"
@@ -107,14 +107,14 @@ func (s *Service) processRatesOxr(res *oxrResponse) error {
         }
 
         // direct pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:          from+to,
             Rate:          s.toPrecise(rate),
             Source:        oxrSource,
         })
 
         // inverse pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:          to+from,
             Rate:          s.toPrecise(1/rate),
             Source:        oxrSource,

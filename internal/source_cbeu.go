@@ -4,7 +4,7 @@ import (
     "encoding/xml"
     "errors"
     "fmt"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/satori/go.uuid"
     "go.uber.org/zap"
     "net/http"
@@ -107,14 +107,14 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
         }
 
         // direct pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   rateItem.CurrencyCode + cbeuTo,
             Rate:   s.toPrecise(rateItem.Value),
             Source: cbeuSource,
         })
 
         // inverse pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   cbeuTo + rateItem.CurrencyCode,
             Rate:   s.toPrecise(1 / rateItem.Value),
             Source: cbeuSource,

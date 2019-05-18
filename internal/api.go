@@ -5,7 +5,7 @@ import (
     "errors"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
     "time"
 )
@@ -25,8 +25,8 @@ const (
 
 func (s *Service) GetRateCurrentCommon(
     ctx context.Context,
-    req *currencyrates.GetRateCurrentCommonRequest,
-    res *currencyrates.RateData,
+    req *currencies.GetRateCurrentCommonRequest,
+    res *currencies.RateData,
 ) error {
     err := s.getRate(req.RateType, req.From, req.To, bson.M{}, res)
     if err != nil {
@@ -39,8 +39,8 @@ func (s *Service) GetRateCurrentCommon(
 
 func (s *Service) GetRateByDateCommon(
     ctx context.Context,
-    req *currencyrates.GetRateByDateCommonRequest,
-    res *currencyrates.RateData,
+    req *currencies.GetRateByDateCommonRequest,
+    res *currencies.RateData,
 ) error {
     dt, err := ptypes.Timestamp(req.Datetime)
     if err != nil {
@@ -60,8 +60,8 @@ func (s *Service) GetRateByDateCommon(
 
 func (s *Service) GetRateCurrentForMerchant(
     ctx context.Context,
-    req *currencyrates.GetRateCurrentForMerchantRequest,
-    res *currencyrates.RateData,
+    req *currencies.GetRateCurrentForMerchantRequest,
+    res *currencies.RateData,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -79,8 +79,8 @@ func (s *Service) GetRateCurrentForMerchant(
 
 func (s *Service) GetRateByDateForMerchant(
     ctx context.Context,
-    req *currencyrates.GetRateByDateForMerchantRequest,
-    res *currencyrates.RateData,
+    req *currencies.GetRateByDateForMerchantRequest,
+    res *currencies.RateData,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -105,8 +105,8 @@ func (s *Service) GetRateByDateForMerchant(
 
 func (s *Service) ExchangeCurrencyCurrentCommon(
     ctx context.Context,
-    req *currencyrates.ExchangeCurrencyCurrentCommonRequest,
-    res *currencyrates.ExchangeCurrencyResponse,
+    req *currencies.ExchangeCurrencyCurrentCommonRequest,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
     err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", bson.M{}, res)
     if err != nil {
@@ -118,8 +118,8 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
 
 func (s *Service) ExchangeCurrencyCurrentForMerchant(
     ctx context.Context,
-    req *currencyrates.ExchangeCurrencyCurrentForMerchantRequest,
-    res *currencyrates.ExchangeCurrencyResponse,
+    req *currencies.ExchangeCurrencyCurrentForMerchantRequest,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -135,8 +135,8 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
 
 func (s *Service) ExchangeCurrencyByDateCommon(
     ctx context.Context,
-    req *currencyrates.ExchangeCurrencyByDateCommonRequest,
-    res *currencyrates.ExchangeCurrencyResponse,
+    req *currencies.ExchangeCurrencyByDateCommonRequest,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
     dt, err := ptypes.Timestamp(req.Datetime)
     if err != nil {
@@ -154,8 +154,8 @@ func (s *Service) ExchangeCurrencyByDateCommon(
 
 func (s *Service) ExchangeCurrencyByDateForMerchant(
     ctx context.Context,
-    req *currencyrates.ExchangeCurrencyByDateForMerchantRequest,
-    res *currencyrates.ExchangeCurrencyResponse,
+    req *currencies.ExchangeCurrencyByDateForMerchantRequest,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -178,8 +178,8 @@ func (s *Service) ExchangeCurrencyByDateForMerchant(
 
 func (s *Service) GetCommonRateCorrectionRule(
     ctx context.Context,
-    req *currencyrates.CommonCorrectionRuleRequest,
-    res *currencyrates.CorrectionRule,
+    req *currencies.CommonCorrectionRuleRequest,
+    res *currencies.CorrectionRule,
 ) error {
     err := s.getCorrectionRule(req.RateType, "", res)
     if err != nil {
@@ -191,8 +191,8 @@ func (s *Service) GetCommonRateCorrectionRule(
 
 func (s *Service) GetMerchantRateCorrectionRule(
     ctx context.Context,
-    req *currencyrates.MerchantCorrectionRuleRequest,
-    res *currencyrates.CorrectionRule,
+    req *currencies.MerchantCorrectionRuleRequest,
+    res *currencies.CorrectionRule,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -209,16 +209,16 @@ func (s *Service) GetMerchantRateCorrectionRule(
 
 func (s *Service) AddCommonRateCorrectionRule(
     ctx context.Context,
-    req *currencyrates.CommonCorrectionRule,
-    res *currencyrates.EmptyResponse,
+    req *currencies.CommonCorrectionRule,
+    res *currencies.EmptyResponse,
 ) error {
     return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, "")
 }
 
 func (s *Service) AddMerchantRateCorrectionRule(
     ctx context.Context,
-    req *currencyrates.CorrectionRule,
-    res *currencyrates.EmptyResponse,
+    req *currencies.CorrectionRule,
+    res *currencies.EmptyResponse,
 ) error {
     if req.MerchantId == "" {
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
@@ -230,8 +230,8 @@ func (s *Service) AddMerchantRateCorrectionRule(
 
 func (s *Service) SetPaysuperCorrectionCorridor(
     ctx context.Context,
-    req *currencyrates.CorrectionCorridor,
-    res *currencyrates.EmptyResponse,
+    req *currencies.CorrectionCorridor,
+    res *currencies.EmptyResponse,
 ) error {
 
     corridor := PaysuperCorridor{

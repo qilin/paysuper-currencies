@@ -798,6 +798,7 @@ github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c h1:Lgl0gzECD8GnQ5
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
+github.com/paysuper/paysuper-currencies-rates v0.0.0-20190427162743-b4df5a0c3522 h1:hwRHUuREoqXzh7X/jHe791ZhZwKkdDOrD4qlIw8HNgk=
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105430-4daddbd57e4c h1:/RDlclDMVUnjFK13GV8t1pyn4VeYZCDPFM+jMyn73ek=
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105430-4daddbd57e4c/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506105715-355f83704aee h1:lwKUJ+gjsqJri6q8kqItCexEUbBWg2ClXV8qhwWZYjo=

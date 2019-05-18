@@ -2,7 +2,7 @@ package pkg
 
 const (
     // ServiceName - name of microservice
-    ServiceName = "paysupercurrencyrates"
+    ServiceName = "paysupercurrencies"
 
     // Version - version of service
     Version = "latest"

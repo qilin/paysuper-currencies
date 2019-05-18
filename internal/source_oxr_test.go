@@ -3,8 +3,8 @@ package internal
 import (
     "context"
     "github.com/globalsign/mgo"
-    "github.com/paysuper/paysuper-currencies-rates/pkg"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/stretchr/testify/assert"
 )
 
@@ -28,17 +28,17 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesFailed2(
 
 func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 
-    req1 := &currencyrates.GetRateCurrentCommonRequest{
+    req1 := &currencies.GetRateCurrentCommonRequest{
         From: "USD",
         To:   "AUD",
         RateType: pkg.RateTypeOxr,
     }
-    req2 := &currencyrates.GetRateCurrentCommonRequest{
+    req2 := &currencies.GetRateCurrentCommonRequest{
         From: "AUD",
         To:   "USD",
         RateType: pkg.RateTypeOxr,
     }
-    res := &currencyrates.RateData{}
+    res := &currencies.RateData{}
 
     err := suite.service.GetRateCurrentCommon(context.TODO(), req1, res)
     assert.Error(suite.T(), err)

@@ -1,4 +1,4 @@
-package currencyrates
+package currencies
 
 func (r *CorrectionRule) GetCorrectionValue(pair string) float64 {
     if pair == "" {

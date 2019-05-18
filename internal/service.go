@@ -10,9 +10,9 @@ import (
     "github.com/centrifugal/gocent"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
-    "github.com/paysuper/paysuper-currencies-rates/config"
-    "github.com/paysuper/paysuper-currencies-rates/pkg"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/config"
+    "github.com/paysuper/paysuper-currencies/pkg"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/tools"
     "go.uber.org/zap"
@@ -186,11 +186,11 @@ func (s *Service) contains(slice map[string]bool, item string) bool {
     return ok
 }
 
-func (s *Service) getRateByDate(collectionRatesNameSuffix string, from string, to string, date time.Time, res *currencyrates.RateData) error {
+func (s *Service) getRateByDate(collectionRatesNameSuffix string, from string, to string, date time.Time, res *currencies.RateData) error {
     return s.getRate(collectionRatesNameSuffix, from, to, s.getByDateQuery(date), res)
 }
 
-func (s *Service) getRate(collectionRatesNameSuffix string, from string, to string, query bson.M, res *currencyrates.RateData) error {
+func (s *Service) getRate(collectionRatesNameSuffix string, from string, to string, query bson.M, res *currencies.RateData) error {
     if !s.isCurrencySupported(from) {
         return errors.New(errorFromCurrencyNotSupported)
     }
@@ -240,7 +240,7 @@ func (s *Service) exchangeCurrencyByDate(
     amount float64,
     merchantId string,
     date time.Time,
-    res *currencyrates.ExchangeCurrencyResponse,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
     return s.exchangeCurrency(rateType, from, to, amount, merchantId, s.getByDateQuery(date), res)
 }
@@ -252,20 +252,20 @@ func (s *Service) exchangeCurrency(
     amount float64,
     merchantId string,
     query bson.M,
-    res *currencyrates.ExchangeCurrencyResponse,
+    res *currencies.ExchangeCurrencyResponse,
 ) error {
 
     if amount < 0 {
         return errors.New(errorInvalidExchangeAmount)
     }
 
-    rd := &currencyrates.RateData{}
+    rd := &currencies.RateData{}
     err := s.getRate(rateType, from, to, query, rd)
     if err != nil {
         return err
     }
 
-    rule := &currencyrates.CorrectionRule{}
+    rule := &currencies.CorrectionRule{}
 
     // ignore error possible here, it not change workflow,
     // and a warning will be written to log in getCorrectionRule method body
@@ -286,7 +286,7 @@ func (s *Service) exchangeCurrency(
     return nil
 }
 
-func (s *Service) getCorrectionRule(rateType string, merchantId string, r *currencyrates.CorrectionRule) error {
+func (s *Service) getCorrectionRule(rateType string, merchantId string, r *currencies.CorrectionRule) error {
 
     if !s.contains(s.cfg.RatesTypes, rateType) {
         return errors.New(errorRateTypeInvalid)
@@ -323,7 +323,7 @@ func (s *Service) addCorrectionRule(
         return errors.New(errorRateTypeInvalid)
     }
 
-    rule := &currencyrates.CorrectionRule{
+    rule := &currencies.CorrectionRule{
         Id:               bson.NewObjectId().Hex(),
         CreatedAt:        ptypes.TimestampNow(),
         RateType:         rateType,
@@ -397,8 +397,8 @@ func (s *Service) toPrecise(val float64) float64 {
     return math.Round(val*p) / p
 }
 
-func (s *Service) applyCorrection(rd *currencyrates.RateData, rateType string, merchantId string) {
-    rule := &currencyrates.CorrectionRule{}
+func (s *Service) applyCorrection(rd *currencies.RateData, rateType string, merchantId string) {
+    rule := &currencies.CorrectionRule{}
     err := s.getCorrectionRule(rateType, merchantId, rule)
     if err != nil {
         // here is simple return, no error report need
@@ -408,7 +408,7 @@ func (s *Service) applyCorrection(rd *currencyrates.RateData, rateType string, m
     s.applyCorrectionRule(rd, rule)
 }
 
-func (s *Service) applyCorrectionRule(rd *currencyrates.RateData, rule *currencyrates.CorrectionRule) {
+func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.CorrectionRule) {
     value := rule.GetCorrectionValue(rd.Pair)
     if value == 0 {
         return

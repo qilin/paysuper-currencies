@@ -3,7 +3,7 @@ package internal
 import (
     "encoding/xml"
     "errors"
-    "github.com/paysuper/paysuper-currencies-rates/pkg/proto/currencyrates"
+    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
     "net/http"
 )
@@ -101,14 +101,14 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
         rate := rateItem.Statistics.ExchangeRate.Observation.Value
 
         // direct pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   cFrom + cbauTo,
             Rate:   s.toPrecise(rate),
             Source: cbauSource,
         })
 
         // inverse pair
-        rates = append(rates, &currencyrates.RateData{
+        rates = append(rates, &currencies.RateData{
             Pair:   cbauTo + cFrom,
             Rate:   s.toPrecise(1 / rate),
             Source: cbauSource,
