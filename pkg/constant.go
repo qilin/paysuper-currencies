@@ -12,4 +12,8 @@ const (
     RateTypePaysuper     = "paysuper"
     RateTypeStock        = "stock"
     RateTypeCardpay      = "cardpay"
+
+    CardpayTopicRateData         = "cardpay-rate-data"
+    CardpayTopicRateDataRetry    = "cardpay-rate-data-retry"
+    CardpayTopicRateDataFinished = "cardpay-rate-data-finished"
 )

@@ -84,11 +84,6 @@ func main() {
             }
         case "stock":
             err = cs.SetRatesStock()
-        case "cardpay":
-            err = cs.RequestRatesCardpay()
-            if err == nil {
-                err = cs.CalculatePaysuperCorrections()
-            }
         default:
             logger.Fatal("Source is unknown, exiting")
         }
@@ -98,6 +93,11 @@ func main() {
         }
 
         return
+    }
+
+    err = cs.Init()
+    if err != nil {
+        logger.Fatal("Service init failed", zap.Error(err))
     }
 
     router := http.NewServeMux()

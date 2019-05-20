@@ -7,14 +7,18 @@ import (
     "encoding/xml"
     "errors"
     "fmt"
+    "github.com/ProtocolONE/rabbitmq/pkg"
     "github.com/centrifugal/gocent"
+    "github.com/globalsign/mgo"
     "github.com/globalsign/mgo/bson"
+    "github.com/gogo/protobuf/proto"
     "github.com/golang/protobuf/ptypes"
     "github.com/paysuper/paysuper-currencies/config"
     "github.com/paysuper/paysuper-currencies/pkg"
     "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "github.com/paysuper/paysuper-database-mongo"
     "github.com/paysuper/paysuper-recurring-repository/tools"
+    "github.com/streadway/amqp"
     "go.uber.org/zap"
     "golang.org/x/net/html/charset"
     "gopkg.in/go-playground/validator.v9"
@@ -41,6 +45,11 @@ const (
     errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
     errorCorrectionRuleNotFound   = "correction rule not found"
     errorInvalidExchangeAmount    = "invalid amount for exchange"
+    errorBrokerMaxRetryReached    = "broker max retry reached"
+    errorBrokerRetryPublishFailed = "broker retry publishing failed"
+    errorPullTrigger              = "pull trigger failed"
+    errorReleaseTrigger           = "release trigger failed"
+    errorDelayedFunction          = "error in delayed function"
 
     MIMEApplicationJSON = "application/json"
     MIMEApplicationXML  = "application/xml"
@@ -60,6 +69,7 @@ const (
     collectionNamePaysuperCorrections = "paysuper_corrections"
     collectionNamePaysuperCorridors   = "paysuper_corridors"
     collectionNameCorrectionRules     = "correction_rules"
+    collectionNameTriggers            = "triggers"
 
     ratesPrecision = 10
 
@@ -67,18 +77,35 @@ const (
 
     serviceStatusOK   = "ok"
     serviceStatusFail = "fail"
+
+    retryCountHeader = "x-retry-count"
+
+    triggerCardpay = 1
 )
+
+type trigger struct {
+    ID        bson.ObjectId `bson:"_id,omitempty"`
+    Type      int           `bson:"type"`
+    Active    bool          `bson:"active"`
+    CreatedAt time.Time     `bson:"created_at"`
+}
+
+type callable func() error
 
 // Service is application entry point.
 type Service struct {
-    cfg              *config.Config
-    db               *database.Source
-    centrifugoClient *gocent.Client
-    validate         *validator.Validate
+    cfg                 *config.Config
+    db                  *database.Source
+    centrifugoClient    *gocent.Client
+    validate            *validator.Validate
+    cardpayBroker       *rabbitmq.Broker
+    cardpayRetryBroker  *rabbitmq.Broker
+    cardpayFinishBroker *rabbitmq.Broker
 }
 
 // NewService create new Service.
 func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
+
     return &Service{
         cfg:      cfg,
         db:       db,
@@ -93,6 +120,31 @@ func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
     }, nil
 }
 
+func (s *Service) Init() error {
+    var err error
+    s.cardpayBroker, s.cardpayRetryBroker, s.cardpayFinishBroker, err = s.getBrokers(
+        pkg.CardpayTopicRateData,
+        pkg.CardpayTopicRateDataRetry,
+        pkg.CardpayTopicRateDataFinished,
+    )
+
+    tgr, err := s.getTrigger(triggerCardpay)
+
+    if err != nil && err != mgo.ErrNotFound {
+        return err
+    } else {
+
+        if tgr != nil && tgr.Active == true {
+            now := time.Now()
+            eod := s.Eod(now)
+            delta := eod.Sub(now)
+            return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
+        }
+    }
+
+    return nil
+}
+
 // Status used to return micro service health.
 func (s *Service) Status() (interface{}, error) {
     err := s.db.Ping()
@@ -100,6 +152,72 @@ func (s *Service) Status() (interface{}, error) {
         return serviceStatusFail, err
     }
     return serviceStatusOK, nil
+}
+
+func (s *Service) getBrokers(topicName string, retryTopicName string, finishTopicName string) (*rabbitmq.Broker, *rabbitmq.Broker, *rabbitmq.Broker, error) {
+    broker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+    retryBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+    finishBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+    broker.Opts.ExchangeOpts.Name = topicName
+
+    retryBroker.Opts.QueueOpts.Args = amqp.Table{
+        "x-dead-letter-exchange":    retryTopicName,
+        "x-message-ttl":             int32(s.cfg.BrokerRetryTimeout * 1000),
+        "x-dead-letter-routing-key": "*",
+    }
+    retryBroker.Opts.ExchangeOpts.Name = retryTopicName
+
+    finishBroker.Opts.ExchangeOpts.Name = finishTopicName
+
+    err = broker.RegisterSubscriber(topicName, s.SetRatesCardpay)
+
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+    err = finishBroker.RegisterSubscriber(topicName, s.PullRecalcTrigger)
+
+    if err != nil {
+        return nil, nil, nil, err
+    }
+
+    return broker, retryBroker, finishBroker, nil
+}
+
+func (s *Service) retry(msg proto.Message, dlv amqp.Delivery, msgID string) error {
+    var rtc = int32(0)
+
+    if v, ok := dlv.Headers[retryCountHeader]; ok {
+        rtc = v.(int32)
+    }
+
+    if rtc >= s.cfg.BrokerMaxRetry {
+        zap.L().Error(errorBrokerMaxRetryReached, zap.String("msgid", msgID))
+        s.sendCentrifugoMessage(msgID, errors.New(errorBrokerMaxRetryReached))
+        return nil
+    }
+
+    err := s.cardpayRetryBroker.Publish(dlv.RoutingKey, msg, amqp.Table{retryCountHeader: rtc + 1})
+
+    if err != nil {
+        zap.L().Warn(errorBrokerRetryPublishFailed, zap.String("msgid", msgID), zap.Error(err))
+        s.sendCentrifugoMessage(msgID, err)
+        return err
+    }
+
+    return nil
 }
 
 func (s *Service) validateReq(req interface{}) error {
@@ -414,4 +532,52 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
         return
     }
     rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
+}
+
+func (s *Service) pullTrigger(triggerType int) error {
+    trg := &trigger{
+        Type:      triggerType,
+        Active:    true,
+        CreatedAt: time.Now(),
+    }
+    return s.db.Collection(collectionNameTriggers).Insert(trg)
+}
+
+func (s *Service) releaseTrigger(triggerType int) error {
+    trg := &trigger{
+        Type:      triggerType,
+        Active:    false,
+        CreatedAt: time.Now(),
+    }
+    return s.db.Collection(collectionNameTriggers).Insert(trg)
+}
+
+func (s *Service) getTrigger(triggerType int) (*trigger, error) {
+    query := bson.M{"type": triggerType}
+    res := &trigger{}
+    err := s.db.Collection(collectionNameTriggers).Find(query).Sort("-_id").Limit(1).One(res)
+    if err != nil {
+        return nil, err
+    }
+    return res, nil
+}
+
+func (s *Service) planDelayedTask(delay int64, trigger int, fn callable) error {
+    ticker := time.NewTicker(time.Second * time.Duration(delay))
+    err := s.pullTrigger(trigger)
+    if err != nil {
+        zap.S().Errorw(errorPullTrigger, "error", err, "trigger", trigger)
+    }
+    go func() {
+        for {
+            select {
+            case <-ticker.C:
+                err := fn()
+                zap.S().Errorw(errorDelayedFunction, "error", err)
+                s.sendCentrifugoMessage(errorDelayedFunction, err)
+                ticker.Stop()
+            }
+        }
+    }()
+    return err
 }

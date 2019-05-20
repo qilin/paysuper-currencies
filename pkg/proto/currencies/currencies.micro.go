@@ -13,6 +13,7 @@ It has these top-level messages:
 	GetRateCurrentForMerchantRequest
 	GetRateByDateForMerchantRequest
 	RateData
+	CardpayRate
 	EmptyResponse
 	EmptyRequest
 	CorrectionCorridor

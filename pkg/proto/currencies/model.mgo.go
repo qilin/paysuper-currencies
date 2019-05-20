@@ -18,6 +18,7 @@ type MgoRateData struct {
     Pair       string        `bson:"pair"`
     Rate       float64       `bson:"rate"`
     Source     string        `bson:"source"`
+    Volume     float64       `bson:"volume"`
 }
 
 type MgoCorrectionRule struct {
@@ -41,6 +42,7 @@ func (p *RateData) SetBSON(raw bson.Raw) error {
     p.Pair = decoded.Pair
     p.Rate = decoded.Rate
     p.Source = decoded.Source
+    p.Volume = decoded.Volume
 
     p.CreatedAt, err = ptypes.TimestampProto(decoded.CreatedAt)
 
@@ -55,6 +57,7 @@ func (p *RateData) GetBSON() (interface{}, error) {
         Pair:   p.Pair,
         Rate:   p.Rate,
         Source: p.Source,
+        Volume: p.Volume,
     }
 
     st.Id = bson.NewObjectId()
@@ -101,7 +104,7 @@ func (p *CorrectionRule) GetBSON() (interface{}, error) {
         RateType:         p.RateType,
         CommonCorrection: p.CommonCorrection,
         PairCorrection:   p.PairCorrection,
-        MerchantId:   p.MerchantId,
+        MerchantId:       p.MerchantId,
     }
 
     if len(p.Id) <= 0 {

@@ -64,6 +64,12 @@
           "create_date": 1
         },
         "name": "create_date"
+      },
+      {
+        "key": {
+          "source": 1
+        },
+        "name": "source"
       }
     ]
   },
@@ -76,6 +82,17 @@
           "rate_type": 1
         },
         "name": "merchant_rate_type"
+      }
+    ]
+  },
+  {
+    "createIndexes": "triggers",
+    "indexes": [
+      {
+        "key": {
+          "type": 1
+        },
+        "name": "trigger_type"
       }
     ]
   }

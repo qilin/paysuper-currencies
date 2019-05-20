@@ -22,5 +22,8 @@
   },
   {
     "create": "correction_rules"
+  },
+  {
+    "create": "triggers"
   }
 ]

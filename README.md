@@ -14,6 +14,9 @@ This service designed for sync currencies rates and store it locally with histor
 | MONGO_DB                             | true     | -                        | MongoDb database name                                                               |
 | MONGO_USER                           | -        | -                        | MongoDb user                                                                        |
 | MONGO_PASSWORD                       | -        | -                        | MongoDb password                                                                    |
+| BROKER_ADDRESS                       | -        | amqp://127.0.0.1:5672    | RabbitMQ broker address                                                             |
+| BROKER_RETRY_TIMEOUT                 | -        | 60                       | RabbitMQ broker retry timeout                                                       |
+| BROKER_MAX_RETRY                     | -        | 5                        | RabbitMQ broker max retry count                                                     |
 | CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo url                                                                      |
 | CENTRIFUGO_KEY                       | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin                               | Centrifugo channel name to send alert notifications to admins   |
@@ -39,8 +42,7 @@ To start app in console mode you must set `-source` flag in command line to one 
 - `oxr` - to get rates from openexchangerates.org and recalculate paysuper prediction rates
 - `paysuper` - to recalculate paysuper prediction rates only
 - `centralbanks` - to get rates from central banks (currently from cbr.ru and ecb.europa.eu)
-- `stock` - to get stock rates (currently not implemented)
-- `cardpay` - to get cardpay rates (currently not implemented)
+- `stock` - to calculate stock rates
 
 Example: `$ paysuper-currencies-rates.exe -source=oxr` runs rates requests from openexchangerates.org, and exit after it.
 
@@ -64,4 +66,5 @@ Where
 * `create_date` - date of save currency rate data to our DB, used for fast grouping rates to get first, last, min and max values by day
 * `pair` - currency pair
 * `rate` - currency pair rate
-* `source` - code of rates source. Now use only one - XE (xe.com)
+* `source` - code of rates source
+* `volume` - volume of excanhges, made for this rate, optional, 0 by default

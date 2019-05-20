@@ -116,6 +116,12 @@ func (s *Service) CalculatePaysuperCorrections() error {
         return err
     }
 
+    err = s.releaseTrigger(triggerCardpay)
+    if err != nil {
+        zap.S().Errorw(errorReleaseTrigger, "error", err, "trigger", triggerCardpay)
+        return err
+    }
+
     return nil
 }
 

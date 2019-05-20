@@ -101,7 +101,7 @@ message GetRateByDateForMerchantRequest {
 message RateData {
     //@inject_tag: validate:"required,hexadecimal,len=24" json:"id" bson:"_id"
     string id = 1;
-    //@inject_tag: validate:"required,alpha,len=6" json:"created_at" bson:"created_at"
+    //@inject_tag: validate:"required" json:"created_at" bson:"created_at"
     google.protobuf.Timestamp created_at = 2;
     //@inject_tag: validate:"required,alpha,len=6" json:"pair" bson:"pair"
     string pair = 3;
@@ -109,6 +109,23 @@ message RateData {
     double rate = 4;
     //@inject_tag: validate:"required,alpha" json:"source" bson:"source"
     string source = 5;
+    //@inject_tag: validate:"numeric" json:"volume" bson:"volume"
+    double volume = 6;
+}
+
+message CardpayRate {
+    //@inject_tag: validate:"required" json:"created_at" bson:"created_at"
+    google.protobuf.Timestamp created_at = 1;
+    //@inject_tag: validate:"required,alpha,len=3" json:"from" bson:"from"
+    string from = 2;
+    //@inject_tag: validate:"required,alpha,len=3" json:"to" bson:"to"
+    string to = 3;
+    //@inject_tag: validate:"required,numeric,gt=0" json:"rate" bson:"rate"
+    double rate = 4;
+    //@inject_tag: validate:"required,alpha" json:"source" bson:"source"
+    string source = 5;
+    //@inject_tag: validate:"numeric" json:"volume" bson:"volume"
+    double volume = 6;
 }
 
 message EmptyResponse {

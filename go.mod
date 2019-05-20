@@ -2,6 +2,7 @@ module github.com/paysuper/paysuper-currencies
 
 require (
 	github.com/InVisionApp/go-health v2.1.0+incompatible
+	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/coredns/coredns v1.5.0 // indirect
@@ -11,6 +12,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/gogo/googleapis v1.2.0 // indirect
+	github.com/gogo/protobuf v1.2.1
 	github.com/golang-migrate/migrate/v4 v4.3.1 // indirect
 	github.com/golang/protobuf v1.3.1
 	github.com/hashicorp/go-discover v0.0.0-20190408185603-6ccdb67f9b84 // indirect
@@ -28,6 +30,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
+	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
 	github.com/stretchr/testify v1.3.0
 	github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9
 	go.uber.org/zap v1.9.1
