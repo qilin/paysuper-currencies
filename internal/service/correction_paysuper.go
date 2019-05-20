@@ -74,9 +74,9 @@ func (s *Service) CalculatePaysuperCorrections() error {
 
     corrections := []interface{}{}
 
-    for _, cFrom := range s.cfg.OxrBaseCurrencies {
+    for _, cFrom := range s.cfg.SettlementCurrencies {
 
-        for _, cTo := range s.cfg.OxrSupportedCurrencies {
+        for _, cTo := range s.cfg.RatesRequestCurrencies {
 
             if cFrom == cTo {
                 continue

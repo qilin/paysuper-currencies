@@ -178,7 +178,7 @@ func (s *Service) isPairExists(pair string) bool {
 }
 
 func (s *Service) isCurrencySupported(cur string) bool {
-    return s.contains(s.cfg.OxrSupportedCurrenciesParsed, cur)
+    return s.contains(s.cfg.SupportedCurrenciesParsed, cur)
 }
 
 func (s *Service) contains(slice map[string]bool, item string) bool {

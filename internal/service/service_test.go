@@ -76,8 +76,8 @@ func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestService_CreatedOk() {
-    assert.True(suite.T(), len(suite.service.cfg.OxrSupportedCurrencies) > 0)
-    assert.True(suite.T(), len(suite.service.cfg.OxrBaseCurrencies) > 0)
+    assert.True(suite.T(), len(suite.service.cfg.RatesRequestCurrencies) > 0)
+    assert.True(suite.T(), len(suite.service.cfg.SettlementCurrencies) > 0)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestIsCurrencySupported_Ok() {

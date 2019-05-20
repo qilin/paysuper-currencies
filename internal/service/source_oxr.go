@@ -41,11 +41,11 @@ func (s *Service) RequestRatesOxr() error {
     
     queryParams := url.Values{
         "app_id":  []string{s.cfg.OxrAppId},
-        "symbols": []string{strings.Join(s.cfg.OxrSupportedCurrencies, ",")},
+        "symbols": []string{strings.Join(s.cfg.RatesRequestCurrencies, ",")},
     }
     queryString := queryParams.Encode()
 
-    for _, from := range s.cfg.OxrBaseCurrencies {
+    for _, from := range s.cfg.SettlementCurrencies {
 
         reqUrl, err := s.validateUrl(fmt.Sprintf(oxrUrlTemplate, from, queryString))
 
@@ -54,6 +54,8 @@ func (s *Service) RequestRatesOxr() error {
             s.sendCentrifugoMessage(errorOxrUrlValidationFailed, err)
             return err
         }
+
+        zap.S().Info("Sending request to url: ", reqUrl.String())
 
         resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 

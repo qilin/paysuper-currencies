@@ -47,6 +47,8 @@ func (s *Service) RequestRatesCbca() error {
         return err
     }
 
+    zap.S().Info("Sending request to url: ", reqUrl.String())
+
     resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
     if err != nil {
@@ -87,12 +89,20 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
 
     lastRates := res.Observations[len(res.Observations)-1]
 
-    for _, cFrom := range s.cfg.CbcaBaseCurrencies {
+    for _, cFrom := range s.cfg.SettlementCurrencies {
+
+        if cFrom == cbcaTo {
+            continue
+        }
+
         key := fmt.Sprintf(cbcaKeyMask, cFrom, cbcaTo)
 
+        // todo: CBCA not supported currency rate from DKK to CAD and PLN to CAD!
         rateItem, ok := lastRates[key]
         if !ok {
-            return errors.New(errorRateDataNotFound)
+            zap.S().Warnw(errorRateDataNotFound, "from", cFrom, "to", cbcaTo, "key", key)
+            // return errors.New(errorRateDataNotFound)
+            continue
         }
 
         rawRate, ok := rateItem.(map[string]interface{})["v"]

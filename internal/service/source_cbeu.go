@@ -59,6 +59,8 @@ func (s *Service) RequestRatesCbeu() error {
         return err
     }
 
+    zap.S().Info("Sending request to url: ", reqUrl.String())
+
     resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
     if err != nil {
@@ -97,12 +99,19 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
 
     var rates []interface{}
 
-    l := len(s.cfg.CbrfBaseCurrencies)
+    ln := len(s.cfg.SettlementCurrencies)
+    if s.contains(s.cfg.SettlementCurrenciesParsed, cbeuTo) {
+        ln--
+    }
     c := 0
 
     for _, rateItem := range res.Data.Rates.Rates {
 
-        if !s.contains(s.cfg.CbeuBaseCurrenciesParsed, rateItem.CurrencyCode) {
+        if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+            continue
+        }
+
+        if rateItem.CurrencyCode == cbeuTo {
             continue
         }
 
@@ -121,7 +130,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
         })
 
         c++
-        if c == l {
+        if c == ln {
             break
         }
     }

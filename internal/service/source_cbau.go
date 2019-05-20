@@ -49,6 +49,8 @@ func (s *Service) RequestRatesCbau() error {
         HeaderAccept:      MIMEApplicationXML,
     }
 
+    zap.S().Info("Sending request to url: ", cbauUrl)
+
     resp, err := s.request(http.MethodGet, cbauUrl, nil, headers)
 
     if err != nil {
@@ -87,14 +89,21 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
 
     var rates []interface{}
 
-    l := len(s.cfg.CbauBaseCurrencies)
+    ln := len(s.cfg.SettlementCurrencies)
+    if s.contains(s.cfg.SettlementCurrenciesParsed, cbauTo) {
+        ln--
+    }
     c := 0
 
     for _, rateItem := range res.Rates {
 
         cFrom := rateItem.Statistics.ExchangeRate.TargetCurrency
 
-        if !s.contains(s.cfg.CbauBaseCurrenciesParsed, cFrom) {
+        if !s.contains(s.cfg.SettlementCurrenciesParsed, cFrom) {
+            continue
+        }
+
+        if cFrom == cbrfTo {
             continue
         }
 
@@ -115,7 +124,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
         })
 
         c++
-        if c == l {
+        if c == ln {
             break
         }
     }

@@ -20,24 +20,10 @@ type Config struct {
 
     MicroRegistry string `envconfig:"MICRO_REGISTRY" required:"false"`
 
-    OxrSupportedCurrencies []string `envconfig:"OXR_SUPPORTED_CURRENCIES" default:"USD,EUR,RUB,CAD,AUD,GBP,JPY,SGD,KRW,TRY,BRL,UAH,MXN,NZD,NOK,PLN,CNY,INR,CLP,PEN,COP,ZAR,HKD,TWD,THB,VND,SAR,AED,ARS,ILS,KZT,KWD,QAR,UYU,IDR,MYR,PHP"`
-    OxrBaseCurrencies      []string `envconfig:"OXR_BASE_CURRENCIES" default:"EUR,USD"`
     OxrAppId               string   `envconfig:"OXR_APP_ID" required:"true"`
-
-    CbrfBaseCurrencies []string `envconfig:"CBRF_BASE_CURRENCIES" default:"EUR,USD"`
-    CbeuBaseCurrencies []string `envconfig:"CBEU_BASE_CURRENCIES" default:"USD"`
-    CbcaBaseCurrencies []string `envconfig:"CBCA_BASE_CURRENCIES" default:"EUR,USD"`
-    CbauBaseCurrencies []string `envconfig:"CBAU_BASE_CURRENCIES" default:"EUR,USD"`
-    CbplBaseCurrencies []string `envconfig:"CBPL_BASE_CURRENCIES" default:"EUR,USD"`
 
     BollingerDays   int `envconfig:"BOLLINGER_DAYS" default:"7"`
     BollingerPeriod int `envconfig:"BOLLINGER_PERIOD" default:"21"`
-
-    OxrSupportedCurrenciesParsed map[string]bool
-    CbrfBaseCurrenciesParsed     map[string]bool
-    CbeuBaseCurrenciesParsed     map[string]bool
-    CbauBaseCurrenciesParsed     map[string]bool
-    CbplBaseCurrenciesParsed     map[string]bool
 
     RatesTypes map[string]bool
 
@@ -49,36 +35,15 @@ type Config struct {
     AccountingCurrencies   []string
     RatesRequestCurrencies []string
     SupportedCurrencies    []string
+
+    SupportedCurrenciesParsed    map[string]bool
+    SettlementCurrenciesParsed   map[string]bool
+    RatesRequestCurrenciesParsed map[string]bool
 }
 
 func NewConfig() (*Config, error) {
     cfg := &Config{}
     err := envconfig.Process("", cfg)
-
-    cfg.OxrSupportedCurrenciesParsed = make(map[string]bool, len(cfg.OxrSupportedCurrencies))
-    for _, v := range cfg.OxrSupportedCurrencies {
-        cfg.OxrSupportedCurrenciesParsed[v] = true
-    }
-
-    cfg.CbrfBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbrfBaseCurrencies))
-    for _, v := range cfg.CbrfBaseCurrencies {
-        cfg.CbrfBaseCurrenciesParsed[v] = true
-    }
-
-    cfg.CbeuBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbeuBaseCurrencies))
-    for _, v := range cfg.CbeuBaseCurrencies {
-        cfg.CbeuBaseCurrenciesParsed[v] = true
-    }
-
-    cfg.CbauBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbauBaseCurrencies))
-    for _, v := range cfg.CbauBaseCurrencies {
-        cfg.CbauBaseCurrenciesParsed[v] = true
-    }
-
-    cfg.CbplBaseCurrenciesParsed = make(map[string]bool, len(cfg.CbplBaseCurrencies))
-    for _, v := range cfg.CbplBaseCurrencies {
-        cfg.CbplBaseCurrenciesParsed[v] = true
-    }
 
     cfg.RatesTypes = make(map[string]bool, 5)
     cfg.RatesTypes[pkg.RateTypeOxr] = true
@@ -88,9 +53,11 @@ func NewConfig() (*Config, error) {
     cfg.RatesTypes[pkg.RateTypeCardpay] = true
 
     cfg.Currencies = currency.CurrencyDefinitions
+    cfg.SupportedCurrenciesParsed = make(map[string]bool, len(cfg.Currencies))
 
     for code, properties := range cfg.Currencies {
         cfg.SupportedCurrencies = append(cfg.SupportedCurrencies, code)
+        cfg.SupportedCurrenciesParsed[code] = true
 
         if properties.Price || properties.Vat {
             cfg.RatesRequestCurrencies = append(cfg.RatesRequestCurrencies, code)
@@ -111,6 +78,16 @@ func NewConfig() (*Config, error) {
         if properties.Accounting {
             cfg.AccountingCurrencies = append(cfg.AccountingCurrencies, code)
         }
+    }
+
+    cfg.SettlementCurrenciesParsed = make(map[string]bool, len(cfg.SettlementCurrencies))
+    for _, v := range cfg.SettlementCurrencies {
+        cfg.SettlementCurrenciesParsed[v] = true
+    }
+
+    cfg.RatesRequestCurrenciesParsed = make(map[string]bool, len(cfg.RatesRequestCurrencies))
+    for _, v := range cfg.RatesRequestCurrencies {
+        cfg.RatesRequestCurrenciesParsed[v] = true
     }
 
     return cfg, err

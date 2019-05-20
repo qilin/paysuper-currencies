@@ -31,8 +31,8 @@ func (s *Service) SetRatesStock() error {
         rates []interface{}
     )
 
-    for _, cFrom = range s.cfg.OxrBaseCurrencies {
-        for _, cTo = range s.cfg.OxrSupportedCurrencies {
+    for _, cFrom = range s.cfg.SettlementCurrencies {
+        for _, cTo = range s.cfg.RatesRequestCurrencies {
 
             if cFrom == cTo {
                 continue

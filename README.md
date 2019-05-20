@@ -19,14 +19,7 @@ This service designed for sync currencies rates and store it locally with histor
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin                               | Centrifugo channel name to send alert notifications to admins   |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
 | MICRO_REGISTRY                       | -        | -                        | Microservices registry                                                              |
-| OXR_BASE_CURRENCIES                  | -        | EUR,USD                  | Base currencies to get rates from/to on openexchangerates.org                       |  
-| OXR_SUPPORTED_CURRENCIES             | -        | USD, EUR, RUB, CAD, AUD, GBP, JPY, SGD, KRW, TRY, BRL, UAH, MXN, NZD, NOK, PLN, CNY, INR, CLP, PEN, COP, ZAR, HKD, TWD, THB, VND, SAR, AED, ARS, ILS, KZT, KWD, QAR, UYU, IDR, MYR, PHP | Currencies to get rates to/from base currencies on openexchangerates.org |
 | OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
-| CBRF_BASE_CURRENCIES                 | -        | EUR,USD                  | Base currencies to get rates from/to on cbr.ru (Central bank of Russia)             |
-| CBEU_BASE_CURRENCIES                 | -        | USD                      | Base currencies to get rates from/to on ecb.europa.eu (Central bank of Europe)      |
-| CBCA_BASE_CURRENCIES                 | -        | EUR,USD                  | Base currencies to get rates from/to on bankofcanada.ca (Central bank of Canada)    |
-| CBAU_BASE_CURRENCIES                 | -        | EUR,USD                  | Base currencies to get rates from/to on rba.gov.au (Central bank of Australia)      |
-| CBPL_BASE_CURRENCIES                 | -        | EUR,USD                  | Base currencies to get rates from/to on nbp.pl (Central bank of Poland)             |
 | BOLLINGER_DAYS                       | -        | 7                        | Number of days for plot Bollinger functions to calculate Paysuper Prediction Rates  |
 | BOLLINGER_PERIOD                     | -        | 21                       | Number of days in period for each Bollinger function                                |
 

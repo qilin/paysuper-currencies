@@ -41,6 +41,8 @@ func (s *Service) RequestRatesCbrf() error {
         HeaderAccept:      MIMEApplicationXML,
     }
 
+    zap.S().Info("Sending request to url: ", cbrfUrl)
+
     // here may be 302 redirect in answer - https://toster.ru/q/149039
     resp, err := s.request(http.MethodGet, cbrfUrl, nil, headers)
 
@@ -80,12 +82,19 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) error {
 
     var rates []interface{}
 
-    l := len(s.cfg.CbrfBaseCurrencies)
+    ln := len(s.cfg.SettlementCurrencies)
+    if s.contains(s.cfg.SettlementCurrenciesParsed, cbrfTo) {
+        ln--
+    }
     c := 0
 
     for _, rateItem := range res.Rates {
 
-        if !s.contains(s.cfg.CbrfBaseCurrenciesParsed, rateItem.CurrencyCode) {
+        if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+            continue
+        }
+
+        if rateItem.CurrencyCode == cbrfTo {
             continue
         }
 
@@ -111,7 +120,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) error {
         })
 
         c++
-        if c == l {
+        if c == ln {
             break
         }
     }

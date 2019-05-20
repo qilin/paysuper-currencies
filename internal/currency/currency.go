@@ -10,7 +10,7 @@ type CurrencyProperties struct {
 var CurrencyDefinitions = map[string]CurrencyProperties{
     "USD": {Price: true, Settlement: true, Vat: true, Accounting: true},
     "EUR": {Price: true, Settlement: true, Vat: true, Accounting: true},
-    "RUR": {Price: true, Settlement: true, Vat: true, Accounting: true},
+    "RUB": {Price: true, Settlement: true, Vat: true, Accounting: true},
     "CAD": {Price: true, Settlement: true, Vat: true, Accounting: true},
     "AUD": {Price: true, Settlement: true, Vat: true, Accounting: true},
     "GBP": {Price: true, Settlement: true, Vat: true, Accounting: true},
