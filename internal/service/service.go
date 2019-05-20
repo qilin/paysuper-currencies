@@ -309,6 +309,9 @@ func (s *Service) getRateByDate(collectionRatesNameSuffix string, from string, t
 }
 
 func (s *Service) getRate(collectionRatesNameSuffix string, from string, to string, query bson.M, res *currencies.RateData) error {
+
+    var err error
+
     if !s.isCurrencySupported(from) {
         return errors.New(errorFromCurrencyNotSupported)
     }
@@ -316,14 +319,43 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
         return errors.New(errorToCurrencyNotSupported)
     }
 
-    query["pair"] = from + to
+    pair := from + to
+
+    query["pair"] = pair
+
+    isCardpay := collectionRatesNameSuffix == pkg.RateTypeCardpay
 
     cName, err := s.getCollectionName(collectionRatesNameSuffix)
     if err != nil {
         return err
     }
 
-    err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+    if isCardpay {
+        q := []bson.M{
+            {"$match": query},
+            {"$group": bson.M{
+                "_id":         bson.M{"create_date": "$create_date"},
+                "numerator":   bson.M{"$sum": bson.M{"$multiply": []string{"$rate", "$volume"}}},
+                "denominator": bson.M{"$sum": "$volume"},
+                "count": bson.M{"$sum": 1},
+            }},
+            {"$project": bson.M{
+                "value": bson.M{"$divide": []string{"$numerator", "$denominator"}},
+                "count": "$count",
+            }},
+            {"$limit": 1},
+        }
+        var resp []map[string]interface{}
+        err = s.db.Collection(cName).Pipe(q).All(&resp)
+
+        if err == nil && len(resp) > 0 {
+            res.Pair = pair
+            res.Rate = s.toPrecise(resp[0]["value"].(float64))
+            res.Source = cardpaySource
+        }
+    } else {
+        err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+    }
     if err != nil {
         return err
     }

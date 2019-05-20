@@ -9,6 +9,8 @@ import (
 
 const (
     errorCardpaySaveRatesFailed = "Cardpay Rates save data failed"
+
+    cardpaySource = "CARDPAY"
 )
 
 func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery) error {

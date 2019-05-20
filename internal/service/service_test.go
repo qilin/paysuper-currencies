@@ -56,15 +56,18 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
             Pair:   "USDRUB",
             Rate:   r - 1,
             Source: "TEST",
+            Volume: 1,
         },
         &currencies.RateData{
             Pair:   "USDRUB",
             Rate:   r,
             Source: "TEST",
+            Volume: 1,
         },
     }
     err = suite.service.saveRates(collectionRatesNameSuffixOxr, rates)
     err = suite.service.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+    err = suite.service.saveRates(collectionRatesNameSuffixCardpay, rates)
     assert.NoError(suite.T(), err)
 }
 

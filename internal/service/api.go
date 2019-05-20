@@ -5,6 +5,7 @@ import (
     "errors"
     "github.com/globalsign/mgo/bson"
     "github.com/golang/protobuf/ptypes"
+    "github.com/paysuper/paysuper-currencies/pkg"
     "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
     "go.uber.org/zap"
     "time"
@@ -28,7 +29,11 @@ func (s *Service) GetRateCurrentCommon(
     req *currencies.GetRateCurrentCommonRequest,
     res *currencies.RateData,
 ) error {
-    err := s.getRate(req.RateType, req.From, req.To, bson.M{}, res)
+    query := bson.M{}
+    if req.RateType == pkg.RateTypeCardpay {
+        query = s.getByDateQuery(time.Now())
+    }
+    err := s.getRate(req.RateType, req.From, req.To, query, res)
     if err != nil {
         zap.S().Errorw(errorGetRateCurrentCommonRequest, "error", err, "req", req)
         return err
@@ -68,7 +73,12 @@ func (s *Service) GetRateCurrentForMerchant(
         return errors.New(errorMerchantIdRequired)
     }
 
-    err := s.getRate(req.RateType, req.From, req.To, bson.M{}, res)
+    query := bson.M{}
+    if req.RateType == pkg.RateTypeCardpay {
+        query = s.getByDateQuery(time.Now())
+    }
+
+    err := s.getRate(req.RateType, req.From, req.To, query, res)
     if err != nil {
         zap.S().Errorw(errorGetRateCurrentForMerchantRequest, "error", err, "req", req)
         return err
@@ -108,7 +118,11 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
     req *currencies.ExchangeCurrencyCurrentCommonRequest,
     res *currencies.ExchangeCurrencyResponse,
 ) error {
-    err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", bson.M{}, res)
+    query := bson.M{}
+    if req.RateType == pkg.RateTypeCardpay {
+        query = s.getByDateQuery(time.Now())
+    }
+    err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", query, res)
     if err != nil {
         zap.S().Errorw(errorExchangeCurrencyCurrentCommon, "error", err, "req", req)
         return err
@@ -125,7 +139,11 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
         zap.S().Errorw(errorMerchantIdRequired, "req", req)
         return errors.New(errorMerchantIdRequired)
     }
-    err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, req.MerchantId, bson.M{}, res)
+    query := bson.M{}
+    if req.RateType == pkg.RateTypeCardpay {
+        query = s.getByDateQuery(time.Now())
+    }
+    err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, req.MerchantId, query, res)
     if err != nil {
         zap.S().Errorw(errorExchangeCurrencyCurrentForMerchant, "error", err, "req", req)
         return err

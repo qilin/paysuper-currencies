@@ -63,6 +63,7 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
             Rate:      suite.service.toPrecise(rate),
             Pair:      cFrom + cTo,
             Source:    "TEST",
+            Volume:    1,
         }
 
         fakes = append(fakes, rd1)
@@ -73,6 +74,7 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
             Rate:      suite.service.toPrecise(1 / rate),
             Pair:      cTo + cFrom,
             Source:    "TEST",
+            Volume:    1,
         }
 
         fakes = append(fakes, rd2)
@@ -91,8 +93,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestCorrectionPaysuper_getRatesFor
     assert.NoError(suite.T(), err)
 
     totalDays := days + timePeriod - 1
-    startDate := today.AddDate(0, 0, -1*totalDays)
-    oxrRates, err := suite.service.getRatesForBollinger(collectionRatesNameSuffixOxr, cFrom+cTo, startDate, totalDays)
+    oxrRates, err := suite.service.getRatesForBollinger(collectionRatesNameSuffixOxr, cFrom+cTo, totalDays)
     assert.NoError(suite.T(), err)
 
     assert.Equal(suite.T(), oxrRates, fakeratesOxr[len(fakeratesOxr)-totalDays:])

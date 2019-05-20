@@ -3,6 +3,7 @@ package service
 import (
     "errors"
     "github.com/globalsign/mgo/bson"
+    "github.com/paysuper/paysuper-currencies/pkg"
     "github.com/thetruetrade/gotrade"
     "github.com/thetruetrade/gotrade/indicators"
     "go.uber.org/zap"
@@ -157,10 +158,8 @@ func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corr
 }
 
 func (s *Service) getBollingerBands(collectionRatesNameSuffix string, pair string, days int, timePeriod int) ([]float64, []float64, []float64, error) {
-    today := s.Bod(time.Now())
     totalDays := days + timePeriod - 1
-    startDate := today.AddDate(0, 0, -1*totalDays)
-    rates, err := s.getRatesForBollinger(collectionRatesNameSuffix, pair, startDate, totalDays)
+    rates, err := s.getRatesForBollinger(collectionRatesNameSuffix, pair, totalDays)
     if err != nil {
         return nil, nil, nil, err
     }
@@ -187,23 +186,41 @@ func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
     return value, nil
 }
 
-func (s *Service) getRatesForBollinger(collectionRatesNameSuffix string, pair string, dateFrom time.Time, limit int) (res []float64, err error) {
+func (s *Service) getRatesForBollinger(collectionRatesNameSuffix string, pair string, limit int) (res []float64, err error) {
     if !s.isPairExists(pair) {
         return nil, errors.New(errorCurrencyPairNotExists)
     }
+
+    isCardpay := collectionRatesNameSuffix == pkg.RateTypeCardpay
 
     cName, err := s.getCollectionName(collectionRatesNameSuffix)
     if err != nil {
         return nil, err
     }
 
+    groupQuery := bson.M{
+        "_id": bson.M{"create_date": "$create_date"},
+    }
+
+    if isCardpay {
+        groupQuery["numerator"] = bson.M{"$sum": bson.M{"$multiply": []string{"$rate", "$volume"}}}
+        groupQuery["denominator"] = bson.M{"$sum": "$volume"}
+    } else {
+        groupQuery["value"] = bson.M{"$last": "$rate"}
+    }
+
     q := []bson.M{
-        {"$match": bson.M{"pair": pair, "created_at": bson.M{"$gte": s.Bod(dateFrom)}}},
-        {"$group": bson.M{
-            "_id":  bson.M{"create_date": "$create_date"},
-            "last": bson.M{"$last": "$rate"},
-        }},
+        {"$match": bson.M{"pair": pair}},
+        {"$group": groupQuery},
+        {"$sort": bson.M{"_id": -1}},
+        {"$limit": limit},
         {"$sort": bson.M{"_id": 1}},
+    }
+
+    if isCardpay {
+        q = append(q, bson.M{"$project": bson.M{
+            "value": bson.M{"$divide": []string{"$numerator", "$denominator"}},
+        }})
     }
 
     var resp []map[string]interface{}
@@ -218,7 +235,7 @@ func (s *Service) getRatesForBollinger(collectionRatesNameSuffix string, pair st
     }
 
     for _, val := range resp[len(resp)-limit:] {
-        res = append(res, val["last"].(float64))
+        res = append(res, s.toPrecise(val["value"].(float64)))
     }
 
     return res, nil
