@@ -29,7 +29,7 @@ type cbcaResponse struct {
     Observations []map[string]interface{} `json:"observations"`
 }
 
-func (s *Service) RequestRatesCbca() error {
+func (s *Service) RequestRatesCbca(c chan error) {
     zap.S().Info("Requesting rates from CBCA")
 
     headers := map[string]string{
@@ -44,7 +44,8 @@ func (s *Service) RequestRatesCbca() error {
     if err != nil {
         zap.S().Errorw(errorCbcaUrlValidationFailed, "error", err)
         s.sendCentrifugoMessage(errorCbcaUrlValidationFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Sending request to url: ", reqUrl.String())
@@ -54,7 +55,8 @@ func (s *Service) RequestRatesCbca() error {
     if err != nil {
         zap.S().Errorw(errorCbcaRequestFailed, "error", err)
         s.sendCentrifugoMessage(errorCbcaRequestFailed, err)
-        return err
+        c <- err
+        return
     }
 
     res := &cbcaResponse{}
@@ -63,7 +65,8 @@ func (s *Service) RequestRatesCbca() error {
     if err != nil {
         zap.S().Errorw(errorCbcaResponseParsingFailed, "error", err)
         s.sendCentrifugoMessage(errorCbcaResponseParsingFailed, err)
-        return err
+        c <- err
+        return
     }
 
     err = s.processRatesCbca(res)
@@ -71,12 +74,11 @@ func (s *Service) RequestRatesCbca() error {
     if err != nil {
         zap.S().Errorw(errorCbcaSaveRatesFailed, "error", err)
         s.sendCentrifugoMessage(errorCbcaSaveRatesFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Rates from CBCA updated")
-
-    return nil
 }
 
 func (s *Service) processRatesCbca(res *cbcaResponse) error {

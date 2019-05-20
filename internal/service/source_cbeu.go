@@ -43,7 +43,7 @@ type cbeuResponseCube3 struct {
     Value        float64  `xml:"rate,attr"`
 }
 
-func (s *Service) RequestRatesCbeu() error {
+func (s *Service) RequestRatesCbeu(c chan error) {
     zap.S().Info("Requesting rates from CBEU")
 
     headers := map[string]string{
@@ -56,7 +56,8 @@ func (s *Service) RequestRatesCbeu() error {
     if err != nil {
         zap.S().Errorw(errorCbeuUrlValidationFailed, "error", err)
         s.sendCentrifugoMessage(errorCbeuUrlValidationFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Sending request to url: ", reqUrl.String())
@@ -66,7 +67,8 @@ func (s *Service) RequestRatesCbeu() error {
     if err != nil {
         zap.S().Errorw(errorCbeuRequestFailed, "error", err)
         s.sendCentrifugoMessage(errorCbeuRequestFailed, err)
-        return err
+        c <- err
+        return
     }
 
     res := &cbeuResponse{}
@@ -75,7 +77,8 @@ func (s *Service) RequestRatesCbeu() error {
     if err != nil {
         zap.S().Errorw(errorCbeuResponseParsingFailed, "error", err)
         s.sendCentrifugoMessage(errorCbeuResponseParsingFailed, err)
-        return err
+        c <- err
+        return
     }
 
     err = s.processRatesCbeu(res)
@@ -83,12 +86,11 @@ func (s *Service) RequestRatesCbeu() error {
     if err != nil {
         zap.S().Errorw(errorCbeuSaveRatesFailed, "error", err)
         s.sendCentrifugoMessage(errorCbeuSaveRatesFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Rates from CBEU updated")
-
-    return nil
 }
 
 func (s *Service) processRatesCbeu(res *cbeuResponse) error {

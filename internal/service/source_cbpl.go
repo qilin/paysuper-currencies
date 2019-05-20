@@ -29,7 +29,7 @@ type cbplResponseRate struct {
     Value        float64 `xml:",chardata"`
 }
 
-func (s *Service) RequestRatesCbpl() error {
+func (s *Service) RequestRatesCbpl(c chan error) {
     zap.S().Info("Requesting rates from CBPL")
 
     headers := map[string]string{
@@ -44,7 +44,8 @@ func (s *Service) RequestRatesCbpl() error {
     if err != nil {
         zap.S().Errorw(errorCbplRequestFailed, "error", err)
         s.sendCentrifugoMessage(errorCbplRequestFailed, err)
-        return err
+        c <- err
+        return
     }
 
     res := &cbplResponse{}
@@ -53,7 +54,8 @@ func (s *Service) RequestRatesCbpl() error {
     if err != nil {
         zap.S().Errorw(errorCbplResponseParsingFailed, "error", err)
         s.sendCentrifugoMessage(errorCbplResponseParsingFailed, err)
-        return err
+        c <- err
+        return
     }
 
     err = s.processRatesCbpl(res)
@@ -61,12 +63,11 @@ func (s *Service) RequestRatesCbpl() error {
     if err != nil {
         zap.S().Errorw(errorCbplSaveRatesFailed, "error", err)
         s.sendCentrifugoMessage(errorCbplSaveRatesFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Rates from CBPL updated")
-
-    return nil
 }
 
 func (s *Service) processRatesCbpl(res *cbplResponse) error {

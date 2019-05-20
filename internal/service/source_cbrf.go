@@ -33,7 +33,7 @@ type cbrfResponseRate struct {
     Value        string   `xml:"Value"`
 }
 
-func (s *Service) RequestRatesCbrf() error {
+func (s *Service) RequestRatesCbrf(c chan error) {
     zap.S().Info("Requesting rates from CBRF")
 
     headers := map[string]string{
@@ -49,7 +49,8 @@ func (s *Service) RequestRatesCbrf() error {
     if err != nil {
         zap.S().Errorw(errorCbrfRequestFailed, "error", err)
         s.sendCentrifugoMessage(errorCbrfRequestFailed, err)
-        return err
+        c <- err
+        return
     }
 
     res := &cbrfResponse{}
@@ -58,7 +59,8 @@ func (s *Service) RequestRatesCbrf() error {
     if err != nil {
         zap.S().Errorw(errorCbrfResponseParsingFailed, "error", err)
         s.sendCentrifugoMessage(errorCbrfResponseParsingFailed, err)
-        return err
+        c <- err
+        return
     }
 
     err = s.processRatesCbrf(res)
@@ -66,12 +68,11 @@ func (s *Service) RequestRatesCbrf() error {
     if err != nil {
         zap.S().Errorw(errorCbrfSaveRatesFailed, "error", err)
         s.sendCentrifugoMessage(errorCbrfSaveRatesFailed, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Rates from CBRF updated")
-
-    return nil
 }
 
 func (s *Service) processRatesCbrf(res *cbrfResponse) error {

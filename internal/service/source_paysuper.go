@@ -13,7 +13,7 @@ const (
     errorPaysuperRateSave = "paysuper prediction rates save error"
 )
 
-func (s *Service) SetRatesPaysuper() error {
+func (s *Service) SetRatesPaysuper(c chan error) {
 
     zap.S().Info("Start calculation of prediction rates for Paysuper")
 
@@ -34,7 +34,8 @@ func (s *Service) SetRatesPaysuper() error {
             if err != nil {
                 zap.S().Errorw(errorPaysuperRateCalc, "error", err)
                 s.sendCentrifugoMessage(errorPaysuperRateCalc, err)
-                return err
+                c <- err
+                return
             }
             rates = append(rates, rd)
 
@@ -42,7 +43,8 @@ func (s *Service) SetRatesPaysuper() error {
             if err != nil {
                 zap.S().Errorw(errorPaysuperRateCalc, "error", err)
                 s.sendCentrifugoMessage(errorPaysuperRateCalc, err)
-                return err
+                c <- err
+                return
             }
             rates = append(rates, rd)
         }
@@ -52,12 +54,11 @@ func (s *Service) SetRatesPaysuper() error {
     if err != nil {
         zap.S().Errorw(errorPaysuperRateSave, "error", err)
         s.sendCentrifugoMessage(errorPaysuperRateSave, err)
-        return err
+        c <- err
+        return
     }
 
     zap.S().Info("Prediction rates for Paysuper updated")
-
-    return nil
 }
 
 func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateData, error) {
