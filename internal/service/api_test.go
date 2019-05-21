@@ -45,6 +45,19 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Ok() {
     assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCalc))
     assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Source, cardpaySource)
+
+    // and for the same currencies
+    req = &currencies.GetRateCurrentCommonRequest{
+        From:     "USD",
+        To:       "USD",
+        RateType: pkg.RateTypeOxr,
+    }
+
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.Pair, "USDUSD")
+    assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(1))
+    assert.Equal(suite.T(), res.Source, stubSource)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Fail() {
@@ -265,6 +278,20 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentCommon
     assert.Equal(suite.T(), res.ExchangeRate, float64(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(cardpayMidRateCtrl))
+
+    req = &currencies.ExchangeCurrencyCurrentCommonRequest{
+        From:     "USD",
+        To:       "USD",
+        RateType: pkg.RateTypeOxr,
+        Amount:   100,
+    }
+
+    err = suite.service.ExchangeCurrencyCurrentCommon(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(100))
+    assert.Equal(suite.T(), res.ExchangeRate, float64(1))
+    assert.Equal(suite.T(), res.Correction, float64(0))
+    assert.Equal(suite.T(), res.OriginalRate, float64(1))
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentForMerchant_Ok() {

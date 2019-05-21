@@ -81,6 +81,8 @@ const (
     retryCountHeader = "x-retry-count"
 
     triggerCardpay = 1
+
+    stubSource = "STUB"
 )
 
 type trigger struct {
@@ -320,6 +322,18 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
     }
 
     pair := from + to
+
+    // stub for rate with the same from/to currencies
+    if from == to {
+        res.Rate = s.toPrecise(1)
+        res.Pair = pair
+        res.Source = stubSource
+        res.CreatedAt = ptypes.TimestampNow()
+        res.Volume = 1
+
+        return nil
+    }
+
 
     query["pair"] = pair
 
