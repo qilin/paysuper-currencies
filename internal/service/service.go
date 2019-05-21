@@ -369,6 +369,16 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
         }
     } else {
         err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+
+        // requested pair is not found in central banks rates
+        // try to fallback to OXR rate for it
+        if err == mgo.ErrNotFound && collectionRatesNameSuffix == pkg.RateTypeCentralbanks {
+            cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
+            if err != nil {
+                return err
+            }
+            err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+        }
     }
     if err != nil {
         return err

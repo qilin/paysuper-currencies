@@ -11,7 +11,7 @@ import (
 )
 
 var (
-    cardpayMidRateCalc = float64((r*1 + (r-1)*1) / (1+1))
+    cardpayMidRateCalc = float64((r*1 + (r-1)*1) / (1 + 1))
     cardpayMidRateCtrl = float64(64.1314)
 )
 
@@ -58,6 +58,37 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Ok() {
     assert.Equal(suite.T(), res.Pair, "USDUSD")
     assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(1))
     assert.Equal(suite.T(), res.Source, stubSource)
+}
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_CbFallback_Ok() {
+    // fallback for centralbanks
+    res := &currencies.RateData{}
+
+    req := &currencies.GetRateCurrentCommonRequest{
+        From:     "USD",
+        To:       "RUB",
+        RateType: pkg.RateTypeCentralbanks,
+    }
+
+    err := suite.service.GetRateCurrentCommon(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
+    assert.Equal(suite.T(), res.Rate, r)
+    assert.Equal(suite.T(), res.Source, "TEST")
+
+    rd := &currencies.RateData{
+        Pair:   "USDRUB",
+        Rate:   r + 1,
+        Source: cbrfSource,
+    }
+    err = suite.service.saveRates(collectionRatesNameSuffixCentralbanks, []interface{}{rd})
+    assert.NoError(suite.T(), err)
+
+    err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
+    assert.NoError(suite.T(), err)
+    assert.Equal(suite.T(), res.Pair, "USDRUB")
+    assert.Equal(suite.T(), res.Rate, r+1)
+    assert.Equal(suite.T(), res.Source, cbrfSource)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Fail() {
@@ -160,9 +191,9 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentForMerchant_Ok(
 
     // and special for Cardpay
     req = &currencies.GetRateCurrentForMerchantRequest{
-        From:     "USD",
-        To:       "RUB",
-        RateType: pkg.RateTypeCardpay,
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeCardpay,
         MerchantId: bson.NewObjectId().Hex(),
     }
 
@@ -207,9 +238,9 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateForMerchant_Ok()
 
     // and for Cardpay
     req = &currencies.GetRateByDateForMerchantRequest{
-        From:     "USD",
-        To:       "RUB",
-        RateType: pkg.RateTypeCardpay,
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeCardpay,
         MerchantId: bson.NewObjectId().Hex(),
         Datetime:   ptypes.TimestampNow(),
     }
@@ -274,7 +305,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentCommon
 
     err = suite.service.ExchangeCurrencyCurrentCommon(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl * 100))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl*100))
     assert.Equal(suite.T(), res.ExchangeRate, float64(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(cardpayMidRateCtrl))
@@ -314,16 +345,16 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyCurrentForMer
 
     // and for Cardpay
     req = &currencies.ExchangeCurrencyCurrentForMerchantRequest{
-        From:     "USD",
-        To:       "RUB",
-        RateType: pkg.RateTypeCardpay,
-        Amount:   100,
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeCardpay,
+        Amount:     100,
         MerchantId: bson.NewObjectId().Hex(),
     }
 
     err = suite.service.ExchangeCurrencyCurrentForMerchant(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl * 100))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl*100))
     assert.Equal(suite.T(), res.ExchangeRate, float64(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(cardpayMidRateCtrl))
@@ -373,7 +404,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateCommon_
 
     err = suite.service.ExchangeCurrencyByDateCommon(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl * 100))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl*100))
     assert.Equal(suite.T(), res.ExchangeRate, float64(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(cardpayMidRateCtrl))
@@ -415,17 +446,17 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerc
 
     // and for Cardpay
     req = &currencies.ExchangeCurrencyByDateForMerchantRequest{
-        From:     "USD",
-        To:       "RUB",
-        RateType: pkg.RateTypeCardpay,
-        Amount:   100,
+        From:       "USD",
+        To:         "RUB",
+        RateType:   pkg.RateTypeCardpay,
+        Amount:     100,
         MerchantId: bson.NewObjectId().Hex(),
-        Datetime: ptypes.TimestampNow(),
+        Datetime:   ptypes.TimestampNow(),
     }
 
     err = suite.service.ExchangeCurrencyByDateForMerchant(context.TODO(), req, res)
     assert.NoError(suite.T(), err)
-    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl * 100))
+    assert.Equal(suite.T(), res.ExchangedAmount, float64(cardpayMidRateCtrl*100))
     assert.Equal(suite.T(), res.ExchangeRate, float64(cardpayMidRateCtrl))
     assert.Equal(suite.T(), res.Correction, float64(0))
     assert.Equal(suite.T(), res.OriginalRate, float64(cardpayMidRateCtrl))
