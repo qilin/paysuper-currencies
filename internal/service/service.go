@@ -245,6 +245,10 @@ func (s *Service) validateUrl(cUrl string) (*url.URL, error) {
 
 func (s *Service) request(method string, url string, req []byte, headers map[string]string) (*http.Response, error) {
     client := tools.NewLoggedHttpClient(zap.S())
+    // prevent following to redirects
+    client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+        return http.ErrUseLastResponse
+    }
     httpReq, err := http.NewRequest(method, url, bytes.NewBuffer(req))
 
     if err != nil {
