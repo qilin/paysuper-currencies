@@ -26,6 +26,7 @@ import (
     "math"
     "net/http"
     "net/url"
+    "strings"
     "time"
 )
 
@@ -56,6 +57,7 @@ const (
     MIMETextXML         = "text/xml"
 
     HeaderAccept      = "Accept"
+    HeaderCookie      = "Cookie"
     HeaderContentType = "Content-Type"
 
     collectionRatesNameTemplate           = "%s_%s"
@@ -257,6 +259,16 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 
     if err != nil {
         return nil, err
+    }
+
+    cookies := resp.Cookies()
+    if resp.StatusCode == http.StatusFound && len(cookies) > 0 {
+        c := []string{}
+        for _, v := range cookies {
+            c = append(c, v.Name + "=" + v.Value)
+        }
+        headers[HeaderCookie] = strings.Join(c, ";")
+        return s.request(method, url, req, headers)
     }
 
     if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent &&
