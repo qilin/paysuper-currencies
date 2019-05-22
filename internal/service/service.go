@@ -131,12 +131,10 @@ func (s *Service) Init() error {
     )
 
     tgr, err := s.getTrigger(triggerCardpay)
-
-    if err != nil && err != mgo.ErrNotFound {
+    if err != nil {
         return err
     } else {
-
-        if tgr != nil && tgr.Active == true {
+        if tgr.Active == true {
             now := time.Now()
             eod := s.Eod(now)
             delta := eod.Sub(now)
@@ -610,9 +608,13 @@ func (s *Service) releaseTrigger(triggerType int) error {
 
 func (s *Service) getTrigger(triggerType int) (*trigger, error) {
     query := bson.M{"type": triggerType}
-    res := &trigger{}
+    res := &trigger{
+        Type: triggerType,
+        Active: false,
+        CreatedAt: time.Now(),
+    }
     err := s.db.Collection(collectionNameTriggers).Find(query).Sort("-_id").Limit(1).One(res)
-    if err != nil {
+    if err != nil && err != mgo.ErrNotFound {
         return nil, err
     }
     return res, nil
