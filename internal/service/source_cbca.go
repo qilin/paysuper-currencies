@@ -119,6 +119,7 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
             Pair:   cFrom + cbcaTo,
             Rate:   s.toPrecise(rate),
             Source: cbcaSource,
+            Volume: 1,
         })
 
         // inverse pair
@@ -126,6 +127,7 @@ func (s *Service) processRatesCbca(res *cbcaResponse) error {
             Pair:   cbcaTo + cFrom,
             Rate:   s.toPrecise(1 / rate),
             Source: cbcaSource,
+            Volume: 1,
         })
     }
 

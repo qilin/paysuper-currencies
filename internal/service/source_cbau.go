@@ -20,8 +20,8 @@ const (
 )
 
 type cbauResponse struct {
-    XMLName xml.Name `xml:"http://www.w3.org/1999/02/22-rdf-syntax-ns# RDF"`
-    Rates   []cbauResponseItem   `xml:"item"`
+    XMLName xml.Name           `xml:"http://www.w3.org/1999/02/22-rdf-syntax-ns# RDF"`
+    Rates   []cbauResponseItem `xml:"item"`
 }
 
 type cbauResponseItem struct {
@@ -33,8 +33,8 @@ type cbauResponseStatistics struct {
 }
 
 type cbauResponseExchangeRate struct {
-    TargetCurrency string `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ targetCurrency"`
-    Observation cbauResponseObservation `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ observation"`
+    TargetCurrency string                  `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ targetCurrency"`
+    Observation    cbauResponseObservation `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ observation"`
 }
 
 type cbauResponseObservation struct {
@@ -115,6 +115,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
             Pair:   cFrom + cbauTo,
             Rate:   s.toPrecise(rate),
             Source: cbauSource,
+            Volume: 1,
         })
 
         // inverse pair
@@ -122,6 +123,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) error {
             Pair:   cbauTo + cFrom,
             Rate:   s.toPrecise(1 / rate),
             Source: cbauSource,
+            Volume: 1,
         })
 
         c++

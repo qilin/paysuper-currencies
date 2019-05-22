@@ -38,7 +38,7 @@ func (s *Service) RequestRatesOxr() error {
         HeaderContentType: MIMEApplicationJSON,
         HeaderAccept:      MIMEApplicationJSON,
     }
-    
+
     queryParams := url.Values{
         "app_id":  []string{s.cfg.OxrAppId},
         "symbols": []string{strings.Join(s.cfg.RatesRequestCurrencies, ",")},
@@ -110,16 +110,18 @@ func (s *Service) processRatesOxr(res *oxrResponse) error {
 
         // direct pair
         rates = append(rates, &currencies.RateData{
-            Pair:          from+to,
-            Rate:          s.toPrecise(rate),
-            Source:        oxrSource,
+            Pair:   from + to,
+            Rate:   s.toPrecise(rate),
+            Source: oxrSource,
+            Volume: 1,
         })
 
         // inverse pair
         rates = append(rates, &currencies.RateData{
-            Pair:          to+from,
-            Rate:          s.toPrecise(1/rate),
-            Source:        oxrSource,
+            Pair:   to + from,
+            Rate:   s.toPrecise(1 / rate),
+            Source: oxrSource,
+            Volume: 1,
         })
     }
 

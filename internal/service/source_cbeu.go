@@ -122,6 +122,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
             Pair:   rateItem.CurrencyCode + cbeuTo,
             Rate:   s.toPrecise(rateItem.Value),
             Source: cbeuSource,
+            Volume: 1,
         })
 
         // inverse pair
@@ -129,6 +130,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) error {
             Pair:   cbeuTo + rateItem.CurrencyCode,
             Rate:   s.toPrecise(1 / rateItem.Value),
             Source: cbeuSource,
+            Volume: 1,
         })
 
         c++

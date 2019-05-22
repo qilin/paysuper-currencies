@@ -55,7 +55,8 @@ To run application as microservice simply don't pass any flags to command line :
   "create_date": "2019-04-29",
   "pair": "USDRUB",
   "rate": 64.679270801,
-  "source": "OXR"
+  "source": "OXR",
+  "volume": 1
 }
 ```
 Where

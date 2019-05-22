@@ -78,6 +78,7 @@ func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateDat
         Pair:   cFrom + cTo,
         Rate:   s.toPrecise(res.Rate + correction),
         Source: paysuperSource,
+        Volume: 1,
     }
 
     return rd, nil

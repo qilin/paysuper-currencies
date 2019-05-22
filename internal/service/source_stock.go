@@ -87,6 +87,7 @@ func (s *Service) getRateStock(cFrom string, cTo string, rule *currencies.Correc
         Pair:   res.Pair,
         Rate:   res.Rate,
         Source: stockSource,
+        Volume: 1,
     }
 
     return rd, nil
