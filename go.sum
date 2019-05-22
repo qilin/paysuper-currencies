@@ -811,6 +811,8 @@ github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124201-815e11898665 h
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124201-815e11898665/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc h1:gAT2p1CkbRurc5V+XXkVBUt8sV7fpfw2KwTA5SbUf5c=
 github.com/paysuper/paysuper-database-mongo v0.0.0-20190506124405-bfef773ae9cc/go.mod h1:hfnZjRAHT+CYPn+7Zrx83N6viM+tIyv0Z1J1sYx8WMU=
+github.com/paysuper/paysuper-database-mongo v0.1.0 h1:RMSIYB8rpTAAHc0wmIQz8XQVa8KB6/xX8iA8ceiDic8=
+github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
 github.com/paysuper/paysuper-recurring-repository v1.0.104 h1:UOaz4BU7v+H/0LaTDSG6Ax4xD+76NyyQMupSrW5x4To=
 github.com/paysuper/paysuper-recurring-repository v1.0.104/go.mod h1:FyZzueaAoG6apdmfjz7BQd5QMgV3KRIGgFhRXHEIpro=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=

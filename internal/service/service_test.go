@@ -39,13 +39,7 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
     suite.config, err = config.NewConfig()
     assert.NoError(suite.T(), err, "Config load failed")
 
-    settings := database.Connection{
-        Host:     suite.config.MongoHost,
-        Database: suite.config.MongoDatabase,
-        User:     suite.config.MongoUser,
-        Password: suite.config.MongoPassword,
-    }
-    db, err := database.NewDatabase(settings)
+    db, err := database.NewDatabase()
     assert.NoError(suite.T(), err, "Db connection failed")
 
     suite.service, err = NewService(suite.config, db)

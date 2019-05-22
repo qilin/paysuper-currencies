@@ -7,10 +7,8 @@ import (
 )
 
 type Config struct {
-    MongoHost     string `envconfig:"MONGO_HOST" required:"true"`
-    MongoDatabase string `envconfig:"MONGO_DB" required:"true"`
-    MongoUser     string `envconfig:"MONGO_USER" default:""`
-    MongoPassword string `envconfig:"MONGO_PASSWORD" default:""`
+    MongoHost     string `envconfig:"MONGO_DSN" required:"true"`
+    MongoDatabase string `envconfig:"MONGO_DIAL_TIMEOUT" required:"false" default:"10"`
 
     MetricsPort int `envconfig:"METRICS_PORT" required:"false" default:"80"`
 

@@ -33,15 +33,9 @@ func main() {
         logger.Fatal("Config init failed with error", zap.Error(err))
     }
 
-    settings := database.Connection{
-        Host:     cfg.MongoHost,
-        Database: cfg.MongoDatabase,
-        User:     cfg.MongoUser,
-        Password: cfg.MongoPassword,
-    }
-    db, err := database.NewDatabase(settings)
+    db, err := database.NewDatabase()
     if err != nil {
-        logger.Fatal("Database connection failed", zap.Error(err), zap.String("connection_string", settings.String()))
+        logger.Fatal("Database connection failed", zap.Error(err))
     }
 
     cs, err := service.NewService(cfg, db)
