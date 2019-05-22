@@ -1,8 +1,8 @@
 # Paysuper currency rates
 [![License: GNU 3.0](https://img.shields.io/badge/License-GNU3.0-green.svg)](https://opensource.org/licenses/GNU3.0)
-[![Build Status](https://travis-ci.org/paysuper/paysuper-currencies-rates.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-currencies-rates) 
-[![codecov](https://codecov.io/gh/paysuper/paysuper-currencies-rates/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-currencies-rates)
-[![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-currencies-rates)](https://goreportcard.com/report/github.com/paysuper/paysuper-currencies-rates)
+[![Build Status](https://travis-ci.org/paysuper/paysuper-currencies.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-currencies) 
+[![codecov](https://codecov.io/gh/paysuper/paysuper-currencies/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-currencies)
+[![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-currencies)](https://goreportcard.com/report/github.com/paysuper/paysuper-currencies)
 
 This service designed for sync currencies rates and store it locally with history of changes
 
@@ -42,7 +42,7 @@ To start app in console mode you must set `-source` flag in command line to one 
 - `centralbanks` - to get rates from central banks (currently from cbr.ru and ecb.europa.eu)
 - `stock` - to calculate stock rates
 
-Example: `$ paysuper-currencies-rates.exe -source=oxr` runs rates requests from openexchangerates.org, and exit after it.
+Example: `$ paysuper-currencies.exe -source=oxr` runs rates requests from openexchangerates.org, and exit after it.
 
 To run application as microservice simply don't pass any flags to command line :)  
 
