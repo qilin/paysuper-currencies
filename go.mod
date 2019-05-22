@@ -35,6 +35,7 @@ require (
 	github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9
 	go.uber.org/zap v1.9.1
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
 )

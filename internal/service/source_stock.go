@@ -13,7 +13,7 @@ const (
     errorStockRateSave = "stock rates save error"
 )
 
-func (s *Service) SetRatesStock(c chan error) {
+func (s *Service) SetRatesStock() error {
 
     zap.S().Info("Start calculation rates for Stock")
 
@@ -22,8 +22,7 @@ func (s *Service) SetRatesStock(c chan error) {
     if err != nil {
         zap.S().Errorw(errorCorrectionRuleNotFound, "error", err)
         s.sendCentrifugoMessage(errorCorrectionRuleNotFound, err)
-        c <- err
-        return
+        return err
     }
 
     var (
@@ -43,8 +42,7 @@ func (s *Service) SetRatesStock(c chan error) {
             if err != nil {
                 zap.S().Errorw(errorStockRateCalc, "error", err)
                 s.sendCentrifugoMessage(errorStockRateCalc, err)
-                c <- err
-                return
+                return err
             }
             rates = append(rates, rd)
 
@@ -52,8 +50,7 @@ func (s *Service) SetRatesStock(c chan error) {
             if err != nil {
                 zap.S().Errorw(errorStockRateCalc, "error", err)
                 s.sendCentrifugoMessage(errorStockRateCalc, err)
-                c <- err
-                return
+                return err
             }
             rates = append(rates, rd)
         }
@@ -63,11 +60,12 @@ func (s *Service) SetRatesStock(c chan error) {
     if err != nil {
         zap.S().Errorw(errorStockRateSave, "error", err)
         s.sendCentrifugoMessage(errorStockRateSave, err)
-        c <- err
-        return
+        return err
     }
 
     zap.S().Info("Rates for Stock updated")
+
+    return nil
 }
 
 func (s *Service) getRateStock(cFrom string, cTo string, rule *currencies.CorrectionRule) (*currencies.RateData, error) {

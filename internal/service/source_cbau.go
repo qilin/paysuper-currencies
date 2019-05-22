@@ -41,7 +41,7 @@ type cbauResponseObservation struct {
     Value float64 `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ value"`
 }
 
-func (s *Service) RequestRatesCbau(c chan error) {
+func (s *Service) RequestRatesCbau() error {
     zap.S().Info("Requesting rates from CBAU")
 
     headers := map[string]string{
@@ -56,8 +56,7 @@ func (s *Service) RequestRatesCbau(c chan error) {
     if err != nil {
         zap.S().Errorw(errorCbauRequestFailed, "error", err)
         s.sendCentrifugoMessage(errorCbauRequestFailed, err)
-        c <- err
-        return
+        return err
     }
 
     res := &cbauResponse{}
@@ -66,8 +65,7 @@ func (s *Service) RequestRatesCbau(c chan error) {
     if err != nil {
         zap.S().Errorw(errorCbauResponseParsingFailed, "error", err)
         s.sendCentrifugoMessage(errorCbauResponseParsingFailed, err)
-        c <- err
-        return
+        return err
     }
 
     err = s.processRatesCbau(res)
@@ -75,11 +73,12 @@ func (s *Service) RequestRatesCbau(c chan error) {
     if err != nil {
         zap.S().Errorw(errorCbauSaveRatesFailed, "error", err)
         s.sendCentrifugoMessage(errorCbauSaveRatesFailed, err)
-        c <- err
-        return
+        return err
     }
 
     zap.S().Info("Rates from CBAU updated")
+
+    return nil
 }
 
 func (s *Service) processRatesCbau(res *cbauResponse) error {

@@ -2,7 +2,6 @@ package main
 
 import (
     "context"
-    "errors"
     "flag"
     "fmt"
     "github.com/InVisionApp/go-health"
@@ -18,11 +17,10 @@ import (
     "github.com/paysuper/paysuper-recurring-repository/pkg/constant"
     "github.com/prometheus/client_golang/prometheus/promhttp"
     "go.uber.org/zap"
+    "golang.org/x/sync/errgroup"
     "net/http"
     "time"
 )
-
-var updateError = errors.New("Updating currency rates failed")
 
 func main() {
     logger, _ := zap.NewProduction()
@@ -52,63 +50,51 @@ func main() {
 
         defer db.Close()
 
+        g := errgroup.Group{}
+
         var err error
 
         switch source {
         case "oxr":
             err = cs.RequestRatesOxr()
             if err == nil {
-                c := make(chan error)
-                go cs.SetRatesPaysuper(c)
-                go cs.SetRatesStock(c)
-                err1, err2 := <-c, <-c
-                if err1 != nil {
-                    logger.Error("Updating currency rates error", zap.Error(err1))
-                    err = updateError
-                }
-                if err2 != nil {
-                    logger.Error("Updating currency rates error", zap.Error(err2))
-                    err = updateError
-                }
+                g.Go(func() error {
+                    return cs.SetRatesPaysuper()
+                })
+                g.Go(func() error {
+                    return cs.SetRatesStock()
+                })
             }
         case "paysuper":
-            c := make(chan error)
-            go cs.SetRatesPaysuper(c)
-            err = <-c
+            g.Go(func() error {
+                return cs.SetRatesPaysuper()
+            })
         case "centralbanks":
-            c := make(chan error)
-            go cs.RequestRatesCbrf(c)
-            go cs.RequestRatesCbeu(c)
-            go cs.RequestRatesCbca(c)
-            go cs.RequestRatesCbpl(c)
-            go cs.RequestRatesCbau(c)
-            err1, err2, err3, err4, err5 := <-c, <-c, <-c, <-c, <-c
-            if err1 != nil {
-                logger.Error("Updating currency rates error", zap.Error(err1))
-                err = updateError
-            }
-            if err2 != nil {
-                logger.Error("Updating currency rates error", zap.Error(err2))
-                err = updateError
-            }
-            if err3 != nil {
-                logger.Error("Updating currency rates error", zap.Error(err3))
-                err = updateError
-            }
-            if err4 != nil {
-                logger.Error("Updating currency rates error", zap.Error(err4))
-                err = updateError
-            }
-            if err5 != nil {
-                logger.Error("Updating currency rates error", zap.Error(err5))
-                err = updateError
-            }
+            g.Go(func() error {
+                return cs.RequestRatesCbrf()
+            })
+            g.Go(func() error {
+                return cs.RequestRatesCbeu()
+            })
+            g.Go(func() error {
+                return cs.RequestRatesCbca()
+            })
+            g.Go(func() error {
+                return cs.RequestRatesCbpl()
+            })
+            g.Go(func() error {
+                return cs.RequestRatesCbau()
+            })
         case "stock":
-            c := make(chan error)
-            go cs.SetRatesStock(c)
-            err = <-c
+            g.Go(func() error {
+                return cs.SetRatesStock()
+            })
         default:
             logger.Fatal("Source is unknown, exiting")
+        }
+
+        if err == nil {
+            err = g.Wait()
         }
 
         if err != nil {
