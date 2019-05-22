@@ -14,8 +14,7 @@ jobs:
         - 1.11.x
       env:
         - GO111MODULE=on
-        - MONGO_HOST=127.0.0.1:27017
-        - MONGO_DB=currency_rates_test
+        - MONGO_DSN=mongodb://127.0.0.1:27017/currency_rates_test
         - CENTRIFUGO_SECRET=some-key
         - OXR_APP_ID=some-app-id
       install: true
