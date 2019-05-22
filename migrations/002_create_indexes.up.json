@@ -1,0 +1,99 @@
+[
+  {
+    "createIndexes": "currency_rates_oxr",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
+      },
+      {
+        "key": {
+          "create_date": 1
+        },
+        "name": "create_date"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_paysuper",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_centralbanks",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1,
+          "created_at": -1
+        },
+        "name": "pair_created_at"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_stock",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
+      }
+    ]
+  },
+  {
+    "createIndexes": "currency_rates_cardpay",
+    "indexes": [
+      {
+        "key": {
+          "pair": 1
+        },
+        "name": "pair"
+      },
+      {
+        "key": {
+          "create_date": 1
+        },
+        "name": "create_date"
+      },
+      {
+        "key": {
+          "source": 1
+        },
+        "name": "source"
+      }
+    ]
+  },
+  {
+    "createIndexes": "correction_rules",
+    "indexes": [
+      {
+        "key": {
+          "merchant_id": 1,
+          "rate_type": 1
+        },
+        "name": "merchant_rate_type"
+      }
+    ]
+  },
+  {
+    "createIndexes": "triggers",
+    "indexes": [
+      {
+        "key": {
+          "type": 1
+        },
+        "name": "trigger_type"
+      }
+    ]
+  }
+]
