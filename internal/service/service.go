@@ -361,11 +361,9 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
                 "_id":         bson.M{"create_date": "$create_date"},
                 "numerator":   bson.M{"$sum": bson.M{"$multiply": []string{"$rate", "$volume"}}},
                 "denominator": bson.M{"$sum": "$volume"},
-                "count": bson.M{"$sum": 1},
             }},
             {"$project": bson.M{
                 "value": bson.M{"$divide": []string{"$numerator", "$denominator"}},
-                "count": "$count",
             }},
             {"$limit": 1},
         }
