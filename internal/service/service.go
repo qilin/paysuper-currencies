@@ -377,11 +377,18 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 		var resp []map[string]interface{}
 		err = s.db.Collection(cName).Pipe(q).All(&resp)
 
-		if err == nil && len(resp) > 0 {
-			res.Pair = pair
-			res.Rate = s.toPrecise(resp[0]["value"].(float64))
-			res.Source = cardpaySource
+		if err != nil {
+			return err
 		}
+
+		if len(resp) == 0 {
+			return mgo.ErrNotFound
+		}
+
+		res.Pair = pair
+		res.Rate = s.toPrecise(resp[0]["value"].(float64))
+		res.Source = cardpaySource
+
 	} else {
 		err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
 
