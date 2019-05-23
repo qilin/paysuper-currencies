@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang-migrate/migrate/v4"
@@ -83,6 +84,30 @@ func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
 		suite.FailNow("Database deletion failed", "%v", err)
 	}
 	suite.service.db.Close()
+}
+
+func (suite *CurrenciesratesServiceTestSuite) CleanRatesCollection(collectionSuffix string) error {
+	// cleaning collection before test starts
+	cName, err := suite.service.getCollectionName(collectionRatesNameSuffixCentralbanks)
+	if err != nil {
+		return err
+	}
+
+	var selector interface{} = nil
+	_, err = suite.service.db.Collection(cName).RemoveAll(selector)
+	if err != nil {
+		return err
+	}
+
+	n, err := suite.service.db.Collection(cName).Count()
+	if err != nil {
+		return err
+	}
+	if n != 0 {
+		return errors.New("Collection not empty")
+	}
+
+	return nil
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TestService_CreatedOk() {

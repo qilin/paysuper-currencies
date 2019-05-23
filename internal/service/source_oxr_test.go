@@ -75,11 +75,11 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 // waiting for commercial oxr app_id
 /*
 func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesOxr_Ok() {
-    if err := suite.service.db.Drop(); err != nil {
-        suite.FailNow("Database deletion failed", "%v", err)
-    }
+	// cleaning collection before test starts
+	err := suite.CleanRatesCollection(collectionRatesNameSuffixCentralbanks)
+	assert.NoError(suite.T(), err)
 
-    err := suite.service.RequestRatesOxr()
+    err = suite.service.RequestRatesOxr()
     assert.NoError(suite.T(), err)
 
     res := &currencies.RateData{}

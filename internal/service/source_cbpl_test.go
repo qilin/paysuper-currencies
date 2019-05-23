@@ -8,11 +8,11 @@ import (
 )
 
 func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesCbpl_Ok() {
-	if err := suite.service.db.Drop(); err != nil {
-		suite.FailNow("Database deletion failed", "%v", err)
-	}
+	// cleaning collection before test starts
+	err := suite.CleanRatesCollection(collectionRatesNameSuffixCentralbanks)
+	assert.NoError(suite.T(), err)
 
-	err := suite.service.RequestRatesCbpl()
+	err = suite.service.RequestRatesCbpl()
 	assert.NoError(suite.T(), err)
 
 	res := &currencies.RateData{}
