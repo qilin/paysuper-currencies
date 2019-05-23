@@ -1,133 +1,148 @@
 package service
 
 import (
-    "errors"
-    "fmt"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "go.uber.org/zap"
-    "net/http"
-    "net/url"
-    "strings"
+	"errors"
+	"fmt"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"go.uber.org/zap"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 const (
-    errorOxrUrlValidationFailed   = "OXR Rates url validation failed"
-    errorOxrRequestFailed         = "OXR Rates request failed"
-    errorOxrResponseParsingFailed = "OXR Rates response parsing failed"
-    errorOxrSaveRatesFailed       = "OXR Rates save data failed"
-    errorOxrNoResults             = "OXR Rates no results"
-    errorOxrInvalidFrom           = "OXR Rates invalid from"
+	errorOxrUrlValidationFailed   = "OXR Rates url validation failed"
+	errorOxrRequestFailed         = "OXR Rates request failed"
+	errorOxrResponseParsingFailed = "OXR Rates response parsing failed"
+	errorOxrSaveRatesFailed       = "OXR Rates save data failed"
+	errorOxrNoResults             = "OXR Rates no results"
+	errorOxrInvalidFrom           = "OXR Rates invalid from"
 
-    oxrSource = "OXR"
+	oxrSource = "OXR"
 
-    oxrUrlTemplate = "https://openexchangerates.org/api/latest.json?base=%s&%s"
+	oxrUrlTemplate = "https://openexchangerates.org/api/latest.json?base=%s&%s"
 )
 
 type oxrResponse struct {
-    Disclaimer string
-    License    string
-    Timestamp  int64
-    Base       string
-    Rates      map[string]float64
+	Disclaimer string
+	License    string
+	Timestamp  int64
+	Base       string
+	Rates      map[string]float64
 }
 
 func (s *Service) RequestRatesOxr() error {
-    zap.S().Info("Requesting rates from OXR")
+	zap.S().Info("Requesting rates from OXR")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationJSON,
-        HeaderAccept:      MIMEApplicationJSON,
-    }
+	queryParams := url.Values{
+		"app_id":  []string{s.cfg.OxrAppId},
+		"symbols": []string{strings.Join(s.cfg.RatesRequestCurrencies, ",")},
+	}
+	queryString := queryParams.Encode()
 
-    queryParams := url.Values{
-        "app_id":  []string{s.cfg.OxrAppId},
-        "symbols": []string{strings.Join(s.cfg.RatesRequestCurrencies, ",")},
-    }
-    queryString := queryParams.Encode()
+	for _, from := range s.cfg.SettlementCurrencies {
 
-    for _, from := range s.cfg.SettlementCurrencies {
+		resp, err := s.sendRequestOxr(from, queryString)
+		if err != nil {
+			return err
+		}
 
-        reqUrl, err := s.validateUrl(fmt.Sprintf(oxrUrlTemplate, from, queryString))
+		res, err := s.parseResponseOxr(resp)
+		if err != nil {
+			return err
+		}
 
-        if err != nil {
-            zap.S().Errorw(errorOxrUrlValidationFailed, "error", err)
-            s.sendCentrifugoMessage(errorOxrUrlValidationFailed, err)
-            return err
-        }
+		rates, err := s.processRatesOxr(res)
+		if err != nil {
+			zap.S().Errorw(errorOxrSaveRatesFailed, "error", err)
+			s.sendCentrifugoMessage(errorOxrSaveRatesFailed, err)
+			return err
+		}
 
-        zap.S().Info("Sending request to url: ", reqUrl.String())
+		err = s.saveRates(collectionRatesNameSuffixOxr, rates)
+		if err != nil {
+			return err
+		}
+	}
 
-        resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
+	zap.S().Info("Rates from OXR updated")
 
-        if err != nil {
-            zap.S().Errorw(errorOxrRequestFailed, "error", err)
-            s.sendCentrifugoMessage(errorOxrRequestFailed, err)
-            return err
-        }
+	return nil
+}
+func (s *Service) sendRequestOxr(from string, queryString string) (*http.Response, error) {
+	headers := map[string]string{
+		HeaderContentType: MIMEApplicationJSON,
+		HeaderAccept:      MIMEApplicationJSON,
+	}
 
-        res := &oxrResponse{}
-        err = s.decodeJson(resp, res)
+	reqUrl, err := s.validateUrl(fmt.Sprintf(oxrUrlTemplate, from, queryString))
 
-        if err != nil {
-            zap.S().Errorw(errorOxrResponseParsingFailed, "error", err)
-            s.sendCentrifugoMessage(errorOxrResponseParsingFailed, err)
-            return err
-        }
+	if err != nil {
+		zap.S().Errorw(errorOxrUrlValidationFailed, "error", err)
+		s.sendCentrifugoMessage(errorOxrUrlValidationFailed, err)
+		return nil, err
+	}
 
-        err = s.processRatesOxr(res)
+	zap.S().Info("Sending request to url: ", reqUrl.String())
 
-        if err != nil {
-            zap.S().Errorw(errorOxrSaveRatesFailed, "error", err)
-            s.sendCentrifugoMessage(errorOxrSaveRatesFailed, err)
-            return err
-        }
-    }
+	resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
-    zap.S().Info("Rates from OXR updated")
-
-    return nil
+	if err != nil {
+		zap.S().Errorw(errorOxrRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorOxrRequestFailed, err)
+		return nil, err
+	}
+	return resp, nil
 }
 
-func (s *Service) processRatesOxr(res *oxrResponse) error {
+func (s *Service) parseResponseOxr(resp *http.Response) (*oxrResponse, error) {
+	res := &oxrResponse{}
+	err := s.decodeJson(resp, res)
 
-    from := res.Base
+	if err != nil {
+		zap.S().Errorw(errorOxrResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorOxrResponseParsingFailed, err)
+		return nil, err
+	}
 
-    if !s.isCurrencySupported(from) {
-        return errors.New(errorOxrInvalidFrom)
-    }
+	return res, nil
+}
 
-    if len(res.Rates) == 0 {
-        return errors.New(errorOxrNoResults)
-    }
+func (s *Service) processRatesOxr(res *oxrResponse) ([]interface{}, error) {
 
-    var rates []interface{}
+	from := res.Base
 
-    for to, rate := range res.Rates {
+	if !s.isCurrencySupported(from) {
+		return nil, errors.New(errorOxrInvalidFrom)
+	}
 
-        if to == from {
-            continue
-        }
+	if len(res.Rates) == 0 {
+		return nil, errors.New(errorOxrNoResults)
+	}
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   from + to,
-            Rate:   s.toPrecise(rate),
-            Source: oxrSource,
-            Volume: 1,
-        })
+	var rates []interface{}
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   to + from,
-            Rate:   s.toPrecise(1 / rate),
-            Source: oxrSource,
-            Volume: 1,
-        })
-    }
+	for to, rate := range res.Rates {
 
-    err := s.saveRates(collectionRatesNameSuffixOxr, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+		if to == from {
+			continue
+		}
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   from + to,
+			Rate:   s.toPrecise(rate),
+			Source: oxrSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   to + from,
+			Rate:   s.toPrecise(1 / rate),
+			Source: oxrSource,
+			Volume: 1,
+		})
+	}
+	return rates, nil
 }

@@ -1,125 +1,140 @@
 package service
 
 import (
-    "encoding/xml"
-    "errors"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "go.uber.org/zap"
-    "net/http"
+	"encoding/xml"
+	"errors"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"go.uber.org/zap"
+	"net/http"
 )
 
 const (
-    errorCbplRequestFailed         = "CBPL Rates request failed"
-    errorCbplResponseParsingFailed = "CBPL Rates response parsing failed"
-    errorCbplSaveRatesFailed       = "CBPL Rates save data failed"
-    errorCbplNoResults             = "CBPL Rates no results"
+	errorCbplRequestFailed         = "CBPL Rates request failed"
+	errorCbplResponseParsingFailed = "CBPL Rates response parsing failed"
+	errorCbplProcessRatesFailed    = "CBPL Rates save data failed"
+	errorCbplNoResults             = "CBPL Rates no results"
 
-    cbplTo     = "PLN"
-    cbplSource = "CBPL"
-    cbplUrl    = "https://www.nbp.pl/kursy/xml/en/19a092en.xml"
+	cbplTo     = "PLN"
+	cbplSource = "CBPL"
+	cbplUrl    = "https://www.nbp.pl/kursy/xml/en/19a092en.xml"
 )
 
 type cbplResponse struct {
-    XMLName xml.Name           `xml:"exchange_rates"`
-    Rates   []cbplResponseRate `xml:"mid-rate"`
+	XMLName xml.Name           `xml:"exchange_rates"`
+	Rates   []cbplResponseRate `xml:"mid-rate"`
 }
 
 type cbplResponseRate struct {
-    CurrencyCode string  `xml:"code,attr"`
-    Value        float64 `xml:",chardata"`
+	CurrencyCode string  `xml:"code,attr"`
+	Value        float64 `xml:",chardata"`
 }
 
 func (s *Service) RequestRatesCbpl() error {
-    zap.S().Info("Requesting rates from CBPL")
+	zap.S().Info("Requesting rates from CBPL")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationXML,
-        HeaderAccept:      MIMETextXML,
-    }
+	resp, err := s.sendRequestCbpl()
+	if err != nil {
+		return err
+	}
 
-    zap.S().Info("Sending request to url: ", cbplUrl)
+	res, err := s.parseResponseCbpl(resp)
+	if err != nil {
+		return err
+	}
 
-    resp, err := s.request(http.MethodGet, cbplUrl, nil, headers)
+	rates, err := s.processRatesCbpl(res)
+	if err != nil {
+		zap.S().Errorw(errorCbplProcessRatesFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbplProcessRatesFailed, err)
+		return err
+	}
 
-    if err != nil {
-        zap.S().Errorw(errorCbplRequestFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbplRequestFailed, err)
-        return err
-    }
+	err = s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+	if err != nil {
+		return err
+	}
 
-    res := &cbplResponse{}
-    err = s.decodeXml(resp, res)
+	zap.S().Info("Rates from CBPL updated")
 
-    if err != nil {
-        zap.S().Errorw(errorCbplResponseParsingFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbplResponseParsingFailed, err)
-        return err
-    }
-
-    err = s.processRatesCbpl(res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbplSaveRatesFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbplSaveRatesFailed, err)
-        return err
-    }
-
-    zap.S().Info("Rates from CBPL updated")
-
-    return nil
+	return nil
 }
 
-func (s *Service) processRatesCbpl(res *cbplResponse) error {
+func (s *Service) sendRequestCbpl() (*http.Response, error) {
+	headers := map[string]string{
+		HeaderContentType: MIMEApplicationXML,
+		HeaderAccept:      MIMETextXML,
+	}
 
-    if len(res.Rates) == 0 {
-        return errors.New(errorCbplNoResults)
-    }
+	resp, err := s.request(http.MethodGet, cbplUrl, nil, headers)
 
-    var rates []interface{}
+	if err != nil {
+		zap.S().Errorw(errorCbplRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbplRequestFailed, err)
+		return nil, err
+	}
+	return resp, nil
+}
 
-    ln := len(s.cfg.SettlementCurrencies)
-    if s.contains(s.cfg.SettlementCurrenciesParsed, cbplTo) {
-        ln--
-    }
-    c := 0
+func (s *Service) parseResponseCbpl(resp *http.Response) (*cbplResponse, error) {
+	res := &cbplResponse{}
+	err := s.decodeXml(resp, res)
 
-    for _, rateItem := range res.Rates {
+	if err != nil {
+		zap.S().Errorw(errorCbplResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbplResponseParsingFailed, err)
+		return nil, err
+	}
 
-        if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
-            continue
-        }
+	return res, nil
+}
 
-        if rateItem.CurrencyCode == cbplTo {
-            continue
-        }
+func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 
-        rate := rateItem.Value
+	if len(res.Rates) == 0 {
+		return nil, errors.New(errorCbplNoResults)
+	}
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   rateItem.CurrencyCode + cbplTo,
-            Rate:   s.toPrecise(rate),
-            Source: cbplSource,
-            Volume: 1,
-        })
+	var rates []interface{}
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cbplTo + rateItem.CurrencyCode,
-            Rate:   s.toPrecise(1 / rate),
-            Source: cbplSource,
-            Volume: 1,
-        })
+	ln := len(s.cfg.SettlementCurrencies)
+	if s.contains(s.cfg.SettlementCurrenciesParsed, cbplTo) {
+		ln--
+	}
+	c := 0
 
-        c++
-        if c == ln {
-            break
-        }
-    }
+	for _, rateItem := range res.Rates {
 
-    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+		if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+			continue
+		}
+
+		if rateItem.CurrencyCode == cbplTo {
+			continue
+		}
+
+		rate := rateItem.Value
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   rateItem.CurrencyCode + cbplTo,
+			Rate:   s.toPrecise(rate),
+			Source: cbplSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cbplTo + rateItem.CurrencyCode,
+			Rate:   s.toPrecise(1 / rate),
+			Source: cbplSource,
+			Volume: 1,
+		})
+
+		c++
+		if c == ln {
+			break
+		}
+	}
+
+	return rates, nil
 }
