@@ -1,19 +1,19 @@
 package pkg
 
 const (
-    // ServiceName - name of microservice
-    ServiceName = "paysupercurrencies"
+	// ServiceName - name of microservice
+	ServiceName = "paysupercurrencies"
 
-    // Version - version of service
-    Version = "latest"
+	// Version - version of service
+	Version = "latest"
 
-    RateTypeOxr          = "oxr"
-    RateTypeCentralbanks = "centralbanks"
-    RateTypePaysuper     = "paysuper"
-    RateTypeStock        = "stock"
-    RateTypeCardpay      = "cardpay"
+	RateTypeOxr          = "oxr"
+	RateTypeCentralbanks = "centralbanks"
+	RateTypePaysuper     = "paysuper"
+	RateTypeStock        = "stock"
+	RateTypeCardpay      = "cardpay"
 
-    CardpayTopicRateData         = "cardpay-rate-data"
-    CardpayTopicRateDataRetry    = "cardpay-rate-data-retry"
-    CardpayTopicRateDataFinished = "cardpay-rate-data-finished"
+	CardpayTopicRateData         = "cardpay-rate-data"
+	CardpayTopicRateDataRetry    = "cardpay-rate-data-retry"
+	CardpayTopicRateDataFinished = "cardpay-rate-data-finished"
 )
