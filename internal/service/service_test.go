@@ -93,7 +93,7 @@ func (suite *CurrenciesratesServiceTestSuite) CleanRatesCollection(collectionSuf
 		return err
 	}
 
-	var selector interface{} = nil
+	var selector interface{}
 	_, err = suite.service.db.Collection(cName).RemoveAll(selector)
 	if err != nil {
 		return err
@@ -364,7 +364,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_validateUrl_Fail() {
 func (suite *CurrenciesratesServiceTestSuite) Test_getByDateQuery_Ok() {
 	date := time.Now()
 	query := suite.service.getByDateQuery(date)
-	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": suite.service.Eod(date)})
+	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": suite.service.eod(date)})
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {

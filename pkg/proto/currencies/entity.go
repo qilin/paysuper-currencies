@@ -1,5 +1,6 @@
 package currencies
 
+// GetCorrectionValue returns correction value for passed pair of default one
 func (r *CorrectionRule) GetCorrectionValue(pair string) float64 {
 	if pair == "" {
 		return r.CommonCorrection

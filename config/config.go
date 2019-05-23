@@ -6,6 +6,7 @@ import (
 	"github.com/paysuper/paysuper-currencies/pkg"
 )
 
+// Config is struct for store service configuration
 type Config struct {
 	MongoDsn         string `envconfig:"MONGO_DSN" required:"true"`
 	MongoDialTimeout string `envconfig:"MONGO_DIAL_TIMEOUT" required:"false" default:"10"`
@@ -43,6 +44,7 @@ type Config struct {
 	RatesRequestCurrenciesParsed map[string]bool
 }
 
+// NewConfig return new config
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
 	err := envconfig.Process("", cfg)

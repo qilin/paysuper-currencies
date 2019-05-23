@@ -55,7 +55,7 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
 	startDate := today.AddDate(0, 0, -1*len(fakerates))
 	for day, rate := range fakerates {
 		date := startDate.AddDate(0, 0, day)
-		created, _ := ptypes.TimestampProto(suite.service.Bod(date))
+		created, _ := ptypes.TimestampProto(suite.service.bod(date))
 
 		rd1 := &currencies.RateData{
 			Id:        bson.NewObjectId().Hex(),

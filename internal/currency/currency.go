@@ -1,5 +1,6 @@
 package currency
 
+// CurrencyProperties - set of flags of currency using allowance
 type CurrencyProperties struct {
 	Settlement bool
 	Price      bool
@@ -7,6 +8,7 @@ type CurrencyProperties struct {
 	Accounting bool
 }
 
+// CurrencyDefinitions - list of currencies with properties
 var CurrencyDefinitions = map[string]CurrencyProperties{
 	"USD": {Price: true, Settlement: true, Vat: true, Accounting: true},
 	"EUR": {Price: true, Settlement: true, Vat: true, Accounting: true},

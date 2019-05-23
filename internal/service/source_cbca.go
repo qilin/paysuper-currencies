@@ -29,6 +29,7 @@ type cbcaResponse struct {
 	Observations []map[string]interface{} `json:"observations"`
 }
 
+// RequestRatesCbca - retriving current rates from Central bank of Canada
 func (s *Service) RequestRatesCbca() error {
 	zap.S().Info("Requesting rates from CBCA")
 
@@ -61,8 +62,8 @@ func (s *Service) RequestRatesCbca() error {
 
 func (s *Service) sendRequestCbca() (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationJSON,
-		HeaderAccept:      MIMEApplicationJSON,
+		headerContentType: mimeApplicationJSON,
+		headerAccept:      mimeApplicationJSON,
 	}
 
 	today := time.Now()

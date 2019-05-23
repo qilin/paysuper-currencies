@@ -33,6 +33,7 @@ type cbrfResponseRate struct {
 	Value        string   `xml:"Value"`
 }
 
+// RequestRatesCbrf - retriving current rates from Central bank of Russia
 func (s *Service) RequestRatesCbrf() error {
 	zap.S().Info("Requesting rates from CBRF")
 
@@ -65,8 +66,8 @@ func (s *Service) RequestRatesCbrf() error {
 
 func (s *Service) sendRequestCbrf() (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationXML,
-		HeaderAccept:      MIMEApplicationXML,
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
 	}
 
 	// here may be 302 redirect in answer - https://toster.ru/q/149039

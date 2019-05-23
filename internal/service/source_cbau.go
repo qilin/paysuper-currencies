@@ -41,6 +41,7 @@ type cbauResponseObservation struct {
 	Value float64 `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ value"`
 }
 
+// RequestRatesCbau - retriving current rates from Central bank of Australia
 func (s *Service) RequestRatesCbau() error {
 	zap.S().Info("Requesting rates from CBAU")
 
@@ -73,8 +74,8 @@ func (s *Service) RequestRatesCbau() error {
 
 func (s *Service) sendRequestCbau() (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationXML,
-		HeaderAccept:      MIMEApplicationXML,
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
 	}
 
 	resp, err := s.request(http.MethodGet, cbauUrl, nil, headers)

@@ -23,17 +23,18 @@ const (
 	errorGetCorrection                  = "can't get correction value"
 )
 
-type PaysuperCorrection struct {
+type paysuperCorrection struct {
 	Pair      string    `bson:"pair"`
 	CreatedAt time.Time `bson:"created_at"`
 	Value     float64   `bson:"value"`
 }
 
-type PaysuperCorridor struct {
+type paysuperCorridor struct {
 	CreatedAt time.Time `bson:"created_at"`
 	Value     float64   `bson:"value"`
 }
 
+// GetPaysuperCorrection - returns paysuper correction value for passed pair of currencies
 func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 	if !s.isPairExists(pair) {
 		zap.S().Errorw(errorGetCorrection, "error", errorCurrencyPairNotExists, "pair", pair)
@@ -42,7 +43,7 @@ func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 
 	query := bson.M{"pair": pair}
 
-	res := &PaysuperCorrection{}
+	res := &paysuperCorrection{}
 	err := s.db.Collection(collectionNamePaysuperCorrections).Find(query).Sort("-_id").Limit(1).One(res)
 	if err != nil {
 		zap.S().Errorw(errorGetCorrection, "error", err, "pair", pair)
@@ -52,6 +53,7 @@ func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 	return res.Value, nil
 }
 
+// CalculatePaysuperCorrections - calculates paysuper corrections for all settlement сurrencies
 func (s *Service) CalculatePaysuperCorrections() error {
 	days := s.cfg.BollingerDays
 	if days < 1 {
@@ -90,7 +92,7 @@ func (s *Service) CalculatePaysuperCorrections() error {
 				zap.S().Errorw(errorCalculateCorrection, "error", err, "pair", pair)
 				return err
 			}
-			corrections = append(corrections, &PaysuperCorrection{
+			corrections = append(corrections, &paysuperCorrection{
 				Pair:      pair,
 				Value:     value,
 				CreatedAt: now,
@@ -102,7 +104,7 @@ func (s *Service) CalculatePaysuperCorrections() error {
 				zap.S().Errorw(errorCalculateCorrection, "error", err, "pair", reversePair)
 				return err
 			}
-			corrections = append(corrections, &PaysuperCorrection{
+			corrections = append(corrections, &paysuperCorrection{
 				Pair:      reversePair,
 				Value:     reverseValue,
 				CreatedAt: now,
@@ -172,7 +174,7 @@ func (s *Service) getBollingerBands(collectionRatesNameSuffix string, pair strin
 
 func (s *Service) getPaysuperCorrectionCorridorWidth() (float64, error) {
 
-	res := &PaysuperCorridor{}
+	res := &paysuperCorridor{}
 	err := s.db.Collection(collectionNamePaysuperCorridors).Find(nil).Sort("-_id").Limit(1).One(res)
 	if err != nil {
 		return 0, err

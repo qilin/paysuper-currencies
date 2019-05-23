@@ -29,6 +29,7 @@ type cbplResponseRate struct {
 	Value        float64 `xml:",chardata"`
 }
 
+// RequestRatesCbpl - retriving current rates from Central bank of Poland
 func (s *Service) RequestRatesCbpl() error {
 	zap.S().Info("Requesting rates from CBPL")
 
@@ -61,8 +62,8 @@ func (s *Service) RequestRatesCbpl() error {
 
 func (s *Service) sendRequestCbpl() (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationXML,
-		HeaderAccept:      MIMETextXML,
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeTextXML,
 	}
 
 	resp, err := s.request(http.MethodGet, cbplUrl, nil, headers)

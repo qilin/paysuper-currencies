@@ -43,6 +43,7 @@ type cbeuResponseCube3 struct {
 	Value        float64  `xml:"rate,attr"`
 }
 
+// RequestRatesCbeu - retriving current rates from European Central bank
 func (s *Service) RequestRatesCbeu() error {
 	zap.S().Info("Requesting rates from CBEU")
 
@@ -75,8 +76,8 @@ func (s *Service) RequestRatesCbeu() error {
 
 func (s *Service) sendRequestCbeu() (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationXML,
-		HeaderAccept:      MIMEApplicationXML,
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
 	}
 
 	reqUrl, err := s.validateUrl(fmt.Sprintf(cbeuUrlTemplate, uuid.NewV4().String()))

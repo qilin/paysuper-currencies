@@ -11,7 +11,7 @@ const (
 	errorInvalidObjectId = "invalid bson object id"
 )
 
-type MgoRateData struct {
+type mgoRateData struct {
 	Id         bson.ObjectId `bson:"_id"`
 	CreatedAt  time.Time     `bson:"created_at"`
 	CreateDate string        `bson:"create_date"`
@@ -21,7 +21,8 @@ type MgoRateData struct {
 	Volume     float64       `bson:"volume"`
 }
 
-type MgoCorrectionRule struct {
+// RateData struct for mongoDb
+type mgoCorrectionRule struct {
 	Id               bson.ObjectId      `bson:"_id"`
 	MerchantId       string             `bson:"merchant_id"`
 	RateType         string             `bson:"rate_type"`
@@ -30,8 +31,9 @@ type MgoCorrectionRule struct {
 	CreatedAt        time.Time          `bson:"created_at"`
 }
 
+// RateData.SetBSON
 func (p *RateData) SetBSON(raw bson.Raw) error {
-	decoded := new(MgoRateData)
+	decoded := new(mgoRateData)
 	err := raw.Unmarshal(decoded)
 
 	if err != nil {
@@ -52,8 +54,9 @@ func (p *RateData) SetBSON(raw bson.Raw) error {
 	return nil
 }
 
+// RateData.GetBSON
 func (p *RateData) GetBSON() (interface{}, error) {
-	st := &MgoRateData{
+	st := &mgoRateData{
 		Pair:   p.Pair,
 		Rate:   p.Rate,
 		Source: p.Source,
@@ -77,8 +80,9 @@ func (p *RateData) GetBSON() (interface{}, error) {
 	return st, nil
 }
 
+// CorrectionRule.SetBSON
 func (p *CorrectionRule) SetBSON(raw bson.Raw) error {
-	decoded := new(MgoCorrectionRule)
+	decoded := new(mgoCorrectionRule)
 	err := raw.Unmarshal(decoded)
 
 	if err != nil {
@@ -99,8 +103,9 @@ func (p *CorrectionRule) SetBSON(raw bson.Raw) error {
 	return nil
 }
 
+// CorrectionRule.GetBSON
 func (p *CorrectionRule) GetBSON() (interface{}, error) {
-	st := &MgoCorrectionRule{
+	st := &mgoCorrectionRule{
 		RateType:         p.RateType,
 		CommonCorrection: p.CommonCorrection,
 		PairCorrection:   p.PairCorrection,

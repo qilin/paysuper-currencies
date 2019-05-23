@@ -13,6 +13,7 @@ const (
 	errorStockRateSave = "stock rates save error"
 )
 
+// SetRatesStock - set rates for stock exchange
 func (s *Service) SetRatesStock() error {
 
 	zap.S().Info("Start calculation rates for Stock")

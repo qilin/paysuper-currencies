@@ -24,6 +24,7 @@ const (
 	errorExchangeCurrencyByDateForMerchant  = "exchange currency by date for merchant failed"
 )
 
+// GetRateCurrentCommon - get current rate with common correction rule applied
 func (s *Service) GetRateCurrentCommon(
 	ctx context.Context,
 	req *currencies.GetRateCurrentCommonRequest,
@@ -42,6 +43,7 @@ func (s *Service) GetRateCurrentCommon(
 	return nil
 }
 
+// GetRateByDateCommon - get rate by date with common correction rule applied
 func (s *Service) GetRateByDateCommon(
 	ctx context.Context,
 	req *currencies.GetRateByDateCommonRequest,
@@ -63,6 +65,7 @@ func (s *Service) GetRateByDateCommon(
 	return nil
 }
 
+// GetRateCurrentForMerchant - get current rate with merchant's correction rule applied
 func (s *Service) GetRateCurrentForMerchant(
 	ctx context.Context,
 	req *currencies.GetRateCurrentForMerchantRequest,
@@ -87,6 +90,7 @@ func (s *Service) GetRateCurrentForMerchant(
 	return nil
 }
 
+// GetRateByDateForMerchant - get rate by date with merchant's correction rule applied
 func (s *Service) GetRateByDateForMerchant(
 	ctx context.Context,
 	req *currencies.GetRateByDateForMerchantRequest,
@@ -113,6 +117,7 @@ func (s *Service) GetRateByDateForMerchant(
 	return nil
 }
 
+// ExchangeCurrencyCurrentCommon - exchange currency via current rate with common correction rule applied
 func (s *Service) ExchangeCurrencyCurrentCommon(
 	ctx context.Context,
 	req *currencies.ExchangeCurrencyCurrentCommonRequest,
@@ -130,6 +135,7 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
 	return nil
 }
 
+// ExchangeCurrencyCurrentForMerchant - exchange currency via current rate with merchant's correction rule applied
 func (s *Service) ExchangeCurrencyCurrentForMerchant(
 	ctx context.Context,
 	req *currencies.ExchangeCurrencyCurrentForMerchantRequest,
@@ -151,6 +157,7 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
 	return nil
 }
 
+// ExchangeCurrencyByDateCommon - exchange currency via rate by date with common correction rule applied
 func (s *Service) ExchangeCurrencyByDateCommon(
 	ctx context.Context,
 	req *currencies.ExchangeCurrencyByDateCommonRequest,
@@ -170,6 +177,7 @@ func (s *Service) ExchangeCurrencyByDateCommon(
 	return nil
 }
 
+// ExchangeCurrencyByDateForMerchant - exchange currency via rate by date with merchant's correction rule applied
 func (s *Service) ExchangeCurrencyByDateForMerchant(
 	ctx context.Context,
 	req *currencies.ExchangeCurrencyByDateForMerchantRequest,
@@ -194,6 +202,7 @@ func (s *Service) ExchangeCurrencyByDateForMerchant(
 	return nil
 }
 
+// GetCommonRateCorrectionRule - returns common (default) correction rule for passed rate type
 func (s *Service) GetCommonRateCorrectionRule(
 	ctx context.Context,
 	req *currencies.CommonCorrectionRuleRequest,
@@ -207,6 +216,7 @@ func (s *Service) GetCommonRateCorrectionRule(
 	return nil
 }
 
+// GetMerchantRateCorrectionRule - returns merchant's correction rule for passed rate type, with fallback to common (default) if it not exists
 func (s *Service) GetMerchantRateCorrectionRule(
 	ctx context.Context,
 	req *currencies.MerchantCorrectionRuleRequest,
@@ -225,6 +235,7 @@ func (s *Service) GetMerchantRateCorrectionRule(
 	return nil
 }
 
+// AddCommonRateCorrectionRule - adding new default correction rule for passed rate type
 func (s *Service) AddCommonRateCorrectionRule(
 	ctx context.Context,
 	req *currencies.CommonCorrectionRule,
@@ -233,6 +244,7 @@ func (s *Service) AddCommonRateCorrectionRule(
 	return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, "")
 }
 
+// AddMerchantRateCorrectionRule - adding new merchant's correction rule for passed rate type and merchant id
 func (s *Service) AddMerchantRateCorrectionRule(
 	ctx context.Context,
 	req *currencies.CorrectionRule,
@@ -246,13 +258,14 @@ func (s *Service) AddMerchantRateCorrectionRule(
 	return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, req.MerchantId)
 }
 
+// SetPaysuperCorrectionCorridor - set new value of paysuper correction corridor, used in predicition rates calculation
 func (s *Service) SetPaysuperCorrectionCorridor(
 	ctx context.Context,
 	req *currencies.CorrectionCorridor,
 	res *currencies.EmptyResponse,
 ) error {
 
-	corridor := PaysuperCorridor{
+	corridor := paysuperCorridor{
 		Value:     req.Value,
 		CreatedAt: time.Now(),
 	}
@@ -266,6 +279,7 @@ func (s *Service) SetPaysuperCorrectionCorridor(
 	return nil
 }
 
+// GetSupportedCurrencies - returns list of all supported currencies
 func (s *Service) GetSupportedCurrencies(
 	ctx context.Context,
 	req *currencies.EmptyRequest,
@@ -277,6 +291,7 @@ func (s *Service) GetSupportedCurrencies(
 	return nil
 }
 
+// GetSettlementCurrencies - returns list of settlement currencies
 func (s *Service) GetSettlementCurrencies(
 	ctx context.Context,
 	req *currencies.EmptyRequest,
@@ -288,6 +303,7 @@ func (s *Service) GetSettlementCurrencies(
 	return nil
 }
 
+// GetPriceCurrencies - returns list of price currencies
 func (s *Service) GetPriceCurrencies(
 	ctx context.Context,
 	req *currencies.EmptyRequest,
@@ -299,6 +315,7 @@ func (s *Service) GetPriceCurrencies(
 	return nil
 }
 
+// GetVatCurrencies - returns list of vat currencies
 func (s *Service) GetVatCurrencies(
 	ctx context.Context,
 	req *currencies.EmptyRequest,
@@ -310,6 +327,7 @@ func (s *Service) GetVatCurrencies(
 	return nil
 }
 
+// GetAccountingCurrencies - returns list of settlement accounting currencies
 func (s *Service) GetAccountingCurrencies(
 	ctx context.Context,
 	req *currencies.EmptyRequest,

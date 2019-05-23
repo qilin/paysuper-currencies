@@ -13,6 +13,7 @@ const (
 	cardpaySource = "CARDPAY"
 )
 
+// SetRatesCardpay - saving rates for Cardpay, getted from messages queue
 func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery) error {
 	id := msg.From + msg.To + msg.Source
 
@@ -39,9 +40,10 @@ func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery
 	return nil
 }
 
+// PullRecalcTrigger - switching-On trigger to recalc Paysuper Corrections after get message form special queue
 func (s *Service) PullRecalcTrigger(msg *currencies.EmptyRequest, dlv amqp.Delivery) error {
 	now := time.Now()
-	eod := s.Eod(now)
+	eod := s.eod(now)
 	delta := eod.Sub(now)
 	return s.planDelayedTask(int64(delta.Seconds()), triggerCardpay, s.CalculatePaysuperCorrections)
 }

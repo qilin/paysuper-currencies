@@ -52,13 +52,13 @@ const (
 	errorReleaseTrigger           = "release trigger failed"
 	errorDelayedFunction          = "error in delayed function"
 
-	MIMEApplicationJSON = "application/json"
-	MIMEApplicationXML  = "application/xml"
-	MIMETextXML         = "text/xml"
+	mimeApplicationJSON = "application/json"
+	mimeApplicationXML  = "application/xml"
+	mimeTextXML         = "text/xml"
 
-	HeaderAccept      = "Accept"
-	HeaderCookie      = "Cookie"
-	HeaderContentType = "Content-Type"
+	headerAccept      = "Accept"
+	headerCookie      = "Cookie"
+	headerContentType = "Content-Type"
 
 	collectionRatesNameTemplate           = "%s_%s"
 	collectionRatesNamePrefix             = "currency_rates"
@@ -124,6 +124,7 @@ func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
 	}, nil
 }
 
+// Init rabbitMq brokers and check for active triggers for delayed tasks
 func (s *Service) Init() error {
 	var err error
 	s.cardpayBroker, s.cardpayRetryBroker, s.cardpayFinishBroker, err = s.getBrokers(
@@ -135,13 +136,13 @@ func (s *Service) Init() error {
 	tgr, err := s.getTrigger(triggerCardpay)
 	if err != nil {
 		return err
-	} else {
-		if tgr.Active == true {
-			now := time.Now()
-			eod := s.Eod(now)
-			delta := eod.Sub(now)
-			return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
-		}
+	}
+
+	if tgr.Active == true {
+		now := time.Now()
+		eod := s.eod(now)
+		delta := eod.Sub(now)
+		return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
 	}
 
 	return nil
@@ -274,7 +275,7 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 		for _, v := range cookies {
 			c = append(c, v.Name+"="+v.Value)
 		}
-		headers[HeaderCookie] = strings.Join(c, ";")
+		headers[headerCookie] = strings.Join(c, ";")
 		return s.request(method, url, req, headers)
 	}
 
@@ -418,7 +419,7 @@ func (s *Service) saveRates(collectionRatesNameSuffix string, data []interface{}
 }
 
 func (s *Service) getByDateQuery(date time.Time) bson.M {
-	return bson.M{"created_at": bson.M{"$lte": s.Eod(date)}}
+	return bson.M{"created_at": bson.M{"$lte": s.eod(date)}}
 }
 
 func (s *Service) exchangeCurrencyByDate(
@@ -561,13 +562,13 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
 }
 
 // returns begin-of-day for passed date
-func (s *Service) Bod(t time.Time) time.Time {
+func (s *Service) bod(t time.Time) time.Time {
 	year, month, day := t.Date()
 	return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
 }
 
 // returns end-of-day for passed date
-func (s *Service) Eod(t time.Time) time.Time {
+func (s *Service) eod(t time.Time) time.Time {
 	year, month, day := t.Date()
 	return time.Date(year, month, day, 23, 59, 59, 999999999, t.Location())
 }

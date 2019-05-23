@@ -31,6 +31,7 @@ type oxrResponse struct {
 	Rates      map[string]float64
 }
 
+// RequestRatesOxr - retriving current rates from openexchangerates.org
 func (s *Service) RequestRatesOxr() error {
 	zap.S().Info("Requesting rates from OXR")
 
@@ -71,8 +72,8 @@ func (s *Service) RequestRatesOxr() error {
 }
 func (s *Service) sendRequestOxr(from string, queryString string) (*http.Response, error) {
 	headers := map[string]string{
-		HeaderContentType: MIMEApplicationJSON,
-		HeaderAccept:      MIMEApplicationJSON,
+		headerContentType: mimeApplicationJSON,
+		headerAccept:      mimeApplicationJSON,
 	}
 
 	reqUrl, err := s.validateUrl(fmt.Sprintf(oxrUrlTemplate, from, queryString))
