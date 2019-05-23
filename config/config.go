@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	MongoHost     string `envconfig:"MONGO_DSN" required:"true"`
-	MongoDatabase string `envconfig:"MONGO_DIAL_TIMEOUT" required:"false" default:"10"`
+	MongoDsn         string `envconfig:"MONGO_DSN" required:"true"`
+	MongoDialTimeout string `envconfig:"MONGO_DIAL_TIMEOUT" required:"false" default:"10"`
 
 	MetricsPort int `envconfig:"METRICS_PORT" required:"false" default:"80"`
 

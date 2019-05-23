@@ -4,6 +4,9 @@ import (
 	"context"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
@@ -38,6 +41,14 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 
 	suite.config, err = config.NewConfig()
 	assert.NoError(suite.T(), err, "Config load failed")
+
+	m, err := migrate.New(
+		"file://../../migrations",
+		suite.config.MongoDsn)
+	assert.NoError(suite.T(), err, "Migrate init failed")
+
+	err = m.Up()
+	assert.NoError(suite.T(), err, "Migrations failed")
 
 	db, err := database.NewDatabase()
 	assert.NoError(suite.T(), err, "Db connection failed")
