@@ -1,139 +1,155 @@
 package service
 
 import (
-    "encoding/xml"
-    "errors"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "go.uber.org/zap"
-    "net/http"
+	"encoding/xml"
+	"errors"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"go.uber.org/zap"
+	"net/http"
 )
 
 const (
-    errorCbauRequestFailed         = "CBAU Rates request failed"
-    errorCbauResponseParsingFailed = "CBAU Rates response parsing failed"
-    errorCbauSaveRatesFailed       = "CBAU Rates save data failed"
-    errorCbauNoResults             = "CBAU Rates no results"
+	errorCbauRequestFailed         = "CBAU Rates request failed"
+	errorCbauResponseParsingFailed = "CBAU Rates response parsing failed"
+	errorCbauSaveRatesFailed       = "CBAU Rates save data failed"
+	errorCbauNoResults             = "CBAU Rates no results"
 
-    cbauTo     = "AUD"
-    cbauSource = "CBAU"
-    cbauUrl    = "https://www.rba.gov.au/rss/rss-cb-exchange-rates.xml"
+	cbauTo     = "AUD"
+	cbauSource = "CBAU"
+	cbauUrl    = "https://www.rba.gov.au/rss/rss-cb-exchange-rates.xml"
 )
 
 type cbauResponse struct {
-    XMLName xml.Name           `xml:"http://www.w3.org/1999/02/22-rdf-syntax-ns# RDF"`
-    Rates   []cbauResponseItem `xml:"item"`
+	XMLName xml.Name           `xml:"http://www.w3.org/1999/02/22-rdf-syntax-ns# RDF"`
+	Rates   []cbauResponseItem `xml:"item"`
 }
 
 type cbauResponseItem struct {
-    Statistics cbauResponseStatistics `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ statistics"`
+	Statistics cbauResponseStatistics `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ statistics"`
 }
 
 type cbauResponseStatistics struct {
-    ExchangeRate cbauResponseExchangeRate `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ exchangeRate"`
+	ExchangeRate cbauResponseExchangeRate `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ exchangeRate"`
 }
 
 type cbauResponseExchangeRate struct {
-    TargetCurrency string                  `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ targetCurrency"`
-    Observation    cbauResponseObservation `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ observation"`
+	TargetCurrency string                  `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ targetCurrency"`
+	Observation    cbauResponseObservation `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ observation"`
 }
 
 type cbauResponseObservation struct {
-    Value float64 `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ value"`
+	Value float64 `xml:"http://www.cbwiki.net/wiki/index.php/Specification_1.2/ value"`
 }
 
+// RequestRatesCbau - retriving current rates from Central bank of Australia
 func (s *Service) RequestRatesCbau() error {
-    zap.S().Info("Requesting rates from CBAU")
+	zap.S().Info("Requesting rates from CBAU")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationXML,
-        HeaderAccept:      MIMEApplicationXML,
-    }
+	resp, err := s.sendRequestCbau()
+	if err != nil {
+		return err
+	}
 
-    zap.S().Info("Sending request to url: ", cbauUrl)
+	res, err := s.parseResponseCbau(resp)
+	if err != nil {
+		return err
+	}
 
-    resp, err := s.request(http.MethodGet, cbauUrl, nil, headers)
+	rates, err := s.processRatesCbau(res)
+	if err != nil {
+		zap.S().Errorw(errorCbauSaveRatesFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbauSaveRatesFailed, err)
+		return err
+	}
 
-    if err != nil {
-        zap.S().Errorw(errorCbauRequestFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbauRequestFailed, err)
-        return err
-    }
+	err = s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+	if err != nil {
+		return err
+	}
 
-    res := &cbauResponse{}
-    err = s.decodeXml(resp, res)
+	zap.S().Info("Rates from CBAU updated")
 
-    if err != nil {
-        zap.S().Errorw(errorCbauResponseParsingFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbauResponseParsingFailed, err)
-        return err
-    }
-
-    err = s.processRatesCbau(res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbauSaveRatesFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbauSaveRatesFailed, err)
-        return err
-    }
-
-    zap.S().Info("Rates from CBAU updated")
-
-    return nil
+	return nil
 }
 
-func (s *Service) processRatesCbau(res *cbauResponse) error {
+func (s *Service) sendRequestCbau() (*http.Response, error) {
+	headers := map[string]string{
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
+	}
 
-    if len(res.Rates) == 0 {
-        return errors.New(errorCbauNoResults)
-    }
+	resp, err := s.request(http.MethodGet, cbauUrl, nil, headers)
 
-    var rates []interface{}
+	if err != nil {
+		zap.S().Errorw(errorCbauRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbauRequestFailed, err)
+		return nil, err
+	}
+	return resp, nil
+}
 
-    ln := len(s.cfg.SettlementCurrencies)
-    if s.contains(s.cfg.SettlementCurrenciesParsed, cbauTo) {
-        ln--
-    }
-    c := 0
+func (s *Service) parseResponseCbau(resp *http.Response) (*cbauResponse, error) {
+	res := &cbauResponse{}
+	err := s.decodeXml(resp, res)
 
-    for _, rateItem := range res.Rates {
+	if err != nil {
+		zap.S().Errorw(errorCbauResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbauResponseParsingFailed, err)
+		return nil, err
+	}
 
-        cFrom := rateItem.Statistics.ExchangeRate.TargetCurrency
+	return res, nil
+}
 
-        if !s.contains(s.cfg.SettlementCurrenciesParsed, cFrom) {
-            continue
-        }
+func (s *Service) processRatesCbau(res *cbauResponse) ([]interface{}, error) {
 
-        if cFrom == cbrfTo {
-            continue
-        }
+	if len(res.Rates) == 0 {
+		return nil, errors.New(errorCbauNoResults)
+	}
 
-        rate := rateItem.Statistics.ExchangeRate.Observation.Value
+	var rates []interface{}
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cFrom + cbauTo,
-            Rate:   s.toPrecise(rate),
-            Source: cbauSource,
-            Volume: 1,
-        })
+	ln := len(s.cfg.SettlementCurrencies)
+	if s.contains(s.cfg.SettlementCurrenciesParsed, cbauTo) {
+		ln--
+	}
+	c := 0
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cbauTo + cFrom,
-            Rate:   s.toPrecise(1 / rate),
-            Source: cbauSource,
-            Volume: 1,
-        })
+	for _, rateItem := range res.Rates {
 
-        c++
-        if c == ln {
-            break
-        }
-    }
+		cFrom := rateItem.Statistics.ExchangeRate.TargetCurrency
 
-    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+		if !s.contains(s.cfg.SettlementCurrenciesParsed, cFrom) {
+			continue
+		}
+
+		if cFrom == cbauTo {
+			continue
+		}
+
+		rate := rateItem.Statistics.ExchangeRate.Observation.Value
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cFrom + cbauTo,
+			Rate:   s.toPrecise(rate),
+			Source: cbauSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cbauTo + cFrom,
+			Rate:   s.toPrecise(1 / rate),
+			Source: cbauSource,
+			Volume: 1,
+		})
+
+		c++
+		if c == ln {
+			break
+		}
+	}
+
+	return rates, nil
 }

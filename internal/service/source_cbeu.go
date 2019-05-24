@@ -1,145 +1,161 @@
 package service
 
 import (
-    "encoding/xml"
-    "errors"
-    "fmt"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "github.com/satori/go.uuid"
-    "go.uber.org/zap"
-    "net/http"
+	"encoding/xml"
+	"errors"
+	"fmt"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"github.com/satori/go.uuid"
+	"go.uber.org/zap"
+	"net/http"
 )
 
 const (
-    errorCbeuUrlValidationFailed   = "CBEU Rates url validation failed"
-    errorCbeuRequestFailed         = "CBEU Rates request failed"
-    errorCbeuResponseParsingFailed = "CBEU Rates response parsing failed"
-    errorCbeuSaveRatesFailed       = "CBEU Rates save data failed"
-    errorCbeuNoResults             = "CBEU Rates no results"
+	errorCbeuUrlValidationFailed   = "CBEU Rates url validation failed"
+	errorCbeuRequestFailed         = "CBEU Rates request failed"
+	errorCbeuResponseParsingFailed = "CBEU Rates response parsing failed"
+	errorCbeuProcessRatesFailed    = "CBEU Rates save data failed"
+	errorCbeuNoResults             = "CBEU Rates no results"
 
-    cbeuTo          = "EUR"
-    cbeuSource      = "CBEU"
-    cbeuUrlTemplate = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?%s"
+	cbeuTo          = "EUR"
+	cbeuSource      = "CBEU"
+	cbeuUrlTemplate = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml?%s"
 )
 
 type cbeuResponse struct {
-    XMLName xml.Name          `xml:"http://www.gesmes.org/xml/2002-08-01 Envelope"`
-    Data    cbeuResponseCube1 `xml:"Cube"`
+	XMLName xml.Name          `xml:"http://www.gesmes.org/xml/2002-08-01 Envelope"`
+	Data    cbeuResponseCube1 `xml:"Cube"`
 }
 
 type cbeuResponseCube1 struct {
-    XMLName xml.Name          `xml:"Cube"`
-    Rates   cbeuResponseCube2 `xml:"Cube"`
+	XMLName xml.Name          `xml:"Cube"`
+	Rates   cbeuResponseCube2 `xml:"Cube"`
 }
 
 type cbeuResponseCube2 struct {
-    XMLName xml.Name            `xml:"Cube"`
-    Rates   []cbeuResponseCube3 `xml:"Cube"`
+	XMLName xml.Name            `xml:"Cube"`
+	Rates   []cbeuResponseCube3 `xml:"Cube"`
 }
 
 type cbeuResponseCube3 struct {
-    XMLName      xml.Name `xml:"Cube"`
-    CurrencyCode string   `xml:"currency,attr"`
-    Value        float64  `xml:"rate,attr"`
+	XMLName      xml.Name `xml:"Cube"`
+	CurrencyCode string   `xml:"currency,attr"`
+	Value        float64  `xml:"rate,attr"`
 }
 
+// RequestRatesCbeu - retriving current rates from European Central bank
 func (s *Service) RequestRatesCbeu() error {
-    zap.S().Info("Requesting rates from CBEU")
+	zap.S().Info("Requesting rates from CBEU")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationXML,
-        HeaderAccept:      MIMEApplicationXML,
-    }
+	resp, err := s.sendRequestCbeu()
+	if err != nil {
+		return err
+	}
 
-    reqUrl, err := s.validateUrl(fmt.Sprintf(cbeuUrlTemplate, uuid.NewV4().String()))
+	res, err := s.parseResponseCbeu(resp)
+	if err != nil {
+		return err
+	}
 
-    if err != nil {
-        zap.S().Errorw(errorCbeuUrlValidationFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbeuUrlValidationFailed, err)
-        return err
-    }
+	rates, err := s.processRatesCbeu(res)
+	if err != nil {
+		zap.S().Errorw(errorCbeuProcessRatesFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbeuProcessRatesFailed, err)
+		return err
+	}
 
-    zap.S().Info("Sending request to url: ", reqUrl.String())
+	err = s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+	if err != nil {
+		return err
+	}
 
-    resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
+	zap.S().Info("Rates from CBEU updated")
 
-    if err != nil {
-        zap.S().Errorw(errorCbeuRequestFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbeuRequestFailed, err)
-        return err
-    }
-
-    res := &cbeuResponse{}
-    err = s.decodeXml(resp, res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbeuResponseParsingFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbeuResponseParsingFailed, err)
-        return err
-    }
-
-    err = s.processRatesCbeu(res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbeuSaveRatesFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbeuSaveRatesFailed, err)
-        return err
-    }
-
-    zap.S().Info("Rates from CBEU updated")
-
-    return nil
+	return nil
 }
 
-func (s *Service) processRatesCbeu(res *cbeuResponse) error {
+func (s *Service) sendRequestCbeu() (*http.Response, error) {
+	headers := map[string]string{
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
+	}
 
-    if len(res.Data.Rates.Rates) == 0 {
-        return errors.New(errorCbeuNoResults)
-    }
+	reqUrl, err := s.validateUrl(fmt.Sprintf(cbeuUrlTemplate, uuid.NewV4().String()))
 
-    var rates []interface{}
+	if err != nil {
+		zap.S().Errorw(errorCbeuUrlValidationFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbeuUrlValidationFailed, err)
+		return nil, err
+	}
 
-    ln := len(s.cfg.SettlementCurrencies)
-    if s.contains(s.cfg.SettlementCurrenciesParsed, cbeuTo) {
-        ln--
-    }
-    c := 0
+	resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
-    for _, rateItem := range res.Data.Rates.Rates {
+	if err != nil {
+		zap.S().Errorw(errorCbeuRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbeuRequestFailed, err)
+		return nil, err
+	}
+	return resp, nil
+}
 
-        if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
-            continue
-        }
+func (s *Service) parseResponseCbeu(resp *http.Response) (*cbeuResponse, error) {
+	res := &cbeuResponse{}
+	err := s.decodeXml(resp, res)
 
-        if rateItem.CurrencyCode == cbeuTo {
-            continue
-        }
+	if err != nil {
+		zap.S().Errorw(errorCbeuResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbeuResponseParsingFailed, err)
+		return nil, err
+	}
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   rateItem.CurrencyCode + cbeuTo,
-            Rate:   s.toPrecise(rateItem.Value),
-            Source: cbeuSource,
-            Volume: 1,
-        })
+	return res, nil
+}
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cbeuTo + rateItem.CurrencyCode,
-            Rate:   s.toPrecise(1 / rateItem.Value),
-            Source: cbeuSource,
-            Volume: 1,
-        })
+func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 
-        c++
-        if c == ln {
-            break
-        }
-    }
+	if len(res.Data.Rates.Rates) == 0 {
+		return nil, errors.New(errorCbeuNoResults)
+	}
 
-    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+	var rates []interface{}
+
+	ln := len(s.cfg.SettlementCurrencies)
+	if s.contains(s.cfg.SettlementCurrenciesParsed, cbeuTo) {
+		ln--
+	}
+	c := 0
+
+	for _, rateItem := range res.Data.Rates.Rates {
+
+		if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+			continue
+		}
+
+		if rateItem.CurrencyCode == cbeuTo {
+			continue
+		}
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   rateItem.CurrencyCode + cbeuTo,
+			Rate:   s.toPrecise(rateItem.Value),
+			Source: cbeuSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cbeuTo + rateItem.CurrencyCode,
+			Rate:   s.toPrecise(1 / rateItem.Value),
+			Source: cbeuSource,
+			Volume: 1,
+		})
+
+		c++
+		if c == ln {
+			break
+		}
+	}
+
+	return rates, nil
 }

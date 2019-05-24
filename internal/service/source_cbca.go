@@ -1,137 +1,153 @@
 package service
 
 import (
-    "errors"
-    "fmt"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "go.uber.org/zap"
-    "net/http"
-    "time"
+	"errors"
+	"fmt"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"go.uber.org/zap"
+	"net/http"
+	"time"
 )
 
 const (
-    errorCbcaUrlValidationFailed   = "CBCA Rates url validation failed"
-    errorCbcaRequestFailed         = "CBCA Rates request failed"
-    errorCbcaResponseParsingFailed = "CBCA Rates response parsing failed"
-    errorCbcaSaveRatesFailed       = "CBCA Rates save data failed"
-    errorCbcaNoResults             = "CBCA Rates no results"
-    errorRateDataNotFound          = "CBCA Rate data not found"
-    errorRateDataInvalidFormat     = "CBCA Rate data has invalid format"
+	errorCbcaUrlValidationFailed   = "CBCA Rates url validation failed"
+	errorCbcaRequestFailed         = "CBCA Rates request failed"
+	errorCbcaResponseParsingFailed = "CBCA Rates response parsing failed"
+	errorCbcaProcessRatesFailed    = "CBCA Rates save data failed"
+	errorCbcaNoResults             = "CBCA Rates no results"
+	errorCbcaRateDataNotFound      = "CBCA Rate data not found"
+	errorCbcaRateDataInvalidFormat = "CBCA Rate data has invalid format"
 
-    cbcaTo          = "CAD"
-    cbcaSource      = "CBCA"
-    cbcaUrlTemplate = "https://www.bankofcanada.ca/valet/observations/group/FX_RATES_DAILY/json?start_date=%s"
+	cbcaTo          = "CAD"
+	cbcaSource      = "CBCA"
+	cbcaUrlTemplate = "https://www.bankofcanada.ca/valet/observations/group/FX_RATES_DAILY/json?start_date=%s"
 
-    cbcaKeyMask = "FX%s%s"
+	cbcaKeyMask = "FX%s%s"
 )
 
 type cbcaResponse struct {
-    Observations []map[string]interface{} `json:"observations"`
+	Observations []map[string]interface{} `json:"observations"`
 }
 
+// RequestRatesCbca - retriving current rates from Central bank of Canada
 func (s *Service) RequestRatesCbca() error {
-    zap.S().Info("Requesting rates from CBCA")
+	zap.S().Info("Requesting rates from CBCA")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationJSON,
-        HeaderAccept:      MIMEApplicationJSON,
-    }
+	resp, err := s.sendRequestCbca()
+	if err != nil {
+		return err
+	}
 
-    today := time.Now()
-    d := today.AddDate(0, 0, -7)
+	res, err := s.parseResponseCbca(resp)
+	if err != nil {
+		return err
+	}
 
-    reqUrl, err := s.validateUrl(fmt.Sprintf(cbcaUrlTemplate, d.Format(dateFormatLayout)))
-    if err != nil {
-        zap.S().Errorw(errorCbcaUrlValidationFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbcaUrlValidationFailed, err)
-        return err
-    }
+	rates, err := s.processRatesCbca(res)
+	if err != nil {
+		zap.S().Errorw(errorCbcaProcessRatesFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbcaProcessRatesFailed, err)
+		return err
+	}
 
-    zap.S().Info("Sending request to url: ", reqUrl.String())
+	err = s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+	if err != nil {
+		return err
+	}
 
-    resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
+	zap.S().Info("Rates from CBCA updated")
 
-    if err != nil {
-        zap.S().Errorw(errorCbcaRequestFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbcaRequestFailed, err)
-        return err
-    }
-
-    res := &cbcaResponse{}
-    err = s.decodeJson(resp, res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbcaResponseParsingFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbcaResponseParsingFailed, err)
-        return err
-    }
-
-    err = s.processRatesCbca(res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbcaSaveRatesFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbcaSaveRatesFailed, err)
-        return err
-    }
-
-    zap.S().Info("Rates from CBCA updated")
-
-    return nil
+	return nil
 }
 
-func (s *Service) processRatesCbca(res *cbcaResponse) error {
+func (s *Service) sendRequestCbca() (*http.Response, error) {
+	headers := map[string]string{
+		headerContentType: mimeApplicationJSON,
+		headerAccept:      mimeApplicationJSON,
+	}
 
-    if len(res.Observations) == 0 {
-        return errors.New(errorCbcaNoResults)
-    }
+	today := time.Now()
+	d := today.AddDate(0, 0, -7)
 
-    var rates []interface{}
+	reqUrl, err := s.validateUrl(fmt.Sprintf(cbcaUrlTemplate, d.Format(dateFormatLayout)))
+	if err != nil {
+		zap.S().Errorw(errorCbcaUrlValidationFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbcaUrlValidationFailed, err)
+		return nil, err
+	}
 
-    lastRates := res.Observations[len(res.Observations)-1]
+	resp, err := s.request(http.MethodGet, reqUrl.String(), nil, headers)
 
-    for _, cFrom := range s.cfg.SettlementCurrencies {
+	if err != nil {
+		zap.S().Errorw(errorCbcaRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbcaRequestFailed, err)
+		return nil, err
+	}
+	return resp, nil
+}
 
-        if cFrom == cbcaTo {
-            continue
-        }
+func (s *Service) parseResponseCbca(resp *http.Response) (*cbcaResponse, error) {
+	res := &cbcaResponse{}
+	err := s.decodeJson(resp, res)
 
-        key := fmt.Sprintf(cbcaKeyMask, cFrom, cbcaTo)
+	if err != nil {
+		zap.S().Errorw(errorCbcaResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbcaResponseParsingFailed, err)
+		return nil, err
+	}
 
-        // todo: CBCA not supported currency rate from DKK to CAD and PLN to CAD!
-        rateItem, ok := lastRates[key]
-        if !ok {
-            zap.S().Warnw(errorRateDataNotFound, "from", cFrom, "to", cbcaTo, "key", key)
-            // return errors.New(errorRateDataNotFound)
-            continue
-        }
+	return res, nil
+}
 
-        rawRate, ok := rateItem.(map[string]interface{})["v"]
-        if !ok {
-            return errors.New(errorRateDataInvalidFormat)
-        }
+func (s *Service) processRatesCbca(res *cbcaResponse) ([]interface{}, error) {
 
-        rate := rawRate.(float64)
+	if len(res.Observations) == 0 {
+		return nil, errors.New(errorCbcaNoResults)
+	}
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cFrom + cbcaTo,
-            Rate:   s.toPrecise(rate),
-            Source: cbcaSource,
-            Volume: 1,
-        })
+	var rates []interface{}
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cbcaTo + cFrom,
-            Rate:   s.toPrecise(1 / rate),
-            Source: cbcaSource,
-            Volume: 1,
-        })
-    }
+	lastRates := res.Observations[len(res.Observations)-1]
 
-    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+	for _, cFrom := range s.cfg.SettlementCurrencies {
+
+		if cFrom == cbcaTo {
+			continue
+		}
+
+		key := fmt.Sprintf(cbcaKeyMask, cFrom, cbcaTo)
+
+		// todo: CBCA not supported currency rate from DKK to CAD and PLN to CAD!
+		rateItem, ok := lastRates[key]
+		if !ok {
+			zap.S().Warnw(errorCbcaRateDataNotFound, "from", cFrom, "to", cbcaTo, "key", key)
+			// return errors.New(errorCbcaRateDataNotFound)
+			continue
+		}
+
+		rawRate, ok := rateItem.(map[string]interface{})["v"]
+		if !ok {
+			return nil, errors.New(errorCbcaRateDataInvalidFormat)
+		}
+
+		rate := rawRate.(float64)
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cFrom + cbcaTo,
+			Rate:   s.toPrecise(rate),
+			Source: cbcaSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cbcaTo + cFrom,
+			Rate:   s.toPrecise(1 / rate),
+			Source: cbcaSource,
+			Volume: 1,
+		})
+	}
+
+	return rates, nil
 }

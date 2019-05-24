@@ -13,7 +13,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/gogo/googleapis v1.2.0 // indirect
 	github.com/gogo/protobuf v1.2.1
-	github.com/golang-migrate/migrate/v4 v4.3.1 // indirect
+	github.com/golang-migrate/migrate/v4 v4.3.1
 	github.com/golang/protobuf v1.3.1
 	github.com/hashicorp/go-discover v0.0.0-20190408185603-6ccdb67f9b84 // indirect
 	github.com/hashicorp/hil v0.0.0-20190212132231-97b3a9cdfa93 // indirect

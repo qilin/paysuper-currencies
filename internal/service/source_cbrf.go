@@ -1,135 +1,152 @@
 package service
 
 import (
-    "encoding/xml"
-    "errors"
-    "github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
-    "go.uber.org/zap"
-    "net/http"
-    "strconv"
-    "strings"
+	"encoding/xml"
+	"errors"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"go.uber.org/zap"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 const (
-    errorCbrfRequestFailed         = "CBRF Rates request failed"
-    errorCbrfResponseParsingFailed = "CBRF Rates response parsing failed"
-    errorCbrfParseFloatError       = "CBRF Rates parse float error"
-    errorCbrfSaveRatesFailed       = "CBRF Rates save data failed"
-    errorCbrfNoResults             = "CBRF Rates no results"
+	errorCbrfRequestFailed         = "CBRF Rates request failed"
+	errorCbrfResponseParsingFailed = "CBRF Rates response parsing failed"
+	errorCbrfParseFloatError       = "CBRF Rates parse float error"
+	errorCbrfProcessRatesFailed    = "CBRF Rates save data failed"
+	errorCbrfNoResults             = "CBRF Rates no results"
 
-    cbrfTo     = "RUB"
-    cbrfSource = "CBRF"
-    cbrfUrl    = "http://www.cbr.ru/scripts/XML_daily.asp"
+	cbrfTo     = "RUB"
+	cbrfSource = "CBRF"
+	cbrfUrl    = "http://www.cbr.ru/scripts/XML_daily.asp"
 )
 
 type cbrfResponse struct {
-    XMLName xml.Name           `xml:"ValCurs"`
-    Rates   []cbrfResponseRate `xml:"Valute"`
+	XMLName xml.Name           `xml:"ValCurs"`
+	Rates   []cbrfResponseRate `xml:"Valute"`
 }
 
 type cbrfResponseRate struct {
-    XMLName      xml.Name `xml:"Valute"`
-    CurrencyCode string   `xml:"CharCode"`
-    Value        string   `xml:"Value"`
+	XMLName      xml.Name `xml:"Valute"`
+	CurrencyCode string   `xml:"CharCode"`
+	Value        string   `xml:"Value"`
 }
 
+// RequestRatesCbrf - retriving current rates from Central bank of Russia
 func (s *Service) RequestRatesCbrf() error {
-    zap.S().Info("Requesting rates from CBRF")
+	zap.S().Info("Requesting rates from CBRF")
 
-    headers := map[string]string{
-        HeaderContentType: MIMEApplicationXML,
-        HeaderAccept:      MIMEApplicationXML,
-    }
+	resp, err := s.sendRequestCbrf()
+	if err != nil {
+		return err
+	}
 
-    zap.S().Info("Sending request to url: ", cbrfUrl)
+	res, err := s.parseResponseCbrf(resp)
+	if err != nil {
+		return err
+	}
 
-    // here may be 302 redirect in answer - https://toster.ru/q/149039
-    resp, err := s.request(http.MethodGet, cbrfUrl, nil, headers)
+	rates, err := s.processRatesCbrf(res)
+	if err != nil {
+		zap.S().Errorw(errorCbrfProcessRatesFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbrfProcessRatesFailed, err)
+		return err
+	}
 
-    if err != nil {
-        zap.S().Errorw(errorCbrfRequestFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbrfRequestFailed, err)
-        return err
-    }
+	err = s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
+	if err != nil {
+		return err
+	}
 
-    res := &cbrfResponse{}
-    err = s.decodeXml(resp, res)
+	zap.S().Info("Rates from CBRF updated")
 
-    if err != nil {
-        zap.S().Errorw(errorCbrfResponseParsingFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbrfResponseParsingFailed, err)
-        return err
-    }
-
-    err = s.processRatesCbrf(res)
-
-    if err != nil {
-        zap.S().Errorw(errorCbrfSaveRatesFailed, "error", err)
-        s.sendCentrifugoMessage(errorCbrfSaveRatesFailed, err)
-        return err
-    }
-
-    zap.S().Info("Rates from CBRF updated")
-
-    return nil
+	return nil
 }
 
-func (s *Service) processRatesCbrf(res *cbrfResponse) error {
+func (s *Service) sendRequestCbrf() (*http.Response, error) {
+	headers := map[string]string{
+		headerContentType: mimeApplicationXML,
+		headerAccept:      mimeApplicationXML,
+	}
 
-    if len(res.Rates) == 0 {
-        return errors.New(errorCbrfNoResults)
-    }
+	// here may be 302 redirect in answer - https://toster.ru/q/149039
+	resp, err := s.request(http.MethodGet, cbrfUrl, nil, headers)
 
-    var rates []interface{}
+	if err != nil {
+		zap.S().Errorw(errorCbrfRequestFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbrfRequestFailed, err)
+		return nil, err
+	}
 
-    ln := len(s.cfg.SettlementCurrencies)
-    if s.contains(s.cfg.SettlementCurrenciesParsed, cbrfTo) {
-        ln--
-    }
-    c := 0
+	return resp, nil
+}
 
-    for _, rateItem := range res.Rates {
+func (s *Service) parseResponseCbrf(resp *http.Response) (*cbrfResponse, error) {
+	res := &cbrfResponse{}
+	err := s.decodeXml(resp, res)
 
-        if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
-            continue
-        }
+	if err != nil {
+		zap.S().Errorw(errorCbrfResponseParsingFailed, "error", err)
+		s.sendCentrifugoMessage(errorCbrfResponseParsingFailed, err)
+		return nil, err
+	}
 
-        if rateItem.CurrencyCode == cbrfTo {
-            continue
-        }
+	return res, nil
+}
 
-        var rate float64
-        rateStr := strings.Replace(rateItem.Value, ",", ".", -1)
-        rate, err := strconv.ParseFloat(rateStr, 64)
-        if err != nil {
-            return errors.New(errorCbrfParseFloatError)
-        }
+func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 
-        // direct pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   rateItem.CurrencyCode + cbrfTo,
-            Rate:   s.toPrecise(rate),
-            Source: cbrfSource,
-            Volume: 1,
-        })
+	if len(res.Rates) == 0 {
+		return nil, errors.New(errorCbrfNoResults)
+	}
 
-        // inverse pair
-        rates = append(rates, &currencies.RateData{
-            Pair:   cbrfTo + rateItem.CurrencyCode,
-            Rate:   s.toPrecise(1 / rate),
-            Source: cbrfSource,
-            Volume: 1,
-        })
+	var rates []interface{}
 
-        c++
-        if c == ln {
-            break
-        }
-    }
+	ln := len(s.cfg.SettlementCurrencies)
+	if s.contains(s.cfg.SettlementCurrenciesParsed, cbrfTo) {
+		ln--
+	}
+	c := 0
 
-    err := s.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-    if err != nil {
-        return err
-    }
-    return nil
+	for _, rateItem := range res.Rates {
+
+		if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+			continue
+		}
+
+		if rateItem.CurrencyCode == cbrfTo {
+			continue
+		}
+
+		var rate float64
+		rateStr := strings.Replace(rateItem.Value, ",", ".", -1)
+		rate, err := strconv.ParseFloat(rateStr, 64)
+		if err != nil {
+			return nil, errors.New(errorCbrfParseFloatError)
+		}
+
+		// direct pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   rateItem.CurrencyCode + cbrfTo,
+			Rate:   s.toPrecise(rate),
+			Source: cbrfSource,
+			Volume: 1,
+		})
+
+		// inverse pair
+		rates = append(rates, &currencies.RateData{
+			Pair:   cbrfTo + rateItem.CurrencyCode,
+			Rate:   s.toPrecise(1 / rate),
+			Source: cbrfSource,
+			Volume: 1,
+		})
+
+		c++
+		if c == ln {
+			break
+		}
+	}
+
+	return rates, nil
 }
