@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/InVisionApp/go-health"
 	"github.com/InVisionApp/go-health/handlers"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	k8s "github.com/micro/kubernetes/go/micro"
@@ -30,6 +33,20 @@ func main() {
 	if err != nil {
 		logger.Fatal("Config init failed with error", zap.Error(err))
 	}
+
+	migrations, err := migrate.New("file://./migrations", cfg.MongoDsn)
+
+	if err != nil {
+		logger.Fatal("Migrations initialization failed", zap.Error(err))
+	}
+
+	err = migrations.Up()
+
+	if err != nil && err != migrate.ErrNoChange && err != migrate.ErrNilVersion {
+		logger.Fatal("Migrations processing failed", zap.Error(err))
+	}
+
+	logger.Info("db migrations applied")
 
 	db, err := database.NewDatabase()
 	if err != nil {
