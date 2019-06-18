@@ -15,6 +15,6 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 WORKDIR /application/
 COPY --from=builder /application/app .
-COPY --from=builder /application/migration ./migration
+COPY --from=builder /application/migrations ./migrations
 
 ENTRYPOINT ["./app"]
