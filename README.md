@@ -16,7 +16,7 @@ This service designed for sync currencies rates and store it locally with histor
 | BROKER_RETRY_TIMEOUT                 | -        | 60                       | RabbitMQ broker retry timeout                                                       |
 | BROKER_MAX_RETRY                     | -        | 5                        | RabbitMQ broker max retry count                                                     |
 | CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo url                                                                      |
-| CENTRIFUGO_KEY                       | true     | -                        | Centrifugo secret key                                                               |
+| CENTRIFUGO_SECRET                    | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin           | Centrifugo channel name to send alert notifications to admins                       |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
 | MICRO_REGISTRY                       | -        | -                        | Microservices registry                                                              |
