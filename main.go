@@ -141,7 +141,7 @@ func main() {
 	if err != nil {
 		logger.Fatal("Health check register failed", zap.Error(err))
 	}
-	router.HandleFunc("/health", handlers.NewJSONHandlerFunc(h, nil))
+	router.HandleFunc("/_healthz", handlers.NewJSONHandlerFunc(h, nil))
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.MetricsPort),
