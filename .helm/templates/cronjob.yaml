@@ -1,15 +1,15 @@
-{{- $job := .Values.backend -}}
-{{- $jobName := printf "%s-%s" .Release.Name $job.name }}
+{{- $deployment := .Values.backend -}}
+{{- $deploymentName := printf "%s-%s" .Release.Name $deployment.name }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ $deploymentName }}
   labels:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    role: {{ $job.role }}
+    role: {{ $deployment.role }}
   annotations: 
     released: {{ .Release.Time }} 
 spec:
@@ -20,7 +20,7 @@ spec:
         spec:
           containers:
           - name: {{ .Release.Name }}
-            image: {{ $job.image }}:{{ $job.imageTag }}
+            image: {{ $deployment.image }}:{{ $deployment.imageTag }}
             command: ["/application/app"]
             args: ["-source=oxr"]
             env:
@@ -28,7 +28,7 @@ spec:
             - name: {{ . }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ $jobName }}-env
+                  name: {{ $deploymentName }}-env
                   key: {{ . }}
             {{- end }}
           restartPolicy: OnFailure 
