@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/paysuper/paysuper-currencies.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-currencies) 
 [![codecov](https://codecov.io/gh/paysuper/paysuper-currencies/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-currencies)
 [![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-currencies)](https://goreportcard.com/report/github.com/paysuper/paysuper-currencies)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=paysuper_paysuper-currencies&metric=alert_status)](https://sonarcloud.io/dashboard?id=paysuper_paysuper-currencies)
 
 This service designed for sync currencies rates and store it locally with history of changes
 
