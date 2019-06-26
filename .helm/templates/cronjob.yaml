@@ -22,7 +22,7 @@ spec:
           - name: "{{ .Release.Name }}-cronjob"
             image: {{ $deployment.image }}:{{ $deployment.imageTag }}
             command: ["/application/app"]
-            args: ["-source=oxr"]
+            args: ["-source=centralbanks"]
             env:
             {{- range .Values.backend.env }}
             - name: {{ . }}
