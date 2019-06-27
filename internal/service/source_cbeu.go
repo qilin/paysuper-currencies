@@ -16,6 +16,7 @@ const (
 	errorCbeuResponseParsingFailed = "CBEU Rates response parsing failed"
 	errorCbeuProcessRatesFailed    = "CBEU Rates save data failed"
 	errorCbeuNoResults             = "CBEU Rates no results"
+	errorCbeuRateDataNotFound      = "CBEU Rate data not found"
 
 	cbeuTo          = "EUR"
 	cbeuSource      = "CBEU"
@@ -123,7 +124,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 	if s.contains(s.cfg.SettlementCurrenciesParsed, cbeuTo) {
 		ln--
 	}
-	c := 0
+	counter := make(map[string]bool, ln)
 
 	for _, rateItem := range res.Data.Rates.Rates {
 
@@ -151,9 +152,18 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 			Volume: 1,
 		})
 
-		c++
-		if c == ln {
+		counter[rateItem.CurrencyCode] = true
+		if len(counter) == ln {
 			break
+		}
+	}
+
+	for _, cFrom := range s.cfg.SettlementCurrencies {
+		if cFrom == cbauTo {
+			continue
+		}
+		if _, ok := counter[cFrom]; !ok {
+			zap.S().Warnw(errorCbeuRateDataNotFound, "from", cFrom, "to", cbauTo)
 		}
 	}
 

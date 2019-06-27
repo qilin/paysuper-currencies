@@ -117,11 +117,10 @@ func (s *Service) processRatesCbca(res *cbcaResponse) ([]interface{}, error) {
 
 		key := fmt.Sprintf(cbcaKeyMask, cFrom, cbcaTo)
 
-		// todo: CBCA not supported currency rate from DKK to CAD and PLN to CAD!
+		// CBCA not supported currency rate from DKK to CAD and PLN to CAD!
 		rateItem, ok := lastRates[key]
 		if !ok {
 			zap.S().Warnw(errorCbcaRateDataNotFound, "from", cFrom, "to", cbcaTo, "key", key)
-			// return errors.New(errorCbcaRateDataNotFound)
 			continue
 		}
 

@@ -13,6 +13,7 @@ const (
 	errorCbplResponseParsingFailed = "CBPL Rates response parsing failed"
 	errorCbplProcessRatesFailed    = "CBPL Rates save data failed"
 	errorCbplNoResults             = "CBPL Rates no results"
+	errorCbplRateDataNotFound      = "CBPL Rate data not found"
 
 	cbplTo     = "PLN"
 	cbplSource = "CBPL"
@@ -101,7 +102,7 @@ func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 	if s.contains(s.cfg.SettlementCurrenciesParsed, cbplTo) {
 		ln--
 	}
-	c := 0
+	counter := make(map[string]bool, ln)
 
 	for _, rateItem := range res.Rates {
 
@@ -131,9 +132,18 @@ func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 			Volume: 1,
 		})
 
-		c++
-		if c == ln {
+		counter[rateItem.CurrencyCode] = true
+		if len(counter) == ln {
 			break
+		}
+	}
+
+	for _, cFrom := range s.cfg.SettlementCurrencies {
+		if cFrom == cbauTo {
+			continue
+		}
+		if _, ok := counter[cFrom]; !ok {
+			zap.S().Warnw(errorCbplRateDataNotFound, "from", cFrom, "to", cbauTo)
 		}
 	}
 

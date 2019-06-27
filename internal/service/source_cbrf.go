@@ -16,6 +16,7 @@ const (
 	errorCbrfParseFloatError       = "CBRF Rates parse float error"
 	errorCbrfProcessRatesFailed    = "CBRF Rates save data failed"
 	errorCbrfNoResults             = "CBRF Rates no results"
+	errorCbrfRateDataNotFound      = "CBRF Rate data not found"
 
 	cbrfTo     = "RUB"
 	cbrfSource = "CBRF"
@@ -107,7 +108,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 	if s.contains(s.cfg.SettlementCurrenciesParsed, cbrfTo) {
 		ln--
 	}
-	c := 0
+	counter := make(map[string]bool, ln)
 
 	for _, rateItem := range res.Rates {
 
@@ -142,9 +143,18 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 			Volume: 1,
 		})
 
-		c++
-		if c == ln {
+		counter[rateItem.CurrencyCode] = true
+		if len(counter) == ln {
 			break
+		}
+	}
+
+	for _, cFrom := range s.cfg.SettlementCurrencies {
+		if cFrom == cbauTo {
+			continue
+		}
+		if _, ok := counter[cFrom]; !ok {
+			zap.S().Warnw(errorCbrfRateDataNotFound, "from", cFrom, "to", cbauTo)
 		}
 	}
 
