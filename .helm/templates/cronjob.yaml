@@ -3,7 +3,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ .Release.Name }}
+  name: "{{ .Release.Name }}-oxr"
   labels:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -19,7 +19,40 @@ spec:
       template:
         spec:
           containers:
-          - name: "{{ .Release.Name }}-cronjob"
+          - name: "{{ .Release.Name }}-oxr"
+            image: {{ $deployment.image }}:{{ $deployment.imageTag }}
+            command: ["/application/app"]
+            args: ["-source=oxr"]
+            env:
+            {{- range .Values.backend.env }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $deploymentName }}-env
+                  key: {{ . }}
+            {{- end }}
+          restartPolicy: OnFailure 
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "{{ .Release.Name }}-cb"
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: {{ $deployment.role }}
+  annotations: 
+    released: {{ .Release.Time }} 
+spec:
+  schedule: 0 8 * * *
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: "{{ .Release.Name }}-cb"
             image: {{ $deployment.image }}:{{ $deployment.imageTag }}
             command: ["/application/app"]
             args: ["-source=centralbanks"]
