@@ -11,13 +11,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
-	k8s "github.com/micro/kubernetes/go/micro"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/internal/service"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-database-mongo"
-	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -183,14 +181,9 @@ func main() {
 		}),
 	}
 
-	if cfg.MicroRegistry == constant.RegistryKubernetes {
-		ms = k8s.NewService(options...)
-		logger.Info("Initialize k8s service")
-	} else {
-		ms = micro.NewService(options...)
-		logger.Info("Initialize micro service")
-	}
+	logger.Info("Initialize micro service")
 
+	ms = micro.NewService(options...)
 	ms.Init()
 
 	err = currencies.RegisterCurrencyratesServiceHandler(ms.Server(), cs)

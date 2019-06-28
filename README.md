@@ -20,7 +20,6 @@ This service designed for sync currencies rates and store it locally with histor
 | CENTRIFUGO_SECRET                    | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin           | Centrifugo channel name to send alert notifications to admins                       |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
-| MICRO_REGISTRY                       | -        | -                        | Microservices registry                                                              |
 | OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
 | BOLLINGER_DAYS                       | -        | 7                        | Number of days for plot Bollinger functions to calculate Paysuper Prediction Rates  |
 | BOLLINGER_PERIOD                     | -        | 21                       | Number of days in period for each Bollinger function                                |
