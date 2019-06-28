@@ -22,7 +22,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/micro/go-micro v0.26.1
 	github.com/micro/go-plugins v0.25.0
-	github.com/micro/kubernetes v0.7.0
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/paysuper/paysuper-database-mongo v0.1.0
 	github.com/paysuper/paysuper-recurring-repository v1.0.104
