@@ -24,8 +24,6 @@ This service designed for sync currencies rates and store it locally with histor
 | BOLLINGER_DAYS                       | -        | 7                        | Number of days for plot Bollinger functions to calculate Paysuper Prediction Rates  |
 | BOLLINGER_PERIOD                     | -        | 21                       | Number of days in period for each Bollinger function                                |
 
-
-
 ## Starting the app
 
 This application can be started in 2 modes:
@@ -67,3 +65,12 @@ Where
 * `rate` - currency pair rate
 * `source` - code of rates source
 * `volume` - volume of excanhges, made for this rate, optional, 0 by default
+
+## Contributing
+We feel that a welcoming community is important and we ask that you follow PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.
+
+PaySuper welcomes contributions from anyone and everyone. Please refer to each project's style and contribution guidelines for submitting patches and additions. In general, we follow the "fork-and-pull" Git workflow.
+
+The master branch of this repository contains the latest stable release of this component.
+
+ 
