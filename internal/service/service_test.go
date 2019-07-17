@@ -44,7 +44,7 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 	assert.NoError(suite.T(), err, "Config load failed")
 
 	m, err := migrate.New(
-		"file://../../migrations",
+		"file://../../migrations/tests",
 		suite.config.MongoDsn)
 	assert.NoError(suite.T(), err, "Migrate init failed")
 

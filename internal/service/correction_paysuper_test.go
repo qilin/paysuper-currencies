@@ -84,6 +84,8 @@ func (suite *CurrenciesratesServiceTestSuite) fillFakes(fakerates []float64, cFr
 	if err != nil {
 		return err
 	}
+	_, err = suite.service.db.Collection(cName).RemoveAll(nil)
+	assert.NoError(suite.T(), err)
 	return suite.service.db.Collection(cName).Insert(fakes...)
 }
 

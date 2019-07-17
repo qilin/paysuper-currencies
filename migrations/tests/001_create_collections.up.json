@@ -1,0 +1,29 @@
+[
+  {
+    "create": "currency_rates_oxr"
+  },
+  {
+    "create": "currency_rates_paysuper"
+  },
+  {
+    "create": "currency_rates_centralbanks"
+  },
+  {
+    "create": "currency_rates_stock"
+  },
+  {
+    "create": "currency_rates_cardpay"
+  },
+  {
+    "create": "paysuper_corrections"
+  },
+  {
+    "create": "paysuper_corridors"
+  },
+  {
+    "create": "correction_rules"
+  },
+  {
+    "create": "triggers"
+  }
+]
