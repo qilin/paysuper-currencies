@@ -55,6 +55,8 @@ func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 
 // CalculatePaysuperCorrections - calculates paysuper corrections for all settlement сurrencies
 func (s *Service) CalculatePaysuperCorrections() error {
+	zap.S().Info("Start calculation of Paysuper corrections")
+
 	days := s.cfg.BollingerDays
 	if days < 1 {
 		zap.S().Errorw(errorInvalidBollingerDays, "days", days)
@@ -124,6 +126,8 @@ func (s *Service) CalculatePaysuperCorrections() error {
 		zap.S().Errorw(errorReleaseTrigger, "error", err, "trigger", triggerCardpay)
 		return err
 	}
+
+	zap.S().Info("Paysuper corrections calculated")
 
 	return nil
 }

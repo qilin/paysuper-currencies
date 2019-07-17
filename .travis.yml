@@ -21,7 +21,6 @@ jobs:
         - GO111MODULE=on
         - MONGO_DSN=mongodb://127.0.0.1:27017/currency_rates_test
         - CENTRIFUGO_SECRET=some-key
-        - OXR_APP_ID=some-app-id
       install: true
       script:
         - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
@@ -38,3 +37,6 @@ jobs:
           -e JENKINS_BUILD_PROJECT=$TRAVIS_REPO_SLUG
           -e JENKINS_BUILD_BRANCH=$TRAVIS_BRANCH
           p1hub/p1jenkinstrigger
+env:
+  global:
+    secure: ClZ4OJDSIPJE4NaBwMhRRr3bfLDLNKXnGYwaplUt1TfW5uhIPmFaspd9gdfyUejgvpfmbJu4faGsfE01xpn5ZNdc125sKXrGMgqGSYfuK7bLwYaN2+5cFL2z14d58S4u3NI4TnIHj6kSC01Vnqo0NtBkN4y1bh4u+rMQJq/HpE5GeRoI6Is58UEfcg4Hkma0pibkVZmPdmlOxJ+manI4Jg/K44SJz4NpxQ/S0fUlZnliTItMcGuHZHmqrqbpmZ0Fv/Isbz8iw1aoDy21iA3yDOkOAt8jyludXaHXfKxs9WQrC8EaPI9LQIU84/+GvUWw7roUkHAfN+TQQKJtNTGH51jnrQ/wsHj5C7BjSo7+pdy7KEZ/aYvYxlGMSObftD4x80Yq3UsA+M20rFfnx28wbYJ6tJNYt4JBHkMnnNksqbZhvQEusahu1AUf+24ghysRjd0CJmvBUg8/eB0yCKX8aYThHXYur/wjKNSh6YCUZI3fzm5B+swfOJ2akj7PlNHtwpIcBN1YNmAFZKMZPYYI2YeHKanUIJItOriAckGn/9d4puNpE1oAwLFuy6W5zlmWV0qDKXKd1FdeaPraW8f5npST/OeovomlYDcZqQxZs6Sc+R/2KIDaKlEvfMJS60oMUEt4iqI9ZmxHcZTG14i4YZoBvWFXyGr3/84igj/1eR8=

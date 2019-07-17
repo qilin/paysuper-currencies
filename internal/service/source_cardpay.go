@@ -10,11 +10,15 @@ import (
 const (
 	errorCardpaySaveRatesFailed = "Cardpay Rates save data failed"
 
-	cardpaySource = "CARDPAY"
+	cardpaySource     = "CARDPAY"
+	cardpayStubSource = "CPSTUB"
 )
 
 // SetRatesCardpay - saving rates for Cardpay, getted from messages queue
 func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery) error {
+
+	zap.S().Warn("Remove Cardpay settlements stub!")
+
 	id := msg.From + msg.To + msg.Source
 
 	zap.S().Info("Saving rates from Cardpay: ", id)
@@ -38,6 +42,7 @@ func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery
 
 	zap.S().Info("Rates from Cardpay saved: ", id)
 	return nil
+
 }
 
 // PullRecalcTrigger - switching-On trigger to recalc Paysuper Corrections after get message form special queue
