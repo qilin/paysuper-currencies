@@ -4,7 +4,7 @@
 backend:
   name: gobackend
   role: gobackend
-  image: "p1hub/pscurrencies"
+  image: "p1hub/paysupercurrencies"
   imageTag: latest
   port: 8080
   healthPort: 8081
