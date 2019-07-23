@@ -479,6 +479,9 @@ func (s *Service) exchangeCurrency(
 
 	res.ExchangedAmount = s.toPrecise(amount * res.ExchangeRate)
 
+	zap.S().Infow("exchange currency", "from", from, "to", to, "amount", amount,
+		"rateType", rateType, "merchantId", merchantId, "query", query, "res", res)
+
 	return nil
 }
 
