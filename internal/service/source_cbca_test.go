@@ -29,13 +29,13 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesCbca_Ok() {
 			source = stubSource
 		}
 
-		err = suite.service.getRate(pkg.RateTypeCentralbanks, from, cbcaTo, bson.M{}, res)
+		err = suite.service.getRate(pkg.RateTypeCentralbanks, from, cbcaTo, bson.M{}, source, res)
 		assert.NoError(suite.T(), err)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), res.Pair, from+cbcaTo)
 		assert.Equal(suite.T(), res.Source, source)
 
-		err = suite.service.getRate(pkg.RateTypeCentralbanks, cbcaTo, from, bson.M{}, res)
+		err = suite.service.getRate(pkg.RateTypeCentralbanks, cbcaTo, from, bson.M{}, source, res)
 		assert.NoError(suite.T(), err)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), res.Pair, cbcaTo+from)

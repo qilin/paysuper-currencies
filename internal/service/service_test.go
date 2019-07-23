@@ -49,7 +49,9 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 	assert.NoError(suite.T(), err, "Migrate init failed")
 
 	err = m.Up()
-	assert.NoError(suite.T(), err, "Migrations failed")
+	if err != nil && err.Error() != "no change" {
+		suite.FailNow("Migrations failed", "%v", err)
+	}
 
 	db, err := database.NewDatabase()
 	assert.NoError(suite.T(), err, "Db connection failed")
@@ -372,7 +374,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
 	// requesting exchange
-	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, bson.M{}, res)
+	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, bson.M{}, "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
@@ -383,23 +385,23 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
 func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Fail() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
-	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "BLA", "USD", 100, "", bson.M{}, res)
+	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "BLA", "USD", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorFromCurrencyNotSupported)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "", 100, "", bson.M{}, res)
+	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", -1, "", bson.M{}, res)
+	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", -1, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorInvalidExchangeAmount)
 
-	err = suite.service.exchangeCurrency("bla-bla", "USD", "RUB", 100, "", bson.M{}, res)
+	err = suite.service.exchangeCurrency("bla-bla", "USD", "RUB", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "EUR", 100, "", bson.M{}, res)
+	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "EUR", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 }
@@ -409,7 +411,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrencyByDate_Ok() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
 	// requesting exchange
-	err := suite.service.exchangeCurrencyByDate(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, time.Now(), res)
+	err := suite.service.exchangeCurrencyByDate(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, time.Now(), "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))

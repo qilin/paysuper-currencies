@@ -24,7 +24,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_SetRatesCardpay_Ok() {
 
 	res := &currencies.RateData{}
 
-	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, res)
+	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 
 	msg := &currencies.CardpayRate{
@@ -41,7 +41,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_SetRatesCardpay_Ok() {
 	err = suite.service.SetRatesCardpay(msg, dlv)
 	assert.NoError(suite.T(), err)
 
-	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, res)
+	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(rate1))
 	assert.Equal(suite.T(), res.Pair, from+to)
@@ -63,7 +63,7 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_SetRatesCardpay_Ok() {
 	midRate := suite.service.toPrecise(float64((rate1*volume1 + rate2*volume2) / (volume1 + volume2)))
 	midRateCtrl := suite.service.toPrecise(float64(0.8363636364))
 
-	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, res)
+	err = suite.service.getRate(pkg.RateTypeCardpay, from, to, bson.M{}, "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.Rate, midRate)
 	assert.Equal(suite.T(), res.Rate, midRateCtrl)

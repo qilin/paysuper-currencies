@@ -64,7 +64,7 @@ func (s *Service) SetRatesPaysuper() error {
 func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateData, error) {
 	res := &currencies.RateData{}
 
-	err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
+	err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, "", res)
 	if err != nil {
 		return nil, err
 	}

@@ -61,6 +61,8 @@ message GetRateCurrentCommonRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
 }
 
 message GetRateByDateCommonRequest {
@@ -70,8 +72,10 @@ message GetRateByDateCommonRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     //@inject_tag: validate:"required"
-    google.protobuf.Timestamp datetime = 4;
+    google.protobuf.Timestamp datetime = 5;
 }
 
 message GetRateCurrentForMerchantRequest {
@@ -81,8 +85,10 @@ message GetRateCurrentForMerchantRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 4;
+    string merchant_id = 5;
 }
 
 message GetRateByDateForMerchantRequest {
@@ -92,10 +98,12 @@ message GetRateByDateForMerchantRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbank stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     //@inject_tag: validate:"required"
-    google.protobuf.Timestamp datetime = 4;
+    google.protobuf.Timestamp datetime = 5;
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 5;
+    string merchant_id = 6;
 }
 
 message RateData {
@@ -186,8 +194,10 @@ message ExchangeCurrencyCurrentCommonRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     // @inject_tag: validate:"numeric,gte=0"
-    double amount = 4;
+    double amount = 5;
 }
 
 message ExchangeCurrencyCurrentForMerchantRequest {
@@ -197,10 +207,12 @@ message ExchangeCurrencyCurrentForMerchantRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     // @inject_tag: validate:"numeric,gte=0"
-    double amount = 4;
+    double amount = 5;
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 5;
+    string merchant_id = 6;
 }
 
 message ExchangeCurrencyByDateCommonRequest {
@@ -210,10 +222,12 @@ message ExchangeCurrencyByDateCommonRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 5;
     // @inject_tag: validate:"numeric,gte=0"
-    double amount = 4;
+    double amount = 6;
     //@inject_tag: validate:"required"
-    google.protobuf.Timestamp datetime = 5;
+    google.protobuf.Timestamp datetime = 7;
 }
 
 message ExchangeCurrencyByDateForMerchantRequest {
@@ -223,12 +237,14 @@ message ExchangeCurrencyByDateForMerchantRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
     string rate_type = 3;
+    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
+    string source = 4;
     // @inject_tag: validate:"numeric,gte=0"
-    double amount = 4;
+    double amount = 5;
     //@inject_tag: validate:"omitempty,hexadecimal,len=24"
-    string merchant_id = 5;
+    string merchant_id = 6;
     //@inject_tag: validate:"required"
-    google.protobuf.Timestamp datetime = 6;
+    google.protobuf.Timestamp datetime = 7;
 }
 
 message ExchangeCurrencyResponse {

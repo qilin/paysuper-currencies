@@ -72,7 +72,7 @@ func (s *Service) SetRatesStock() error {
 func (s *Service) getRateStock(cFrom string, cTo string, rule *currencies.CorrectionRule) (*currencies.RateData, error) {
 	res := &currencies.RateData{}
 
-	err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, res)
+	err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, "", res)
 	if err != nil {
 		return nil, err
 	}

@@ -40,6 +40,8 @@ type Config struct {
 	SupportedCurrenciesParsed    map[string]bool
 	SettlementCurrenciesParsed   map[string]bool
 	RatesRequestCurrenciesParsed map[string]bool
+
+	OxrRatesDirectPairs map[string]bool
 }
 
 // NewConfig return new config
@@ -90,6 +92,13 @@ func NewConfig() (*Config, error) {
 	cfg.RatesRequestCurrenciesParsed = make(map[string]bool, len(cfg.RatesRequestCurrencies))
 	for _, v := range cfg.RatesRequestCurrencies {
 		cfg.RatesRequestCurrenciesParsed[v] = true
+	}
+
+	cfg.OxrRatesDirectPairs = make(map[string]bool)
+	for _, from := range cfg.SettlementCurrencies {
+		for _, to := range cfg.RatesRequestCurrencies {
+			cfg.OxrRatesDirectPairs[from+to] = true
+		}
 	}
 
 	return cfg, err

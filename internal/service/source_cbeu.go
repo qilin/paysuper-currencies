@@ -138,7 +138,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 
 		// direct pair
 		rates = append(rates, &currencies.RateData{
-			Pair:   rateItem.CurrencyCode + cbeuTo,
+			Pair:   cbeuTo + rateItem.CurrencyCode,
 			Rate:   s.toPrecise(rateItem.Value),
 			Source: cbeuSource,
 			Volume: 1,
@@ -146,7 +146,7 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 
 		// inverse pair
 		rates = append(rates, &currencies.RateData{
-			Pair:   cbeuTo + rateItem.CurrencyCode,
+			Pair:   rateItem.CurrencyCode + cbeuTo,
 			Rate:   s.toPrecise(1 / rateItem.Value),
 			Source: cbeuSource,
 			Volume: 1,

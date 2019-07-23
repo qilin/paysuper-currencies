@@ -60,6 +60,18 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 	err = suite.service.saveRates(collectionRatesNameSuffixOxr, rates)
 	assert.NoError(suite.T(), err)
 
+	oxrr = &oxrResponse{
+		Base: "AUD",
+		Rates: map[string]float64{
+			"USD": 1 / usdrate,
+		},
+	}
+	rates, err = suite.service.processRatesOxr(oxrr)
+	assert.NoError(suite.T(), err)
+
+	err = suite.service.saveRates(collectionRatesNameSuffixOxr, rates)
+	assert.NoError(suite.T(), err)
+
 	err = suite.service.GetRateCurrentCommon(context.TODO(), req1, res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.Pair, "USDAUD")
@@ -87,18 +99,18 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesOxr_Ok() {
 	for _, from := range suite.config.SettlementCurrencies {
 		for _, to := range suite.config.RatesRequestCurrencies {
 
-			source := oxrSource
+			source := cbrfSource
 			if from == to {
 				source = stubSource
 			}
 
-			err = suite.service.getRate(pkg.RateTypeCentralbanks, from, to, bson.M{}, res)
+			err = suite.service.getRate(pkg.RateTypeCentralbanks, from, to, bson.M{}, cbrfSource, res)
 			assert.NoError(suite.T(), err)
 			assert.True(suite.T(), res.Rate > 0)
 			assert.Equal(suite.T(), res.Pair, from+to)
 			assert.Equal(suite.T(), res.Source, source)
 
-			err = suite.service.getRate(pkg.RateTypeCentralbanks, to, from, bson.M{}, res)
+			err = suite.service.getRate(pkg.RateTypeCentralbanks, to, from, bson.M{}, cbrfSource,  res)
 			assert.NoError(suite.T(), err)
 			assert.True(suite.T(), res.Rate > 0)
 			assert.Equal(suite.T(), res.Pair, to+from)
