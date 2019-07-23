@@ -40,6 +40,7 @@ const (
 	errorDbInsertFailed           = "insert rate to db failed"
 	errorDbReqInvalid             = "attempt to insert invalid structure to db"
 	errorFromCurrencyNotSupported = "from currency not supported"
+	errorSourceNotSupported       = "source not supported"
 	errorToCurrencyNotSupported   = "to currency not supported"
 	errorRateTypeInvalid          = "rate type invalid"
 	errorCurrencyPairNotExists    = "currency pair is not exists"
@@ -85,6 +86,16 @@ const (
 	triggerCardpay = 1
 
 	stubSource = "STUB"
+)
+
+var (
+	availableCentralbanksSources = map[string]bool{
+		cbeuSource: true,
+		cbauSource: true,
+		cbcaSource: true,
+		cbplSource: true,
+		cbrfSource: true,
+	}
 )
 
 type trigger struct {
@@ -324,11 +335,11 @@ func (s *Service) contains(slice map[string]bool, item string) bool {
 	return ok
 }
 
-func (s *Service) getRateByDate(collectionRatesNameSuffix string, from string, to string, date time.Time, res *currencies.RateData) error {
-	return s.getRate(collectionRatesNameSuffix, from, to, s.getByDateQuery(date), res)
+func (s *Service) getRateByDate(collectionRatesNameSuffix string, from string, to string, date time.Time, source string, res *currencies.RateData) error {
+	return s.getRate(collectionRatesNameSuffix, from, to, s.getByDateQuery(date), source, res)
 }
 
-func (s *Service) getRate(collectionRatesNameSuffix string, from string, to string, query bson.M, res *currencies.RateData) error {
+func (s *Service) getRate(collectionRatesNameSuffix string, from string, to string, query bson.M, source string, res *currencies.RateData) error {
 
 	var err error
 
@@ -355,6 +366,7 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 	query["pair"] = pair
 
 	isCardpay := collectionRatesNameSuffix == pkg.RateTypeCardpay
+	isCentralbank := collectionRatesNameSuffix == pkg.RateTypeCentralbanks
 
 	cName, err := s.getCollectionName(collectionRatesNameSuffix)
 	if err != nil {
@@ -390,15 +402,24 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 		res.Source = cardpaySource
 
 	} else {
+		if isCentralbank {
+			source = strings.ToUpper(source)
+			if _, ok := availableCentralbanksSources[source]; !ok {
+				return errors.New(errorSourceNotSupported)
+			}
+			query["source"] = source
+		}
+
 		err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
 
 		// requested pair is not found in central banks rates
 		// try to fallback to OXR rate for it
-		if err == mgo.ErrNotFound && collectionRatesNameSuffix == pkg.RateTypeCentralbanks {
+		if err == mgo.ErrNotFound && isCentralbank {
 			cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
 			if err != nil {
 				return err
 			}
+			query["source"] = bson.M{"$ne": ""}
 			err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
 		}
 	}
@@ -436,9 +457,10 @@ func (s *Service) exchangeCurrencyByDate(
 	amount float64,
 	merchantId string,
 	date time.Time,
+	source string,
 	res *currencies.ExchangeCurrencyResponse,
 ) error {
-	return s.exchangeCurrency(rateType, from, to, amount, merchantId, s.getByDateQuery(date), res)
+	return s.exchangeCurrency(rateType, from, to, amount, merchantId, s.getByDateQuery(date), source, res)
 }
 
 func (s *Service) exchangeCurrency(
@@ -448,6 +470,7 @@ func (s *Service) exchangeCurrency(
 	amount float64,
 	merchantId string,
 	query bson.M,
+	source string,
 	res *currencies.ExchangeCurrencyResponse,
 ) error {
 
@@ -456,7 +479,7 @@ func (s *Service) exchangeCurrency(
 	}
 
 	rd := &currencies.RateData{}
-	err := s.getRate(rateType, from, to, query, rd)
+	err := s.getRate(rateType, from, to, query, source, rd)
 	if err != nil {
 		return err
 	}

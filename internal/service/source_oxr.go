@@ -151,6 +151,11 @@ func (s *Service) processRatesOxr(res *oxrResponse) ([]interface{}, error) {
 			})
 		}
 
+		// prevent duplication of inverse rates, if they will be getted as direct rates
+		if _, ok := s.cfg.OxrRatesDirectPairs[from+to]; ok {
+			continue
+		}
+
 		// inverse pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   to + from,

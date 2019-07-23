@@ -34,7 +34,7 @@ func (s *Service) GetRateCurrentCommon(
 	if req.RateType == pkg.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
-	err := s.getRate(req.RateType, req.From, req.To, query, res)
+	err := s.getRate(req.RateType, req.From, req.To, query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorGetRateCurrentCommonRequest, "error", err, "req", req)
 		return err
@@ -55,7 +55,7 @@ func (s *Service) GetRateByDateCommon(
 		return err
 	}
 
-	err = s.getRateByDate(req.RateType, req.From, req.To, dt, res)
+	err = s.getRateByDate(req.RateType, req.From, req.To, dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorGetRateByDateCommonRequest, "error", err, "req", req)
 		return err
@@ -81,7 +81,7 @@ func (s *Service) GetRateCurrentForMerchant(
 		query = s.getByDateQuery(time.Now())
 	}
 
-	err := s.getRate(req.RateType, req.From, req.To, query, res)
+	err := s.getRate(req.RateType, req.From, req.To, query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorGetRateCurrentForMerchantRequest, "error", err, "req", req)
 		return err
@@ -107,7 +107,7 @@ func (s *Service) GetRateByDateForMerchant(
 		return err
 	}
 
-	err = s.getRateByDate(req.RateType, req.From, req.To, dt, res)
+	err = s.getRateByDate(req.RateType, req.From, req.To, dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorGetRateByDateForMerchantRequest, "error", err, "req", req)
 		return err
@@ -127,7 +127,7 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
 	if req.RateType == pkg.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
-	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", query, res)
+	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyCurrentCommon, "error", err, "req", req)
 		return err
@@ -149,7 +149,7 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
 	if req.RateType == pkg.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
-	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, req.MerchantId, query, res)
+	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, req.MerchantId, query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyCurrentForMerchant, "error", err, "req", req)
 		return err
@@ -169,7 +169,7 @@ func (s *Service) ExchangeCurrencyByDateCommon(
 		return err
 	}
 
-	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, "", dt, res)
+	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, "", dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyByDateCommon, "error", err, "req", req)
 		return err
@@ -194,7 +194,7 @@ func (s *Service) ExchangeCurrencyByDateForMerchant(
 		return err
 	}
 
-	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, req.MerchantId, dt, res)
+	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, req.MerchantId, dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyByDateForMerchant, "error", err, "req", req)
 		return err

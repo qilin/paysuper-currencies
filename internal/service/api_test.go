@@ -75,6 +75,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_CbFallba
 		From:     "USD",
 		To:       "RUB",
 		RateType: pkg.RateTypeCentralbanks,
+		Source:   cbrfSource,
 	}
 
 	err := suite.service.GetRateCurrentCommon(context.TODO(), req, res)
