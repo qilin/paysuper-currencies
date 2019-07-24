@@ -13,12 +13,16 @@ import (
 var (
 	cardpayMidRateCalc  = float64((r*1 + (r-1)*1) / (1 + 1))
 	cardpayMidRateCtrl  = float64(64.1314)
-	supportedCurrencies = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "JPY", "SGD", "KRW", "TRY", "BRL", "UAH",
+	supportedCurrencies = []string{"AED", "ALL", "AMD", "ARS", "AUD", "BHD", "BRL", "BYN", "CAD", "CHF", "CLP", "CNY",
+		"COP", "DKK", "EGP", "EUR", "GBP", "GHS", "HKD", "IDR", "ILS", "INR", "ISK", "JPY", "KES", "KRW", "KWD", "KZT",
+		"MXN", "MYR", "NOK", "NZD", "PEN", "PHP", "PLN", "QAR", "RSD", "RUB", "SAR", "SEK", "SGD", "THB", "TRY", "TWD",
+		"TZS", "UAH", "USD", "UYU", "VND", "ZAR"}
+	settlementCurrencies = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "NOK", "SEK", "DKK", "PLN"}
+	priceCurrencies      = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "JPY", "SGD", "KRW", "TRY", "BRL", "UAH",
 		"MXN", "NZD", "NOK", "SEK", "DKK", "PLN", "CNY", "INR", "CLP", "PEN", "COP", "ZAR", "HKD", "TWD", "THB", "VND",
 		"SAR", "AED", "ARS", "ILS", "KZT", "KWD", "QAR", "UYU", "IDR", "MYR", "PHP"}
-	settlementCurrencies = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "NOK", "SEK", "DKK", "PLN"}
-	priceCurrencies      = supportedCurrencies
-	vatCurrencies        = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "JPY", "SGD", "KRW", "TRY", "BRL", "PLN", "ILS"}
+	vatCurrencies = []string{"ALL", "AMD", "AUD", "BHD", "BRL", "BYN", "CAD", "CHF", "EGP", "EUR", "GBP", "GHS",
+		"ILS", "ISK", "JPY", "KES", "KRW", "PLN", "RSD", "RUB", "SGD", "TRY", "TZS", "USD"}
 	accountingCurrencies = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "NOK", "SEK", "DKK", "PLN"}
 )
 
