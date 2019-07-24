@@ -405,7 +405,8 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 		if isCentralbank {
 			source = strings.ToUpper(source)
 			if _, ok := availableCentralbanksSources[source]; !ok {
-				return errors.New(errorSourceNotSupported)
+				// temporarily ignore unsupported central banks
+				zap.S().Warn(errorSourceNotSupported)
 			}
 			query["source"] = source
 		}

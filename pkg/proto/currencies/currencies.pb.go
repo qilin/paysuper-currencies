@@ -854,8 +854,7 @@ type ExchangeCurrencyCurrentCommonRequest struct {
 	To string `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty" validate:"required,alpha,len=3"`
 	//@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
 	RateType string `protobuf:"bytes,3,opt,name=rate_type,json=rateType,proto3" json:"rate_type,omitempty" validate:"required,oneof=oxr paysuper centralbanks stock cardpay"`
-	//@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
-	Source string `protobuf:"bytes,4,opt,name=source,proto3" json:"source,omitempty" validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"`
+	Source   string `protobuf:"bytes,4,opt,name=source,proto3" json:"source,omitempty"`
 	// @inject_tag: validate:"numeric,gte=0"
 	Amount               float64  `protobuf:"fixed64,5,opt,name=amount,proto3" json:"amount,omitempty" validate:"numeric,gte=0"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-" bson:"-" structure:"-" validate:"-"`

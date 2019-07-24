@@ -194,7 +194,6 @@ message ExchangeCurrencyCurrentCommonRequest {
     string to = 2;
     //@inject_tag: validate:"required,oneof=oxr paysuper centralbanks stock cardpay"
     string rate_type = 3;
-    //@inject_tag: validate:"omitempty,oneof=CBAU CBPL CBCA CBEU CBRF"
     string source = 4;
     // @inject_tag: validate:"numeric,gte=0"
     double amount = 5;
