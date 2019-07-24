@@ -63,7 +63,7 @@ func NewConfig() (*Config, error) {
 		cfg.SupportedCurrencies = append(cfg.SupportedCurrencies, code)
 		cfg.SupportedCurrenciesParsed[code] = true
 
-		if properties.Price || properties.Vat {
+		if properties.Price || properties.Vat || properties.Local {
 			cfg.RatesRequestCurrencies = append(cfg.RatesRequestCurrencies, code)
 		}
 

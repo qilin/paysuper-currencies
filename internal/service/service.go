@@ -218,7 +218,7 @@ func (s *Service) retry(msg proto.Message, dlv amqp.Delivery, msgID string) erro
 	}
 
 	if rtc >= s.cfg.BrokerMaxRetry {
-		zap.L().Error(errorBrokerMaxRetryReached, zap.String("msgid", msgID))
+		zap.S().Error(errorBrokerMaxRetryReached, zap.String("msgid", msgID))
 		s.sendCentrifugoMessage(msgID, errors.New(errorBrokerMaxRetryReached))
 		return nil
 	}
@@ -226,7 +226,7 @@ func (s *Service) retry(msg proto.Message, dlv amqp.Delivery, msgID string) erro
 	err := s.cardpayRetryBroker.Publish(dlv.RoutingKey, msg, amqp.Table{retryCountHeader: rtc + 1})
 
 	if err != nil {
-		zap.L().Warn(errorBrokerRetryPublishFailed, zap.String("msgid", msgID), zap.Error(err))
+		zap.S().Warn(errorBrokerRetryPublishFailed, zap.String("msgid", msgID), zap.Error(err))
 		s.sendCentrifugoMessage(msgID, err)
 		return err
 	}
@@ -406,7 +406,7 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 			source = strings.ToUpper(source)
 			if _, ok := availableCentralbanksSources[source]; !ok {
 				// temporarily ignore unsupported central banks
-				zap.S().Warn(errorSourceNotSupported)
+				zap.S().Warnw(errorSourceNotSupported, "source", source)
 			}
 			query["source"] = source
 		}
@@ -420,7 +420,7 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 			if err != nil {
 				return err
 			}
-			query["source"] = bson.M{"$ne": ""}
+			delete(query, "source")
 			err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
 		}
 	}

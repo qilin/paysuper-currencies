@@ -110,8 +110,8 @@ func (s *Service) processRatesCbau(res *cbauResponse) ([]interface{}, error) {
 
 	var rates []interface{}
 
-	ln := len(s.cfg.SettlementCurrencies)
-	if s.contains(s.cfg.SettlementCurrenciesParsed, cbauTo) {
+	ln := len(s.cfg.RatesRequestCurrencies)
+	if s.contains(s.cfg.RatesRequestCurrenciesParsed, cbauTo) {
 		ln--
 	}
 	counter := make(map[string]bool, ln)
@@ -120,7 +120,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) ([]interface{}, error) {
 
 		cFrom := rateItem.Statistics.ExchangeRate.TargetCurrency
 
-		if !s.contains(s.cfg.SettlementCurrenciesParsed, cFrom) {
+		if !s.contains(s.cfg.RatesRequestCurrenciesParsed, cFrom) {
 			continue
 		}
 
@@ -152,7 +152,7 @@ func (s *Service) processRatesCbau(res *cbauResponse) ([]interface{}, error) {
 		}
 	}
 
-	for _, cFrom := range s.cfg.SettlementCurrencies {
+	for _, cFrom := range s.cfg.RatesRequestCurrencies {
 		if cFrom == cbauTo {
 			continue
 		}

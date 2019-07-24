@@ -104,15 +104,15 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 
 	var rates []interface{}
 
-	ln := len(s.cfg.SettlementCurrencies)
-	if s.contains(s.cfg.SettlementCurrenciesParsed, cbrfTo) {
+	ln := len(s.cfg.RatesRequestCurrencies)
+	if s.contains(s.cfg.RatesRequestCurrenciesParsed, cbrfTo) {
 		ln--
 	}
 	counter := make(map[string]bool, ln)
 
 	for _, rateItem := range res.Rates {
 
-		if !s.contains(s.cfg.SettlementCurrenciesParsed, rateItem.CurrencyCode) {
+		if !s.contains(s.cfg.RatesRequestCurrenciesParsed, rateItem.CurrencyCode) {
 			continue
 		}
 
@@ -149,7 +149,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 		}
 	}
 
-	for _, cFrom := range s.cfg.SettlementCurrencies {
+	for _, cFrom := range s.cfg.RatesRequestCurrencies {
 		if cFrom == cbauTo {
 			continue
 		}

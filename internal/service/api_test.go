@@ -16,7 +16,7 @@ var (
 	supportedCurrencies = []string{"AED", "ALL", "AMD", "ARS", "AUD", "BHD", "BRL", "BYN", "CAD", "CHF", "CLP", "CNY",
 		"COP", "DKK", "EGP", "EUR", "GBP", "GHS", "HKD", "IDR", "ILS", "INR", "ISK", "JPY", "KES", "KRW", "KWD", "KZT",
 		"MXN", "MYR", "NOK", "NZD", "PEN", "PHP", "PLN", "QAR", "RSD", "RUB", "SAR", "SEK", "SGD", "THB", "TRY", "TWD",
-		"TZS", "UAH", "USD", "UYU", "VND", "ZAR"}
+		"TZS", "UAH", "USD", "UYU", "VND", "ZAR", "BGN", "HUF", "RON", "HRK", "CZK"}
 	settlementCurrencies = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "NOK", "SEK", "DKK", "PLN"}
 	priceCurrencies      = []string{"USD", "EUR", "RUB", "CAD", "AUD", "GBP", "JPY", "SGD", "KRW", "TRY", "BRL", "UAH",
 		"MXN", "NZD", "NOK", "SEK", "DKK", "PLN", "CNY", "INR", "CLP", "PEN", "COP", "ZAR", "HKD", "TWD", "THB", "VND",

@@ -109,7 +109,7 @@ func (s *Service) processRatesCbca(res *cbcaResponse) ([]interface{}, error) {
 
 	lastRates := res.Observations[len(res.Observations)-1]
 
-	for _, cFrom := range s.cfg.SettlementCurrencies {
+	for _, cFrom := range s.cfg.RatesRequestCurrencies {
 
 		if cFrom == cbcaTo {
 			continue
