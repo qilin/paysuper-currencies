@@ -73,7 +73,7 @@ const (
 	collectionNameCorrectionRules     = "correction_rules"
 	collectionNameTriggers            = "triggers"
 
-	ratesPrecision = 10
+	ratesPrecision = 6
 
 	dateFormatLayout = "2006-01-02"
 
@@ -611,7 +611,7 @@ func (s *Service) getCollectionName(suffix string) (string, error) {
 
 func (s *Service) toPrecise(val float64) float64 {
 	p := math.Pow(10, ratesPrecision)
-	return math.Round(val*p) / p
+	return math.Ceil(val*p) / p
 }
 
 func (s *Service) applyCorrection(rd *currencies.RateData, rateType string, merchantId string) {
