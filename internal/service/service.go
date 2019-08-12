@@ -46,7 +46,6 @@ const (
 	errorCurrencyPairNotExists    = "currency pair is not exists"
 	errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 	errorCorrectionRuleNotFound   = "correction rule not found"
-	errorInvalidExchangeAmount    = "invalid amount for exchange"
 	errorBrokerMaxRetryReached    = "broker max retry reached"
 	errorBrokerRetryPublishFailed = "broker retry publishing failed"
 	errorPullTrigger              = "pull trigger failed"
@@ -474,11 +473,6 @@ func (s *Service) exchangeCurrency(
 	source string,
 	res *currencies.ExchangeCurrencyResponse,
 ) error {
-
-	if amount < 0 {
-		return errors.New(errorInvalidExchangeAmount)
-	}
-
 	rd := &currencies.RateData{}
 	err := s.getRate(rateType, from, to, query, source, rd)
 	if err != nil {

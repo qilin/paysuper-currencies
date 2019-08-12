@@ -393,10 +393,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Fail() {
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", -1, "", bson.M{}, "", res)
-	assert.Error(suite.T(), err)
-	assert.Equal(suite.T(), err.Error(), errorInvalidExchangeAmount)
-
 	err = suite.service.exchangeCurrency("bla-bla", "USD", "RUB", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
