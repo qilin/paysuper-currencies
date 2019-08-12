@@ -6,6 +6,7 @@ import (
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"go.uber.org/zap"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -129,7 +130,10 @@ func (s *Service) processRatesCbca(res *cbcaResponse) ([]interface{}, error) {
 			return nil, errors.New(errorCbcaRateDataInvalidFormat)
 		}
 
-		rate := rawRate.(float64)
+		rate, err := strconv.ParseFloat(rawRate.(string), 64)
+		if err != nil {
+			return nil, errors.New(errorCbcaRateDataInvalidFormat)
+		}
 
 		// direct pair
 		rates = append(rates, &currencies.RateData{
