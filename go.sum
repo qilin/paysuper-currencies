@@ -1088,6 +1088,8 @@ github.com/paysuper/paysuper-recurring-repository v1.0.104 h1:UOaz4BU7v+H/0LaTDS
 github.com/paysuper/paysuper-recurring-repository v1.0.104/go.mod h1:FyZzueaAoG6apdmfjz7BQd5QMgV3KRIGgFhRXHEIpro=
 github.com/paysuper/paysuper-recurring-repository v1.0.122 h1:v7ah+Dj5XuYpuneymnscAZWi+R+/G2+4IvCSzQBtV7E=
 github.com/paysuper/paysuper-recurring-repository v1.0.122/go.mod h1:jFhjAviVX1IE4OKVE4vq7uqwT+9MzWcgW0jQUKpfRWI=
+github.com/paysuper/paysuper-recurring-repository v1.0.123 h1:24cPUNrJTUXwFPI93fvqW30nA1omEwMxWY2YueiUnnc=
+github.com/paysuper/paysuper-recurring-repository v1.0.123/go.mod h1:J5qs2I+QNL09dzJeCOGT++zrOXMbJNrzGP62/B6ZaEg=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
 github.com/pelletier/go-buffruneio v0.2.0/go.mod h1:JkE26KsDizTr40EUHkXVtNPvgGtbSNq5BcowyYOWdKo=

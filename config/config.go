@@ -42,6 +42,8 @@ type Config struct {
 	RatesRequestCurrenciesParsed map[string]bool
 
 	OxrRatesDirectPairs map[string]bool
+
+	MicroSelector string `envconfig:"MICRO_SELECTOR" default:""`
 }
 
 // NewConfig return new config

@@ -12,7 +12,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-database-mongo v0.1.0
-	github.com/paysuper/paysuper-recurring-repository v1.0.122
+	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/prometheus/client_golang v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94

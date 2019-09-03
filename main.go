@@ -10,6 +10,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/internal/service"
@@ -183,6 +184,11 @@ func main() {
 			}
 			return nil
 		}),
+	}
+
+	if cfg.MicroSelector == "static" {
+		zap.L().Info(`Use micro selector "static"`)
+		options = append(options, micro.Selector(static.NewSelector()))
 	}
 
 	logger.Info("Initialize micro service")
