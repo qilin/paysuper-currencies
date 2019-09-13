@@ -13,6 +13,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
@@ -149,9 +150,9 @@ func (s *Service) Init() error {
 	}
 
 	if tgr.Active == true {
-		now := time.Now()
-		eod := s.eod(now)
-		delta := eod.Sub(now)
+		nowTime := time.Now()
+		eod := now.EndOfDay()
+		delta := eod.Sub(nowTime)
 		return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
 	}
 
@@ -447,7 +448,7 @@ func (s *Service) saveRates(collectionRatesNameSuffix string, data []interface{}
 }
 
 func (s *Service) getByDateQuery(date time.Time) bson.M {
-	return bson.M{"created_at": bson.M{"$lte": s.eod(date)}}
+	return bson.M{"created_at": bson.M{"$lte": now.New(date).EndOfDay()}}
 }
 
 func (s *Service) exchangeCurrencyByDate(
@@ -587,18 +588,6 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
 	if err = s.centrifugoClient.Publish(context.Background(), s.cfg.CentrifugoChannel, b); err != nil {
 		zap.S().Errorw(errorCentrifugoSendMessage, "error", err, "message", message, "original_error", error)
 	}
-}
-
-// returns begin-of-day for passed date
-func (s *Service) bod(t time.Time) time.Time {
-	year, month, day := t.Date()
-	return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
-}
-
-// returns end-of-day for passed date
-func (s *Service) eod(t time.Time) time.Time {
-	year, month, day := t.Date()
-	return time.Date(year, month, day, 23, 59, 59, 999999999, t.Location())
 }
 
 func (s *Service) getCollectionName(suffix string) (string, error) {

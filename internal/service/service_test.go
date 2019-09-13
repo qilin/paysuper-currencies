@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
@@ -366,7 +367,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_validateUrl_Fail() {
 func (suite *CurrenciesratesServiceTestSuite) Test_getByDateQuery_Ok() {
 	date := time.Now()
 	query := suite.service.getByDateQuery(date)
-	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": suite.service.eod(date)})
+	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": now.New(date).EndOfDay()})
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
