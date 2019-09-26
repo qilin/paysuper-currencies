@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
@@ -47,8 +48,8 @@ func (s *Service) SetRatesCardpay(msg *currencies.CardpayRate, dlv amqp.Delivery
 
 // PullRecalcTrigger - switching-On trigger to recalc Paysuper Corrections after get message form special queue
 func (s *Service) PullRecalcTrigger(msg *currencies.EmptyRequest, dlv amqp.Delivery) error {
-	now := time.Now()
-	eod := s.eod(now)
-	delta := eod.Sub(now)
+	nowTime := time.Now()
+	eod := now.EndOfDay()
+	delta := eod.Sub(nowTime)
 	return s.planDelayedTask(int64(delta.Seconds()), triggerCardpay, s.CalculatePaysuperCorrections)
 }

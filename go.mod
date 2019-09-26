@@ -8,6 +8,7 @@ require (
 	github.com/gogo/protobuf v1.2.1
 	github.com/golang-migrate/migrate/v4 v4.3.1
 	github.com/golang/protobuf v1.3.2
+	github.com/jinzhu/now v1.0.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
