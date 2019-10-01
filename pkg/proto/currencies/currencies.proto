@@ -35,9 +35,6 @@ service currencyratesService {
     rpc AddMerchantRateCorrectionRule (CorrectionRule) returns (EmptyResponse) {
     }
 
-    rpc SetPaysuperCorrectionCorridor (CorrectionCorridor) returns (EmptyResponse) {
-    }
-
     rpc GetSupportedCurrencies (EmptyRequest) returns (CurrenciesList) {
     }
 

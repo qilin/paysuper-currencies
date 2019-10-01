@@ -11,18 +11,13 @@ This service designed for sync currencies rates and store it locally with histor
 
 | Name                                 | Required | Default                  | Description                                                                         |
 |:-------------------------------------|:--------:|:-------------------------|:------------------------------------------------------------------------------------|
+| OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
 | MONGO_DSN                            | true     | -                        | MongoBD DSN connection string                                                       |
 | MONGO_DIAL_TIMEOUT                   | -        | 10                       | MongoBD dial timeout in seconds                                                     |
-| BROKER_ADDRESS                       | -        | amqp://127.0.0.1:5672    | RabbitMQ broker address                                                             |
-| BROKER_RETRY_TIMEOUT                 | -        | 60                       | RabbitMQ broker retry timeout                                                       |
-| BROKER_MAX_RETRY                     | -        | 5                        | RabbitMQ broker max retry count                                                     |
 | CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo url                                                                      |
 | CENTRIFUGO_SECRET                    | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin           | Centrifugo channel name to send alert notifications to admins                       |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
-| OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
-| BOLLINGER_DAYS                       | -        | 7                        | Number of days for plot Bollinger functions to calculate Paysuper Prediction Rates  |
-| BOLLINGER_PERIOD                     | -        | 21                       | Number of days in period for each Bollinger function                                |
 
 ## Starting the app
 

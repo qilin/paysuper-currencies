@@ -45,8 +45,6 @@ const (
 	errorCurrencyPairNotExists    = "currency pair is not exists"
 	errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 	errorCorrectionRuleNotFound   = "correction rule not found"
-	errorBrokerMaxRetryReached    = "broker max retry reached"
-	errorBrokerRetryPublishFailed = "broker retry publishing failed"
 	errorPullTrigger              = "pull trigger failed"
 	errorReleaseTrigger           = "release trigger failed"
 	errorDelayedFunction          = "error in delayed function"
@@ -78,8 +76,6 @@ const (
 
 	serviceStatusOK   = "ok"
 	serviceStatusFail = "fail"
-
-	retryCountHeader = "x-retry-count"
 
 	triggerCardpay = 1
 
@@ -287,56 +283,32 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 	}
 
 	if isCardpay {
-		q := []bson.M{
-			{"$match": query},
-			{"$group": bson.M{
-				"_id":         bson.M{"create_date": "$create_date"},
-				"numerator":   bson.M{"$sum": bson.M{"$multiply": []string{"$rate", "$volume"}}},
-				"denominator": bson.M{"$sum": "$volume"},
-			}},
-			{"$project": bson.M{
-				"value": bson.M{"$divide": []string{"$numerator", "$denominator"}},
-			}},
-			{"$limit": 1},
-		}
-		var resp []map[string]interface{}
-		err = s.db.Collection(cName).Pipe(q).All(&resp)
+		zap.S().Warnw(errorDbInsertFailed, "source", source)
+		return errors.New(errorDbInsertFailed)
+	}
 
+	if isCentralbank {
+		source = strings.ToUpper(source)
+		if _, ok := availableCentralbanksSources[source]; !ok {
+			// temporarily ignore unsupported central banks
+			zap.S().Warnw(errorSourceNotSupported, "source", source)
+		}
+		query["source"] = source
+	}
+
+	err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+
+	// requested pair is not found in central banks rates
+	// try to fallback to OXR rate for it
+	if err == mgo.ErrNotFound && isCentralbank {
+		cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
 		if err != nil {
 			return err
 		}
-
-		if len(resp) == 0 {
-			return mgo.ErrNotFound
-		}
-
-		res.Pair = pair
-		res.Rate = s.toPrecise(resp[0]["value"].(float64))
-		res.Source = cardpaySource
-
-	} else {
-		if isCentralbank {
-			source = strings.ToUpper(source)
-			if _, ok := availableCentralbanksSources[source]; !ok {
-				// temporarily ignore unsupported central banks
-				zap.S().Warnw(errorSourceNotSupported, "source", source)
-			}
-			query["source"] = source
-		}
-
+		delete(query, "source")
 		err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
-
-		// requested pair is not found in central banks rates
-		// try to fallback to OXR rate for it
-		if err == mgo.ErrNotFound && isCentralbank {
-			cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
-			if err != nil {
-				return err
-			}
-			delete(query, "source")
-			err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
-		}
 	}
+
 	if err != nil {
 		return err
 	}
@@ -533,56 +505,4 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
 		return
 	}
 	rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
-}
-
-func (s *Service) pullTrigger(triggerType int) error {
-	trg := &trigger{
-		Type:      triggerType,
-		Active:    true,
-		CreatedAt: time.Now(),
-	}
-	return s.db.Collection(collectionNameTriggers).Insert(trg)
-}
-
-func (s *Service) releaseTrigger(triggerType int) error {
-	trg := &trigger{
-		Type:      triggerType,
-		Active:    false,
-		CreatedAt: time.Now(),
-	}
-	return s.db.Collection(collectionNameTriggers).Insert(trg)
-}
-
-func (s *Service) getTrigger(triggerType int) (*trigger, error) {
-	query := bson.M{"type": triggerType}
-	res := &trigger{
-		Type:      triggerType,
-		Active:    false,
-		CreatedAt: time.Now(),
-	}
-	err := s.db.Collection(collectionNameTriggers).Find(query).Sort("-_id").Limit(1).One(res)
-	if err != nil && err != mgo.ErrNotFound {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (s *Service) planDelayedTask(delay int64, trigger int, fn callable) error {
-	ticker := time.NewTicker(time.Second * time.Duration(delay))
-	err := s.pullTrigger(trigger)
-	if err != nil {
-		zap.S().Errorw(errorPullTrigger, "error", err, "trigger", trigger)
-	}
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				err := fn()
-				zap.S().Errorw(errorDelayedFunction, "error", err)
-				s.sendCentrifugoMessage(errorDelayedFunction, err)
-				ticker.Stop()
-			}
-		}
-	}()
-	return err
 }
