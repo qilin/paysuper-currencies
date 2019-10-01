@@ -78,8 +78,6 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 	assert.NoError(suite.T(), err)
 	err = suite.service.saveRates(collectionRatesNameSuffixCentralbanks, rates)
 	assert.NoError(suite.T(), err)
-	err = suite.service.saveRates(collectionRatesNameSuffixCardpay, rates)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {

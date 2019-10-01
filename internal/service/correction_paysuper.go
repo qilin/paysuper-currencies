@@ -53,7 +53,9 @@ func (s *Service) GetPaysuperCorrection(pair string) (float64, error) {
 	return res.Value, nil
 }
 
-// CalculatePaysuperCorrections - calculates paysuper corrections for all settlement сurrencies
+// CalculatePaysuperCorrections - calculates paysuper corrections for all settlement сurrencies.
+//
+// INFO Please see more details in README.md section `Details about rate projection `
 func (s *Service) CalculatePaysuperCorrections() error {
 	zap.S().Info("Start calculation of Paysuper corrections")
 
@@ -133,7 +135,6 @@ func (s *Service) CalculatePaysuperCorrections() error {
 }
 
 func (s *Service) getCorrectionValue(pair string, days int, timePeriod int, corridorWidth float64) (float64, error) {
-
 	oxrL, oxrM, oxrU, err := s.getBollingerBands(collectionRatesNameSuffixOxr, pair, days, timePeriod)
 	if err != nil {
 		return 0, err

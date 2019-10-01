@@ -11,7 +11,6 @@ import (
 	"github.com/centrifugal/gocent"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
@@ -19,7 +18,6 @@ import (
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-database-mongo"
 	"github.com/paysuper/paysuper-recurring-repository/tools"
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/go-playground/validator.v9"
@@ -137,25 +135,6 @@ func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
 
 // Init rabbitMq brokers and check for active triggers for delayed tasks
 func (s *Service) Init() error {
-	var err error
-	s.cardpayBroker, s.cardpayRetryBroker, s.cardpayFinishBroker, err = s.getBrokers(
-		pkg.CardpayTopicRateData,
-		pkg.CardpayTopicRateDataRetry,
-		pkg.CardpayTopicRateDataFinished,
-	)
-
-	tgr, err := s.getTrigger(triggerCardpay)
-	if err != nil {
-		return err
-	}
-
-	if tgr.Active == true {
-		nowTime := time.Now()
-		eod := now.EndOfDay()
-		delta := eod.Sub(nowTime)
-		return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
-	}
-
 	return nil
 }
 
@@ -166,72 +145,6 @@ func (s *Service) Status() (interface{}, error) {
 		return serviceStatusFail, err
 	}
 	return serviceStatusOK, nil
-}
-
-func (s *Service) getBrokers(topicName string, retryTopicName string, finishTopicName string) (*rabbitmq.Broker, *rabbitmq.Broker, *rabbitmq.Broker, error) {
-	broker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	retryBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	finishBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	broker.Opts.ExchangeOpts.Name = topicName
-
-	retryBroker.Opts.QueueOpts.Args = amqp.Table{
-		"x-dead-letter-exchange":    retryTopicName,
-		"x-message-ttl":             int32(s.cfg.BrokerRetryTimeout * 1000),
-		"x-dead-letter-routing-key": "*",
-	}
-	retryBroker.Opts.ExchangeOpts.Name = retryTopicName
-
-	finishBroker.Opts.ExchangeOpts.Name = finishTopicName
-
-	err = broker.RegisterSubscriber(topicName, s.SetRatesCardpay)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	err = finishBroker.RegisterSubscriber(topicName, s.PullRecalcTrigger)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return broker, retryBroker, finishBroker, nil
-}
-
-func (s *Service) retry(msg proto.Message, dlv amqp.Delivery, msgID string) error {
-	var rtc = int32(0)
-
-	if v, ok := dlv.Headers[retryCountHeader]; ok {
-		rtc = v.(int32)
-	}
-
-	if rtc >= s.cfg.BrokerMaxRetry {
-		zap.S().Error(errorBrokerMaxRetryReached, zap.String("msgid", msgID))
-		s.sendCentrifugoMessage(msgID, errors.New(errorBrokerMaxRetryReached))
-		return nil
-	}
-
-	err := s.cardpayRetryBroker.Publish(dlv.RoutingKey, msg, amqp.Table{retryCountHeader: rtc + 1})
-
-	if err != nil {
-		zap.S().Warn(errorBrokerRetryPublishFailed, zap.String("msgid", msgID), zap.Error(err))
-		s.sendCentrifugoMessage(msgID, err)
-		return err
-	}
-
-	return nil
 }
 
 func (s *Service) validateReq(req interface{}) error {

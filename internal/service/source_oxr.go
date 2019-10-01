@@ -122,16 +122,11 @@ func (s *Service) processRatesOxr(res *oxrResponse) ([]interface{}, error) {
 	}
 
 	var rates []interface{}
-	var ratesCardpay []interface{} // Remove Cardpay settlements stub!
-
 	for to, rate := range res.Rates {
 
 		if to == from {
 			continue
 		}
-
-		// Remove Cardpay settlements stub!
-		stubToCardpay := s.contains(s.cfg.SettlementCurrenciesParsed, from) && s.contains(s.cfg.RatesRequestCurrenciesParsed, to)
 
 		// direct pair
 		rates = append(rates, &currencies.RateData{
@@ -140,16 +135,6 @@ func (s *Service) processRatesOxr(res *oxrResponse) ([]interface{}, error) {
 			Source: oxrSource,
 			Volume: 1,
 		})
-
-		// Remove Cardpay settlements stub!
-		if stubToCardpay {
-			ratesCardpay = append(ratesCardpay, &currencies.RateData{
-				Pair:   from + to,
-				Rate:   s.toPrecise(rate),
-				Source: cardpayStubSource,
-				Volume: 1,
-			})
-		}
 
 		// prevent duplication of inverse rates, if they will be getted as direct rates
 		if _, ok := s.cfg.OxrRatesDirectPairs[from+to]; ok {
@@ -163,22 +148,6 @@ func (s *Service) processRatesOxr(res *oxrResponse) ([]interface{}, error) {
 			Source: oxrSource,
 			Volume: 1,
 		})
-
-		// Remove Cardpay settlements stub!
-		if stubToCardpay {
-			ratesCardpay = append(ratesCardpay, &currencies.RateData{
-				Pair:   to + from,
-				Rate:   s.toPrecise(1 / rate),
-				Source: cardpayStubSource,
-				Volume: 1,
-			})
-		}
-	}
-
-	// Remove Cardpay settlements stub!
-	err := s.saveRates(collectionRatesNameSuffixCardpay, ratesCardpay)
-	if err != nil {
-		return nil, err
 	}
 
 	return rates, nil
