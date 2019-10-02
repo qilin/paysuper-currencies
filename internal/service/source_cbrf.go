@@ -69,6 +69,7 @@ func (s *Service) sendRequestCbrf() (*http.Response, error) {
 	headers := map[string]string{
 		headerContentType: mimeApplicationXML,
 		headerAccept:      mimeApplicationXML,
+		headerUserAgent:   defaultUserAgent,
 	}
 
 	// here may be 302 redirect in answer - https://toster.ru/q/149039

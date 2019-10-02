@@ -47,12 +47,14 @@ const (
 	errorCorrectionRuleNotFound   = "correction rule not found"
 
 	mimeApplicationJSON = "application/json"
-	mimeApplicationXML  = "application/xml"
+	mimeApplicationXML  = "application/xhtml+xml,application/xml"
 	mimeTextXML         = "text/xml"
+	defaultUserAgent    = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Mobile Safari/537.36"
 
 	headerAccept      = "Accept"
 	headerCookie      = "Cookie"
 	headerContentType = "Content-Type"
+	headerUserAgent   = "User-Agent"
 
 	collectionRatesNameTemplate           = "%s_%s"
 	collectionRatesNamePrefix             = "currency_rates"
@@ -71,9 +73,8 @@ const (
 	serviceStatusOK   = "ok"
 	serviceStatusFail = "fail"
 
-	triggerCardpay = 1
-
-	stubSource = "STUB"
+	stubSource               = "STUB"
+	defaultHttpClientTimeout = 30
 )
 
 var (
@@ -154,6 +155,8 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 	zap.S().Info("Sending request to url: ", url)
 
 	client := tools.NewLoggedHttpClient(zap.S())
+	client.Timeout = time.Duration(defaultHttpClientTimeout * time.Second)
+
 	// prevent following to redirects
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
@@ -169,7 +172,6 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 	}
 
 	resp, err := client.Do(httpReq)
-
 	if err != nil {
 		return nil, err
 	}
