@@ -15,7 +15,6 @@ const (
 
 // SetRatesPaysuper - set prediction rates for Paysuper
 func (s *Service) SetRatesPaysuper() error {
-
 	zap.S().Info("Start calculation of prediction rates for Paysuper")
 
 	var (

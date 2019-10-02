@@ -78,8 +78,6 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 	assert.NoError(suite.T(), err)
 	err = suite.service.saveRates(collectionRatesNameSuffixCentralbanks, rates)
 	assert.NoError(suite.T(), err)
-	err = suite.service.saveRates(collectionRatesNameSuffixCardpay, rates)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
@@ -414,35 +412,4 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrencyByDate_Ok() {
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
 	assert.Equal(suite.T(), res.Correction, float64(0))
 	assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
-}
-
-func (suite *CurrenciesratesServiceTestSuite) Test_Triggers() {
-	tgr, err := suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.False(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.pullTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.True(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.releaseTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.False(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.pullTrigger(123)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(123)
-	assert.NoError(suite.T(), err)
-	assert.True(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, 123)
 }

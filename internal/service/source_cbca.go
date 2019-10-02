@@ -65,6 +65,7 @@ func (s *Service) sendRequestCbca() (*http.Response, error) {
 	headers := map[string]string{
 		headerContentType: mimeApplicationJSON,
 		headerAccept:      mimeApplicationJSON,
+		headerUserAgent:   defaultUserAgent,
 	}
 
 	today := time.Now()

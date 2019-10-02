@@ -258,27 +258,6 @@ func (s *Service) AddMerchantRateCorrectionRule(
 	return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, req.MerchantId)
 }
 
-// SetPaysuperCorrectionCorridor - set new value of paysuper correction corridor, used in predicition rates calculation
-func (s *Service) SetPaysuperCorrectionCorridor(
-	ctx context.Context,
-	req *currencies.CorrectionCorridor,
-	res *currencies.EmptyResponse,
-) error {
-
-	corridor := paysuperCorridor{
-		Value:     req.Value,
-		CreatedAt: time.Now(),
-	}
-
-	err := s.db.Collection(collectionNamePaysuperCorridors).Insert(corridor)
-	if err != nil {
-		zap.S().Errorw(errorDbInsertFailed, "error", err, "data", corridor)
-		return err
-	}
-
-	return nil
-}
-
 // GetSupportedCurrencies - returns list of all supported currencies
 func (s *Service) GetSupportedCurrencies(
 	ctx context.Context,
