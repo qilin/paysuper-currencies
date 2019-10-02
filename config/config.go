@@ -19,9 +19,6 @@ type Config struct {
 
 	OxrAppId string `envconfig:"OXR_APP_ID" required:"true"`
 
-	BollingerDays   int `envconfig:"BOLLINGER_DAYS" required:"false" default:"7"`
-	BollingerPeriod int `envconfig:"BOLLINGER_PERIOD" required:"false" default:"21"`
-
 	RatesTypes map[string]bool
 
 	Currencies map[string]currency.CurrencyProperties
