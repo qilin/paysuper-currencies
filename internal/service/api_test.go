@@ -43,20 +43,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentCommon_Ok() {
 	assert.Equal(suite.T(), res.Rate, r)
 	assert.Equal(suite.T(), res.Source, "TEST")
 
-	// special for Cardpay
-	req = &currencies.GetRateCurrentCommonRequest{
-		From:     "USD",
-		To:       "RUB",
-		RateType: pkg.RateTypeCardpay,
-	}
-
-	err = suite.service.GetRateCurrentCommon(context.TODO(), req, res)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), res.Pair, "USDRUB")
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCalc))
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCtrl))
-	assert.Equal(suite.T(), res.Source, cardpaySource)
-
 	// and for the same currencies
 	req = &currencies.GetRateCurrentCommonRequest{
 		From:     "USD",
@@ -153,21 +139,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateCommon_Ok() {
 	assert.Equal(suite.T(), res.Pair, "USDRUB")
 	assert.Equal(suite.T(), res.Rate, r)
 	assert.Equal(suite.T(), res.Source, "TEST")
-
-	// and special for Cardpay
-	req = &currencies.GetRateByDateCommonRequest{
-		From:     "USD",
-		To:       "RUB",
-		RateType: pkg.RateTypeCardpay,
-		Datetime: ptypes.TimestampNow(),
-	}
-
-	err = suite.service.GetRateByDateCommon(context.TODO(), req, res)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), res.Pair, "USDRUB")
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCalc))
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCtrl))
-	assert.Equal(suite.T(), res.Source, cardpaySource)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateCommon_Fail() {
@@ -200,21 +171,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentForMerchant_Ok(
 	assert.Equal(suite.T(), res.Pair, "USDRUB")
 	assert.Equal(suite.T(), res.Rate, r)
 	assert.Equal(suite.T(), res.Source, "TEST")
-
-	// and special for Cardpay
-	req = &currencies.GetRateCurrentForMerchantRequest{
-		From:       "USD",
-		To:         "RUB",
-		RateType:   pkg.RateTypeCardpay,
-		MerchantId: bson.NewObjectId().Hex(),
-	}
-
-	err = suite.service.GetRateCurrentForMerchant(context.TODO(), req, res)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), res.Pair, "USDRUB")
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCalc))
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCtrl))
-	assert.Equal(suite.T(), res.Source, cardpaySource)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetRateCurrentForMerchant_Fail() {
@@ -247,22 +203,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateForMerchant_Ok()
 	assert.Equal(suite.T(), res.Pair, "USDRUB")
 	assert.Equal(suite.T(), res.Rate, r)
 	assert.Equal(suite.T(), res.Source, "TEST")
-
-	// and for Cardpay
-	req = &currencies.GetRateByDateForMerchantRequest{
-		From:       "USD",
-		To:         "RUB",
-		RateType:   pkg.RateTypeCardpay,
-		MerchantId: bson.NewObjectId().Hex(),
-		Datetime:   ptypes.TimestampNow(),
-	}
-
-	err = suite.service.GetRateByDateForMerchant(context.TODO(), req, res)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), res.Pair, "USDRUB")
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCalc))
-	assert.Equal(suite.T(), res.Rate, suite.service.toPrecise(cardpayMidRateCtrl))
-	assert.Equal(suite.T(), res.Source, cardpaySource)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetRateByDateForMerchant_Fail() {
@@ -499,15 +439,6 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerc
 	err = suite.service.ExchangeCurrencyByDateForMerchant(context.TODO(), req, res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorTimestampRequired)
-}
-
-func (suite *CurrenciesratesServiceTestSuite) Test_SetPaysuperCorrectionCorridor_Ok() {
-	req := &currencies.CorrectionCorridor{
-		Value: 0.5,
-	}
-	res := &currencies.EmptyResponse{}
-	err := suite.service.SetPaysuperCorrectionCorridor(context.TODO(), req, res)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_Ok() {

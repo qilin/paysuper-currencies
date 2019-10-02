@@ -45,9 +45,6 @@ const (
 	errorCurrencyPairNotExists    = "currency pair is not exists"
 	errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 	errorCorrectionRuleNotFound   = "correction rule not found"
-	errorPullTrigger              = "pull trigger failed"
-	errorReleaseTrigger           = "release trigger failed"
-	errorDelayedFunction          = "error in delayed function"
 
 	mimeApplicationJSON = "application/json"
 	mimeApplicationXML  = "application/xml"
@@ -63,12 +60,9 @@ const (
 	collectionRatesNameSuffixCentralbanks = pkg.RateTypeCentralbanks
 	collectionRatesNameSuffixPaysuper     = pkg.RateTypePaysuper
 	collectionRatesNameSuffixStock        = pkg.RateTypeStock
-	collectionRatesNameSuffixCardpay      = pkg.RateTypeCardpay
 
 	collectionNamePaysuperCorrections = "paysuper_corrections"
-	collectionNamePaysuperCorridors   = "paysuper_corridors"
 	collectionNameCorrectionRules     = "correction_rules"
-	collectionNameTriggers            = "triggers"
 
 	ratesPrecision = 6
 
@@ -91,15 +85,6 @@ var (
 		cbrfSource: true,
 	}
 )
-
-type trigger struct {
-	ID        bson.ObjectId `bson:"_id,omitempty"`
-	Type      int           `bson:"type"`
-	Active    bool          `bson:"active"`
-	CreatedAt time.Time     `bson:"created_at"`
-}
-
-type callable func() error
 
 // Service is application entry point.
 type Service struct {
