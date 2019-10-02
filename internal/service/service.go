@@ -259,17 +259,11 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 
 	query["pair"] = pair
 
-	isCardpay := collectionRatesNameSuffix == pkg.RateTypeCardpay
 	isCentralbank := collectionRatesNameSuffix == pkg.RateTypeCentralbanks
 
 	cName, err := s.getCollectionName(collectionRatesNameSuffix)
 	if err != nil {
 		return err
-	}
-
-	if isCardpay {
-		zap.S().Warnw(errorDbInsertFailed, "source", source)
-		return errors.New(errorDbInsertFailed)
 	}
 
 	if isCentralbank {
