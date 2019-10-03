@@ -30,4 +30,18 @@ const (
 
 	// CardpayTopicRateData - rabbitMq topic name for Cardpay rates finished
 	CardpayTopicRateDataFinished = "cardpay-rate-data-finished"
+
+	ErrorDatabaseQueryFailed          = "Query to database collection failed"
+	ErrorDatabaseFieldCollection      = "collection"
+	ErrorDatabaseFieldDocumentId      = "document_id"
+	ErrorDatabaseFieldQuery           = "query"
+	ErrorDatabaseFieldSet             = "set"
+	ErrorDatabaseFieldSorts           = "sorts"
+	ErrorDatabaseFieldLimit           = "limit"
+	ErrorDatabaseFieldOffset          = "offset"
+	ErrorDatabaseFieldOperation       = "operation"
+	ErrorDatabaseFieldOperationInsert = "insert"
+	ErrorDatabaseFieldOperationUpdate = "update"
+	ErrorDatabaseFieldOperationUpsert = "upsert"
+	ErrorDatabaseFieldDocument        = "document"
 )

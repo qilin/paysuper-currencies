@@ -278,6 +278,14 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 	}
 
 	err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+	if err != nil {
+		zap.L().Error(
+			pkg.ErrorDatabaseQueryFailed,
+			zap.Error(err),
+			zap.String(pkg.ErrorDatabaseFieldCollection, cName),
+			zap.Any(pkg.ErrorDatabaseFieldQuery, query),
+		)
+	}
 
 	// requested pair is not found in central banks rates
 	// try to fallback to OXR rate for it
@@ -288,6 +296,14 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 		}
 		delete(query, "source")
 		err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+		if err != nil {
+			zap.L().Error(
+				pkg.ErrorDatabaseQueryFailed,
+				zap.Error(err),
+				zap.String(pkg.ErrorDatabaseFieldCollection, cName),
+				zap.Any(pkg.ErrorDatabaseFieldQuery, query),
+			)
+		}
 	}
 
 	if err != nil {
