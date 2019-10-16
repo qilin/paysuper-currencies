@@ -77,6 +77,7 @@ func (s *Service) sendRequestCbau() (*http.Response, error) {
 	headers := map[string]string{
 		headerContentType: mimeApplicationXML,
 		headerAccept:      mimeApplicationXML,
+		headerUserAgent:   defaultUserAgent,
 	}
 
 	resp, err := s.request(http.MethodGet, cbauUrl, nil, headers)

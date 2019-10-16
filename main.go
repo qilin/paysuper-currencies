@@ -74,16 +74,12 @@ func main() {
 		case "oxr":
 			err = cs.RequestRatesOxr()
 			if err == nil {
-				// Remove Cardpay settlements stub!
-				err = cs.CalculatePaysuperCorrections()
-				if err == nil {
-					g.Go(func() error {
-						return cs.SetRatesPaysuper()
-					})
-					g.Go(func() error {
-						return cs.SetRatesStock()
-					})
-				}
+				g.Go(func() error {
+					return cs.SetRatesPaysuper()
+				})
+				g.Go(func() error {
+					return cs.SetRatesStock()
+				})
 			}
 		case "paysuper":
 			g.Go(func() error {
