@@ -17,6 +17,14 @@ const (
 func (s *Service) SetRatesPaysuper() error {
 	zap.S().Info("Start calculation of prediction rates for Paysuper")
 
+	rule := &currencies.CorrectionRule{}
+	err := s.getCorrectionRule(collectionRatesNameSuffixPaysuper, "", rule)
+	if err != nil {
+		zap.S().Errorw(errorCorrectionRuleNotFound, "error", err)
+		s.sendCentrifugoMessage(errorCorrectionRuleNotFound, err)
+		return err
+	}
+
 	var (
 		cFrom string
 		cTo   string
@@ -30,7 +38,7 @@ func (s *Service) SetRatesPaysuper() error {
 				continue
 			}
 
-			rd, err := s.getRatePaysuper(cFrom, cTo)
+			rd, err := s.getRatePaysuper(cFrom, cTo, rule)
 			if err != nil {
 				zap.S().Errorw(errorPaysuperRateCalc, "error", err)
 				s.sendCentrifugoMessage(errorPaysuperRateCalc, err)
@@ -38,7 +46,7 @@ func (s *Service) SetRatesPaysuper() error {
 			}
 			rates = append(rates, rd)
 
-			rd, err = s.getRatePaysuper(cTo, cFrom)
+			rd, err = s.getRatePaysuper(cTo, cFrom, rule)
 			if err != nil {
 				zap.S().Errorw(errorPaysuperRateCalc, "error", err)
 				s.sendCentrifugoMessage(errorPaysuperRateCalc, err)
@@ -48,7 +56,7 @@ func (s *Service) SetRatesPaysuper() error {
 		}
 	}
 
-	err := s.saveRates(collectionRatesNameSuffixPaysuper, rates)
+	err = s.saveRates(collectionRatesNameSuffixPaysuper, rates)
 	if err != nil {
 		zap.S().Errorw(errorPaysuperRateSave, "error", err)
 		s.sendCentrifugoMessage(errorPaysuperRateSave, err)
@@ -60,7 +68,7 @@ func (s *Service) SetRatesPaysuper() error {
 	return nil
 }
 
-func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateData, error) {
+func (s *Service) getRatePaysuper(cFrom string, cTo string, rule *currencies.CorrectionRule) (*currencies.RateData, error) {
 	res := &currencies.RateData{}
 
 	err := s.getRate(collectionRatesNameSuffixOxr, cFrom, cTo, bson.M{}, "", res)
@@ -68,14 +76,11 @@ func (s *Service) getRatePaysuper(cFrom string, cTo string) (*currencies.RateDat
 		return nil, err
 	}
 
-	correction, err := s.GetPaysuperCorrection(cFrom + cTo)
-	if err != nil {
-		return nil, err
-	}
+	s.applyCorrectionRule(res, rule)
 
 	rd := &currencies.RateData{
-		Pair:   cFrom + cTo,
-		Rate:   s.toPrecise(res.Rate + correction),
+		Pair:   res.Pair,
+		Rate:   res.Rate,
 		Source: paysuperSource,
 		Volume: 1,
 	}

@@ -1,26 +1,27 @@
 package service
 
 import (
-	"github.com/globalsign/mgo"
+	"github.com/paysuper/paysuper-currencies/pkg"
+	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 func (suite *CurrenciesratesServiceTestSuite) TestSource_getRatePaysuper_Ok() {
-	_, err := suite.service.getRatePaysuper("USD", "RUB")
-	assert.Error(suite.T(), err, mgo.ErrNotFound)
-
-	corrections := []interface{}{&paysuperCorrection{
-		Pair:      "USDRUB",
-		Value:     1.5,
-		CreatedAt: time.Now(),
-	}}
-	err = suite.service.db.Collection(collectionNamePaysuperCorrections).Insert(corrections...)
+	rd, err := suite.service.getRateStock("USD", "RUB", &currencies.CorrectionRule{})
 	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), rd.Rate, r)
 
-	rd, err := suite.service.getRatePaysuper("USD", "RUB")
+	cc := float64(2)
+	cr := &currencies.CorrectionRule{
+		RateType:         pkg.RateTypePaysuper,
+		CommonCorrection: cc,
+	}
+
+	ctrl := suite.service.toPrecise(r / (1 - (cc / 100)))
+
+	rd, err = suite.service.getRateStock("USD", "RUB", cr)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), rd.Rate, r+1.5)
+	assert.Equal(suite.T(), rd.Rate, ctrl)
 }
 
 // waiting for commercial oxr app_id
