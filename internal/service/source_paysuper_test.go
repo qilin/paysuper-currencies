@@ -1,27 +1,16 @@
 package service
 
 import (
-	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/stretchr/testify/assert"
 )
 
 func (suite *CurrenciesratesServiceTestSuite) TestSource_getRatePaysuper_Ok() {
-	rd, err := suite.service.getRateStock("USD", "RUB", &currencies.CorrectionRule{})
+	rd, err := suite.service.getRateStock("USD", "RUB")
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), rd.Rate, r)
 
-	cc := float64(2)
-	cr := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypePaysuper,
-		CommonCorrection: cc,
-	}
-
-	ctrl := suite.service.toPrecise(r / (1 - (cc / 100)))
-
-	rd, err = suite.service.getRateStock("USD", "RUB", cr)
+	rd, err = suite.service.getRateStock("USD", "RUB")
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), rd.Rate, ctrl)
 }
 
 // waiting for commercial oxr app_id
