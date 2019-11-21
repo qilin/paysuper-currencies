@@ -89,7 +89,7 @@ func (suite *CurrenciesratesServiceTestSuite) TearDownTest() {
 
 func (suite *CurrenciesratesServiceTestSuite) CleanRatesCollection(collectionSuffix string) error {
 	// cleaning collection before test starts
-	cName, err := suite.service.getCollectionName(collectionRatesNameSuffixCentralbanks)
+	cName, err := suite.service.getCollectionName(collectionSuffix)
 	if err != nil {
 		return err
 	}
@@ -149,22 +149,25 @@ func (suite *CurrenciesratesServiceTestSuite) TestSaveRate_Ok() {
 
 func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleValue() {
 	rule1 := &currencies.CorrectionRule{
-		RateType: "oxr",
+		RateType:          "oxr",
+		ExchangeDirection: pkg.ExchangeDirectionBuy,
 	}
 	assert.Equal(suite.T(), rule1.GetCorrectionValue(""), float64(0))
 	assert.Equal(suite.T(), rule1.GetCorrectionValue("Blah"), float64(0))
 	assert.Equal(suite.T(), rule1.GetCorrectionValue("USDEUR"), float64(0))
 
 	rule2 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionBuy,
+		CommonCorrection:  1,
 	}
 	assert.Equal(suite.T(), rule2.GetCorrectionValue(""), float64(1))
 	assert.Equal(suite.T(), rule2.GetCorrectionValue("blah"), float64(0))
 	assert.Equal(suite.T(), rule2.GetCorrectionValue("USDEUR"), float64(1))
 
 	rule3 := &currencies.CorrectionRule{
-		RateType: "oxr",
+		RateType:          "oxr",
+		ExchangeDirection: pkg.ExchangeDirectionBuy,
 		PairCorrection: map[string]float64{
 			"USDEUR": -3,
 			"EURUSD": 3,
@@ -177,16 +180,15 @@ func (suite *CurrenciesratesServiceTestSuite) TestGetRateCorrectionRuleValue() {
 	assert.Equal(suite.T(), rule3.GetCorrectionValue("EURRUB"), float64(0))
 
 	rule4 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionBuy,
+		CommonCorrection:  1,
 		PairCorrection: map[string]float64{
-			"USDEUR": -3,
 			"EURUSD": 3,
 		},
 	}
 	assert.Equal(suite.T(), rule4.GetCorrectionValue(""), float64(1))
 	assert.Equal(suite.T(), rule4.GetCorrectionValue("blah"), float64(0))
-	assert.Equal(suite.T(), rule4.GetCorrectionValue("USDEUR"), float64(-3))
 	assert.Equal(suite.T(), rule4.GetCorrectionValue("EURUSD"), float64(3))
 	assert.Equal(suite.T(), rule4.GetCorrectionValue("EURRUB"), float64(1))
 }
@@ -201,17 +203,22 @@ func (suite *CurrenciesratesServiceTestSuite) TestApplyCorrection() {
 	}
 
 	// no correction rule set, rate unchanged
-	suite.service.applyCorrection(rd, pkg.RateTypeOxr, merchantId)
+	suite.service.applyCorrection(rd, pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, merchantId)
 	assert.Equal(suite.T(), rd.Rate, float64(0.89))
 
-	// adding default correction rule
+	// adding default correction rule for Sell
 	req1 := &currencies.CommonCorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
 	}
 	res1 := &currencies.EmptyResponse{}
 	err := suite.service.AddCommonRateCorrectionRule(context.TODO(), req1, res1)
 	assert.NoError(suite.T(), err)
+
+	// rate for Buy will be still unchanged
+	suite.service.applyCorrection(rd, pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, merchantId)
+	assert.Equal(suite.T(), rd.Rate, float64(0.89))
 
 	rd2 := &currencies.RateData{
 		Pair:   "USDEUR",
@@ -219,19 +226,32 @@ func (suite *CurrenciesratesServiceTestSuite) TestApplyCorrection() {
 		Source: "OXR",
 	}
 
-	// rate increased for 1%
-	suite.service.applyCorrection(rd2, pkg.RateTypeOxr, merchantId)
+	// rate for sell increased for 1%
+	suite.service.applyCorrection(rd2, pkg.RateTypeOxr, pkg.ExchangeDirectionSell, merchantId)
 	assert.Equal(suite.T(), rd2.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(1)/100))))
 	assert.Equal(suite.T(), rd2.Rate, float64(0.89899))
 
-	// adding merchant correction rule
+	// adding merchant correction rule for Buy
 	req2 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		MerchantId:       merchantId,
-		CommonCorrection: 5,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionBuy,
+		MerchantId:        merchantId,
+		CommonCorrection:  5,
 		PairCorrection: map[string]float64{
-			"USDEUR": -3,
-			"EURUSD": 3,
+			"USDEUR": 3,
+		},
+	}
+	err = suite.service.AddMerchantRateCorrectionRule(context.TODO(), req2, res1)
+	assert.NoError(suite.T(), err)
+
+	// adding merchant correction rule for Sell
+	req2 = &currencies.CorrectionRule{
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		MerchantId:        merchantId,
+		CommonCorrection:  5,
+		PairCorrection: map[string]float64{
+			"USDEUR": 3,
 		},
 	}
 	err = suite.service.AddMerchantRateCorrectionRule(context.TODO(), req2, res1)
@@ -243,32 +263,37 @@ func (suite *CurrenciesratesServiceTestSuite) TestApplyCorrection() {
 		Source: "OXR",
 	}
 
-	// rate decreased for 3%
-	suite.service.applyCorrection(rd3, pkg.RateTypeOxr, merchantId)
-	assert.Equal(suite.T(), req2.GetCorrectionValue("USDEUR"), float64(-3))
-	assert.Equal(suite.T(), req2.GetCorrectionValue(rd3.Pair), float64(-3))
-	assert.Equal(suite.T(), rd3.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(-3)/100))))
+	// rate for Buy decreased for 3% by pair rule for merchant
+	suite.service.applyCorrection(rd3, pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, merchantId)
+	assert.Equal(suite.T(), req2.GetCorrectionValue("USDEUR"), float64(3))
+	assert.Equal(suite.T(), req2.GetCorrectionValue(rd3.Pair), float64(3))
+	assert.Equal(suite.T(), rd3.Rate, suite.service.toPrecise(float64(0.89)/(1+(float64(3)/100))))
 	assert.Equal(suite.T(), rd3.Rate, float64(0.864078))
 
 	rd4 := &currencies.RateData{
-		Pair:   "EURUSD",
-		Rate:   suite.service.toPrecise(1.12),
+		Pair:   "USDEUR",
+		Rate:   suite.service.toPrecise(0.89),
 		Source: "OXR",
 	}
-	// rate increased for 3%
-	suite.service.applyCorrection(rd4, pkg.RateTypeOxr, merchantId)
-	assert.Equal(suite.T(), req2.GetCorrectionValue("EURUSD"), float64(3))
-	assert.Equal(suite.T(), rd4.Rate, suite.service.toPrecise(float64(1.12)/(1-(float64(3)/100))))
+
+	// rate for Sell increased for 3% by pair rule for merchant
+	suite.service.applyCorrection(rd4, pkg.RateTypeOxr, pkg.ExchangeDirectionSell, merchantId)
+	assert.Equal(suite.T(), req2.GetCorrectionValue("USDEUR"), float64(3))
+	assert.Equal(suite.T(), req2.GetCorrectionValue(rd4.Pair), float64(3))
+	assert.Equal(suite.T(), rd4.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(3)/100))))
+	assert.Equal(suite.T(), rd4.Rate, float64(0.917526))
 
 	rd5 := &currencies.RateData{
 		Pair:   "RUBUSD",
-		Rate:   suite.service.toPrecise(0.015),
+		Rate:   suite.service.toPrecise(0.89),
 		Source: "OXR",
 	}
-	// rate increased for 5%
-	suite.service.applyCorrection(rd5, pkg.RateTypeOxr, merchantId)
+
+	// rate increased for 5% by common rule for merchant
+	suite.service.applyCorrection(rd5, pkg.RateTypeOxr, pkg.ExchangeDirectionSell, merchantId)
 	assert.Equal(suite.T(), req2.GetCorrectionValue("RUBUSD"), float64(5))
-	assert.Equal(suite.T(), rd5.Rate, suite.service.toPrecise(float64(0.015)/(1-(float64(5)/100))))
+	assert.Equal(suite.T(), rd5.Rate, suite.service.toPrecise(float64(0.89)/(1-(float64(5)/100))))
+	assert.Equal(suite.T(), rd5.Rate, float64(0.936843))
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_getCollectionName_Ok() {
@@ -289,54 +314,54 @@ func (suite *CurrenciesratesServiceTestSuite) Test_getCollectionName_Fail() {
 
 func (suite *CurrenciesratesServiceTestSuite) Test_addRateCorrectionRule_Ok() {
 
-	err := suite.service.addCorrectionRule(pkg.RateTypeOxr, 0, map[string]float64{}, "")
+	err := suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 0, map[string]float64{}, "")
 	assert.NoError(suite.T(), err)
 
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 0, map[string]float64{}, bson.NewObjectId().Hex())
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 0, map[string]float64{}, bson.NewObjectId().Hex())
 	assert.NoError(suite.T(), err)
 
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 1, map[string]float64{}, bson.NewObjectId().Hex())
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 1, map[string]float64{}, bson.NewObjectId().Hex())
 	assert.NoError(suite.T(), err)
 
 	pairCorrection := map[string]float64{
-		"USDEUR": -3,
+		"USDEUR": 3,
 		"EURUSD": 3,
 	}
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 1, pairCorrection, bson.NewObjectId().Hex())
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 1, pairCorrection, bson.NewObjectId().Hex())
 	assert.NoError(suite.T(), err)
 
 	pairCorrection = map[string]float64{
-		"USDEUR": -3,
+		"USDEUR": 3,
 		"EURUSD": 3,
 	}
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 0, pairCorrection, "")
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 0, pairCorrection, "")
 	assert.NoError(suite.T(), err)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_addRateCorrectionRule_Fail() {
 
-	err := suite.service.addCorrectionRule("", 0, map[string]float64{}, "")
+	err := suite.service.addCorrectionRule("", pkg.ExchangeDirectionBuy, 0, map[string]float64{}, "")
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
 
-	err = suite.service.addCorrectionRule("bla-bla-bla", 0, map[string]float64{}, "")
+	err = suite.service.addCorrectionRule("bla-bla-bla", pkg.ExchangeDirectionBuy, 0, map[string]float64{}, "")
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
 
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 101, map[string]float64{}, "")
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 101, map[string]float64{}, "")
 	assert.Error(suite.T(), err)
 
 	pairCorrection := map[string]float64{
-		"USDEUR": -101,
+		"USDEUR": 101,
 	}
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 0, pairCorrection, "")
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 0, pairCorrection, "")
 	assert.Error(suite.T(), err)
 
 	pairCorrection = map[string]float64{
-		"USDEUR": -3,
+		"USDEUR": 3,
 		"EURZWD": 3,
 	}
-	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, 0, pairCorrection, "")
+	err = suite.service.addCorrectionRule(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, 0, pairCorrection, "")
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorCurrencyPairNotExists)
 }
@@ -373,7 +398,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
 	// requesting exchange
-	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, bson.M{}, "", res)
+	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, "USD", "RUB", 100, merchantId, bson.M{}, "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
@@ -384,19 +409,19 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
 func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Fail() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
-	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, "BLA", "USD", 100, "", bson.M{}, "", res)
+	err := suite.service.exchangeCurrency(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, "BLA", "USD", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorFromCurrencyNotSupported)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "", 100, "", bson.M{}, "", res)
+	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, "USD", "", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorToCurrencyNotSupported)
 
-	err = suite.service.exchangeCurrency("bla-bla", "USD", "RUB", 100, "", bson.M{}, "", res)
+	err = suite.service.exchangeCurrency("bla-bla", pkg.ExchangeDirectionBuy, "USD", "RUB", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), errorRateTypeInvalid)
 
-	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, "USD", "EUR", 100, "", bson.M{}, "", res)
+	err = suite.service.exchangeCurrency(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, "USD", "EUR", 100, "", bson.M{}, "", res)
 	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), err.Error(), mgo.ErrNotFound.Error())
 }
@@ -406,7 +431,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrencyByDate_Ok() {
 	res := &currencies.ExchangeCurrencyResponse{}
 
 	// requesting exchange
-	err := suite.service.exchangeCurrencyByDate(pkg.RateTypeOxr, "USD", "RUB", 100, merchantId, time.Now(), "", res)
+	err := suite.service.exchangeCurrencyByDate(pkg.RateTypeOxr, pkg.ExchangeDirectionBuy, "USD", "RUB", 100, merchantId, time.Now(), "", res)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), res.ExchangedAmount, float64(6463.14))
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))

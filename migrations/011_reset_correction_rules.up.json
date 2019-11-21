@@ -1,0 +1,103 @@
+[
+  {
+    "delete": "correction_rules",
+    "deletes": [
+      {
+        "q": {},
+        "limit": 0
+      }
+    ]
+  },
+  {
+    "dropIndexes": "correction_rules",
+    "index": "*"
+  },
+  {
+    "createIndexes": "correction_rules",
+    "indexes": [
+      {
+        "key": {
+          "merchant_id": 1,
+          "rate_type": 1,
+          "exchange_direction": 1
+        },
+        "name": "merchant_rate_type"
+      }
+    ]
+  },
+  {
+    "insert": "correction_rules",
+    "documents": [
+      {
+        "rate_type": "stock",
+        "merchant_id": "",
+        "exchange_direction": "buy",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "stock",
+        "merchant_id": "",
+        "exchange_direction": "sell",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "paysuper",
+        "merchant_id": "",
+        "exchange_direction": "buy",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "paysuper",
+        "merchant_id": "",
+        "exchange_direction": "sell",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "oxr",
+        "merchant_id": "",
+        "exchange_direction": "buy",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "oxr",
+        "merchant_id": "",
+        "exchange_direction": "sell",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "centralbanks",
+        "merchant_id": "",
+        "exchange_direction": "buy",
+        "common_correction": 0,
+        "pair_correction": null
+      },
+      {
+        "rate_type": "centralbanks",
+        "merchant_id": "",
+        "exchange_direction": "sell",
+        "common_correction": 0,
+        "pair_correction": null
+      }
+    ]
+  },
+  {
+    "update": "correction_rules",
+    "updates": [
+      {
+        "q": {},
+        "u": {
+          "$currentDate": {
+            "updated_at": true
+          }
+        },
+        "multi": true
+      }
+    ]
+  }
+]

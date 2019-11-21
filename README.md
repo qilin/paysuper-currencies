@@ -61,23 +61,22 @@ Where
 * `source` - code of rates source
 * `volume` - volume of excanhges, made for this rate, optional, 0 by default
 
-## Details about rate projection 
+## Correction rules
 
-Right now rate projection methods based on Bollinger's bands was completely disabled in the project . Evaluation currency 
-rate correction with algorithm based approach has critically low range to real stock rates. According previous test this 
-range should be between 1.25% and 1.75% markups to low-volatile currencies in rates OXR vs actual stock rates and from 
-1.66% to 2.11% for low-volatile currencies. For current algorithm this rates 0.79%-1.19% — the balance of operations in 
-this forecast does not converge. We work at a loss - we need more real data to improve it.
+There are rate correction rules may be in system. 
 
-In current realization currencies markup process in hand-driven: each Monday accountant should calculate median to currency
-rates to each currency pair in system and create recommended markups for each merchant in the system according to average 
-check price and processing vs settlement amounts.
+They are may be defined for combination of RateType, ExchangeDirection, Merchant and, optionally, some currencies pair (or for all pairs by default) 
 
-All Bollinger's based core should be restored from git history after we pass 6 months after launch and check the real 
-projection of rates. Also the code with RabbitMQ subscriber was removed because the actual business process behind rates
-require a lot of hand based reports and we don't see the reasons to automate it right now. 
+Also, you may define system correction rules for combination of  RateType, ExchangeDirection and, optionally, some currencies pair (or for all pairs by default)
 
+Correction rules applies at the moment of rate or exchange request processing.
 
+## Exchange directions
+
+There are two directions for exchange and rates requests: buy and sell. They are affect the application of correction rules for rates and exchages.
+* Exchange direction `sell` will decrease exchange rate for percent determined in the corresponding correction rule, and increase result amount.
+* Exchange direction `buy` will increase exchange rate for percent determined in the corresponding correction rule, and decrease result amount. 
+ 
 ## Contributing
 We feel that a welcoming community is important and we ask that you follow PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.
 

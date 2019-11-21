@@ -42,6 +42,8 @@ const (
 	errorSourceNotSupported       = "source not supported"
 	errorToCurrencyNotSupported   = "to currency not supported"
 	errorRateTypeInvalid          = "rate type invalid"
+	errorExchangeDirectionInvalid = "exchange direction invalid"
+	errorCorrectionPercentInvalid = "correction percent invalid"
 	errorCurrencyPairNotExists    = "currency pair is not exists"
 	errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 	errorCorrectionRuleNotFound   = "correction rule not found"
@@ -335,6 +337,7 @@ func (s *Service) getByDateQuery(date time.Time) bson.M {
 
 func (s *Service) exchangeCurrencyByDate(
 	rateType string,
+	exchangeDirection string,
 	from string,
 	to string,
 	amount float64,
@@ -343,11 +346,12 @@ func (s *Service) exchangeCurrencyByDate(
 	source string,
 	res *currencies.ExchangeCurrencyResponse,
 ) error {
-	return s.exchangeCurrency(rateType, from, to, amount, merchantId, s.getByDateQuery(date), source, res)
+	return s.exchangeCurrency(rateType, exchangeDirection, from, to, amount, merchantId, s.getByDateQuery(date), source, res)
 }
 
 func (s *Service) exchangeCurrency(
 	rateType string,
+	exchangeDirection string,
 	from string,
 	to string,
 	amount float64,
@@ -362,13 +366,15 @@ func (s *Service) exchangeCurrency(
 		return err
 	}
 
-	rule := &currencies.CorrectionRule{}
-
 	// ignore error possible here, it not change workflow,
 	// and a warning will be written to log in getCorrectionRule method body
-	_ = s.getCorrectionRule(rateType, merchantId, rule)
+	rule, _ := s.getCorrectionRule(rateType, exchangeDirection, merchantId)
+	if rule == nil {
+		rule = &currencies.CorrectionRule{}
+	}
 
 	res.Correction = rule.GetCorrectionValue(rd.Pair)
+	res.ExchangeDirection = exchangeDirection
 
 	// applyCorrectionRule mutate rd object!
 	// so, firstly save original rate to response,
@@ -386,14 +392,21 @@ func (s *Service) exchangeCurrency(
 	return nil
 }
 
-func (s *Service) getCorrectionRule(rateType string, merchantId string, r *currencies.CorrectionRule) error {
+func (s *Service) getCorrectionRule(rateType, exchangeDirection, merchantId string) (r *currencies.CorrectionRule, err error) {
 
 	if !s.contains(s.cfg.RatesTypes, rateType) {
-		return errors.New(errorRateTypeInvalid)
+		return nil, errors.New(errorRateTypeInvalid)
+	}
+
+	if !s.contains(pkg.SupportedExchangeDirections, exchangeDirection) {
+		return nil, errors.New(errorExchangeDirectionInvalid)
 	}
 
 	var sort []string
-	query := bson.M{"rate_type": rateType}
+	query := bson.M{
+		"rate_type":          rateType,
+		"exchange_direction": exchangeDirection,
+	}
 	if merchantId == "" {
 		query["merchant_id"] = ""
 	} else {
@@ -402,18 +415,19 @@ func (s *Service) getCorrectionRule(rateType string, merchantId string, r *curre
 	}
 	sort = append(sort, "-_id")
 
-	err := s.db.Collection(collectionNameCorrectionRules).Find(query).Sort(sort...).Limit(1).One(&r)
+	err = s.db.Collection(collectionNameCorrectionRules).Find(query).Sort(sort...).Limit(1).One(&r)
 
 	if err != nil {
-		zap.S().Warnw(errorCorrectionRuleNotFound, "error", err, "rateType", rateType, "merchantId", merchantId)
-		return err
+		zap.S().Warnw(errorCorrectionRuleNotFound, "error", err, "rateType", rateType, "exchangeDirection", exchangeDirection, "merchantId", merchantId)
+		return
 	}
 
-	return nil
+	return
 }
 
 func (s *Service) addCorrectionRule(
 	rateType string,
+	exchangeDirection string,
 	commonCorrection float64,
 	pairCorrection map[string]float64,
 	merchantId string,
@@ -423,19 +437,32 @@ func (s *Service) addCorrectionRule(
 		return errors.New(errorRateTypeInvalid)
 	}
 
+	if !s.contains(pkg.SupportedExchangeDirections, exchangeDirection) {
+		return errors.New(errorExchangeDirectionInvalid)
+	}
+
+	if !s.isCorrectionPercentValid(commonCorrection) {
+		return errors.New(errorCorrectionPercentInvalid)
+	}
+
 	rule := &currencies.CorrectionRule{
-		Id:               bson.NewObjectId().Hex(),
-		CreatedAt:        ptypes.TimestampNow(),
-		RateType:         rateType,
-		CommonCorrection: commonCorrection,
-		PairCorrection:   pairCorrection,
+		Id:                bson.NewObjectId().Hex(),
+		CreatedAt:         ptypes.TimestampNow(),
+		RateType:          rateType,
+		ExchangeDirection: exchangeDirection,
+		CommonCorrection:  commonCorrection,
+		PairCorrection:    pairCorrection,
+		MerchantId:        merchantId,
 	}
 
 	if len(pairCorrection) > 0 {
-		for pair := range pairCorrection {
+		for pair, val := range pairCorrection {
 			if !s.isPairExists(pair) {
 				zap.S().Errorw(errorCurrencyPairNotExists, "req", rule)
 				return errors.New(errorCurrencyPairNotExists)
+			}
+			if !s.isCorrectionPercentValid(val) {
+				return errors.New(errorCorrectionPercentInvalid)
 			}
 		}
 	}
@@ -452,6 +479,10 @@ func (s *Service) addCorrectionRule(
 	}
 
 	return nil
+}
+
+func (s *Service) isCorrectionPercentValid(val float64) bool {
+	return val >= 0 && val <= 100
 }
 
 func (s *Service) sendCentrifugoMessage(message string, error error) {
@@ -485,12 +516,14 @@ func (s *Service) toPrecise(val float64) float64 {
 	return math.Ceil(val*p) / p
 }
 
-func (s *Service) applyCorrection(rd *currencies.RateData, rateType string, merchantId string) {
-	rule := &currencies.CorrectionRule{}
-	err := s.getCorrectionRule(rateType, merchantId, rule)
+func (s *Service) applyCorrection(rd *currencies.RateData, rateType, exchangeDirection, merchantId string) {
+	rule, err := s.getCorrectionRule(rateType, exchangeDirection, merchantId)
 	if err != nil {
 		// here is simple return, no error report need
 		return
+	}
+	if rule == nil {
+		rule = &currencies.CorrectionRule{}
 	}
 
 	s.applyCorrectionRule(rd, rule)
@@ -501,5 +534,17 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
 	if value == 0 {
 		return
 	}
-	rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
+
+	divider := float64(1)
+
+	switch rule.ExchangeDirection {
+
+	case pkg.ExchangeDirectionSell:
+		divider = 1 - (value / 100)
+
+	case pkg.ExchangeDirectionBuy:
+		divider = 1 + (value / 100)
+	}
+
+	rd.Rate = s.toPrecise(rd.Rate / divider)
 }
