@@ -1,0 +1,19 @@
+protoc:
+  version: 3.9.1
+  includes:
+    - api/proto
+
+generate:
+  go_options:
+    import_path: github.com/paysuper/paysuper-currencies
+
+  plugins:
+    - name: go
+      type: go
+      flags: paths=source_relative
+      output: pkg/proto
+
+    - name: micro
+      type: go
+      flags: paths=source_relative
+      output: pkg/proto
