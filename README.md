@@ -11,18 +11,13 @@ This service designed for sync currencies rates and store it locally with histor
 
 | Name                                 | Required | Default                  | Description                                                                         |
 |:-------------------------------------|:--------:|:-------------------------|:------------------------------------------------------------------------------------|
+| OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
 | MONGO_DSN                            | true     | -                        | MongoBD DSN connection string                                                       |
 | MONGO_DIAL_TIMEOUT                   | -        | 10                       | MongoBD dial timeout in seconds                                                     |
-| BROKER_ADDRESS                       | -        | amqp://127.0.0.1:5672    | RabbitMQ broker address                                                             |
-| BROKER_RETRY_TIMEOUT                 | -        | 60                       | RabbitMQ broker retry timeout                                                       |
-| BROKER_MAX_RETRY                     | -        | 5                        | RabbitMQ broker max retry count                                                     |
 | CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo url                                                                      |
 | CENTRIFUGO_SECRET                    | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin           | Centrifugo channel name to send alert notifications to admins                       |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
-| OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
-| BOLLINGER_DAYS                       | -        | 7                        | Number of days for plot Bollinger functions to calculate Paysuper Prediction Rates  |
-| BOLLINGER_PERIOD                     | -        | 21                       | Number of days in period for each Bollinger function                                |
 
 ## Starting the app
 
@@ -65,6 +60,23 @@ Where
 * `rate` - currency pair rate
 * `source` - code of rates source
 * `volume` - volume of excanhges, made for this rate, optional, 0 by default
+
+## Details about rate projection 
+
+Right now rate projection methods based on Bollinger's bands was completely disabled in the project . Evaluation currency 
+rate correction with algorithm based approach has critically low range to real stock rates. According previous test this 
+range should be between 1.25% and 1.75% markups to low-volatile currencies in rates OXR vs actual stock rates and from 
+1.66% to 2.11% for low-volatile currencies. For current algorithm this rates 0.79%-1.19% — the balance of operations in 
+this forecast does not converge. We work at a loss - we need more real data to improve it.
+
+In current realization currencies markup process in hand-driven: each Monday accountant should calculate median to currency
+rates to each currency pair in system and create recommended markups for each merchant in the system according to average 
+check price and processing vs settlement amounts.
+
+All Bollinger's based core should be restored from git history after we pass 6 months after launch and check the real 
+projection of rates. Also the code with RabbitMQ subscriber was removed because the actual business process behind rates
+require a lot of hand based reports and we don't see the reasons to automate it right now. 
+
 
 ## Contributing
 We feel that a welcoming community is important and we ask that you follow PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.

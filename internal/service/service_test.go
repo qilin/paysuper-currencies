@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
@@ -76,8 +77,6 @@ func (suite *CurrenciesratesServiceTestSuite) SetupTest() {
 	err = suite.service.saveRates(collectionRatesNameSuffixOxr, rates)
 	assert.NoError(suite.T(), err)
 	err = suite.service.saveRates(collectionRatesNameSuffixCentralbanks, rates)
-	assert.NoError(suite.T(), err)
-	err = suite.service.saveRates(collectionRatesNameSuffixCardpay, rates)
 	assert.NoError(suite.T(), err)
 }
 
@@ -366,7 +365,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_validateUrl_Fail() {
 func (suite *CurrenciesratesServiceTestSuite) Test_getByDateQuery_Ok() {
 	date := time.Now()
 	query := suite.service.getByDateQuery(date)
-	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": suite.service.eod(date)})
+	assert.Equal(suite.T(), query["created_at"], bson.M{"$lte": now.New(date).EndOfDay()})
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrency_Ok() {
@@ -413,35 +412,4 @@ func (suite *CurrenciesratesServiceTestSuite) Test_exchangeCurrencyByDate_Ok() {
 	assert.Equal(suite.T(), res.ExchangeRate, float64(64.6314))
 	assert.Equal(suite.T(), res.Correction, float64(0))
 	assert.Equal(suite.T(), res.OriginalRate, float64(64.6314))
-}
-
-func (suite *CurrenciesratesServiceTestSuite) Test_Triggers() {
-	tgr, err := suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.False(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.pullTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.True(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.releaseTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(triggerCardpay)
-	assert.NoError(suite.T(), err)
-	assert.False(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, triggerCardpay)
-
-	err = suite.service.pullTrigger(123)
-	assert.NoError(suite.T(), err)
-
-	tgr, err = suite.service.getTrigger(123)
-	assert.NoError(suite.T(), err)
-	assert.True(suite.T(), tgr.Active)
-	assert.Equal(suite.T(), tgr.Type, 123)
 }

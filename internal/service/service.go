@@ -11,14 +11,13 @@ import (
 	"github.com/centrifugal/gocent"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-database-mongo"
 	"github.com/paysuper/paysuper-recurring-repository/tools"
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/go-playground/validator.v9"
@@ -46,19 +45,16 @@ const (
 	errorCurrencyPairNotExists    = "currency pair is not exists"
 	errorDatetimeConversion       = "datetime conversion failed for central bank rate request"
 	errorCorrectionRuleNotFound   = "correction rule not found"
-	errorBrokerMaxRetryReached    = "broker max retry reached"
-	errorBrokerRetryPublishFailed = "broker retry publishing failed"
-	errorPullTrigger              = "pull trigger failed"
-	errorReleaseTrigger           = "release trigger failed"
-	errorDelayedFunction          = "error in delayed function"
 
 	mimeApplicationJSON = "application/json"
-	mimeApplicationXML  = "application/xml"
+	mimeApplicationXML  = "application/xhtml+xml,application/xml"
 	mimeTextXML         = "text/xml"
+	defaultUserAgent    = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Mobile Safari/537.36"
 
 	headerAccept      = "Accept"
 	headerCookie      = "Cookie"
 	headerContentType = "Content-Type"
+	headerUserAgent   = "User-Agent"
 
 	collectionRatesNameTemplate           = "%s_%s"
 	collectionRatesNamePrefix             = "currency_rates"
@@ -66,12 +62,9 @@ const (
 	collectionRatesNameSuffixCentralbanks = pkg.RateTypeCentralbanks
 	collectionRatesNameSuffixPaysuper     = pkg.RateTypePaysuper
 	collectionRatesNameSuffixStock        = pkg.RateTypeStock
-	collectionRatesNameSuffixCardpay      = pkg.RateTypeCardpay
 
 	collectionNamePaysuperCorrections = "paysuper_corrections"
-	collectionNamePaysuperCorridors   = "paysuper_corridors"
 	collectionNameCorrectionRules     = "correction_rules"
-	collectionNameTriggers            = "triggers"
 
 	ratesPrecision = 6
 
@@ -80,11 +73,8 @@ const (
 	serviceStatusOK   = "ok"
 	serviceStatusFail = "fail"
 
-	retryCountHeader = "x-retry-count"
-
-	triggerCardpay = 1
-
-	stubSource = "STUB"
+	stubSource               = "STUB"
+	defaultHttpClientTimeout = 30
 )
 
 var (
@@ -96,15 +86,6 @@ var (
 		cbrfSource: true,
 	}
 )
-
-type trigger struct {
-	ID        bson.ObjectId `bson:"_id,omitempty"`
-	Type      int           `bson:"type"`
-	Active    bool          `bson:"active"`
-	CreatedAt time.Time     `bson:"created_at"`
-}
-
-type callable func() error
 
 // Service is application entry point.
 type Service struct {
@@ -136,25 +117,6 @@ func NewService(cfg *config.Config, db *database.Source) (*Service, error) {
 
 // Init rabbitMq brokers and check for active triggers for delayed tasks
 func (s *Service) Init() error {
-	var err error
-	s.cardpayBroker, s.cardpayRetryBroker, s.cardpayFinishBroker, err = s.getBrokers(
-		pkg.CardpayTopicRateData,
-		pkg.CardpayTopicRateDataRetry,
-		pkg.CardpayTopicRateDataFinished,
-	)
-
-	tgr, err := s.getTrigger(triggerCardpay)
-	if err != nil {
-		return err
-	}
-
-	if tgr.Active == true {
-		now := time.Now()
-		eod := s.eod(now)
-		delta := eod.Sub(now)
-		return s.planDelayedTask(int64(delta.Seconds()), tgr.Type, s.CalculatePaysuperCorrections)
-	}
-
 	return nil
 }
 
@@ -165,72 +127,6 @@ func (s *Service) Status() (interface{}, error) {
 		return serviceStatusFail, err
 	}
 	return serviceStatusOK, nil
-}
-
-func (s *Service) getBrokers(topicName string, retryTopicName string, finishTopicName string) (*rabbitmq.Broker, *rabbitmq.Broker, *rabbitmq.Broker, error) {
-	broker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	retryBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	finishBroker, err := rabbitmq.NewBroker(s.cfg.BrokerAddress)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	broker.Opts.ExchangeOpts.Name = topicName
-
-	retryBroker.Opts.QueueOpts.Args = amqp.Table{
-		"x-dead-letter-exchange":    retryTopicName,
-		"x-message-ttl":             int32(s.cfg.BrokerRetryTimeout * 1000),
-		"x-dead-letter-routing-key": "*",
-	}
-	retryBroker.Opts.ExchangeOpts.Name = retryTopicName
-
-	finishBroker.Opts.ExchangeOpts.Name = finishTopicName
-
-	err = broker.RegisterSubscriber(topicName, s.SetRatesCardpay)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	err = finishBroker.RegisterSubscriber(topicName, s.PullRecalcTrigger)
-
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return broker, retryBroker, finishBroker, nil
-}
-
-func (s *Service) retry(msg proto.Message, dlv amqp.Delivery, msgID string) error {
-	var rtc = int32(0)
-
-	if v, ok := dlv.Headers[retryCountHeader]; ok {
-		rtc = v.(int32)
-	}
-
-	if rtc >= s.cfg.BrokerMaxRetry {
-		zap.S().Error(errorBrokerMaxRetryReached, zap.String("msgid", msgID))
-		s.sendCentrifugoMessage(msgID, errors.New(errorBrokerMaxRetryReached))
-		return nil
-	}
-
-	err := s.cardpayRetryBroker.Publish(dlv.RoutingKey, msg, amqp.Table{retryCountHeader: rtc + 1})
-
-	if err != nil {
-		zap.S().Warn(errorBrokerRetryPublishFailed, zap.String("msgid", msgID), zap.Error(err))
-		s.sendCentrifugoMessage(msgID, err)
-		return err
-	}
-
-	return nil
 }
 
 func (s *Service) validateReq(req interface{}) error {
@@ -259,6 +155,8 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 	zap.S().Info("Sending request to url: ", url)
 
 	client := tools.NewLoggedHttpClient(zap.S())
+	client.Timeout = time.Duration(defaultHttpClientTimeout * time.Second)
+
 	// prevent following to redirects
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
@@ -274,7 +172,6 @@ func (s *Service) request(method string, url string, req []byte, headers map[str
 	}
 
 	resp, err := client.Do(httpReq)
-
 	if err != nil {
 		return nil, err
 	}
@@ -364,7 +261,6 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 
 	query["pair"] = pair
 
-	isCardpay := collectionRatesNameSuffix == pkg.RateTypeCardpay
 	isCentralbank := collectionRatesNameSuffix == pkg.RateTypeCentralbanks
 
 	cName, err := s.getCollectionName(collectionRatesNameSuffix)
@@ -372,57 +268,44 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 		return err
 	}
 
-	if isCardpay {
-		q := []bson.M{
-			{"$match": query},
-			{"$group": bson.M{
-				"_id":         bson.M{"create_date": "$create_date"},
-				"numerator":   bson.M{"$sum": bson.M{"$multiply": []string{"$rate", "$volume"}}},
-				"denominator": bson.M{"$sum": "$volume"},
-			}},
-			{"$project": bson.M{
-				"value": bson.M{"$divide": []string{"$numerator", "$denominator"}},
-			}},
-			{"$limit": 1},
+	if isCentralbank {
+		source = strings.ToUpper(source)
+		if _, ok := availableCentralbanksSources[source]; !ok {
+			// temporarily ignore unsupported central banks
+			zap.S().Warnw(errorSourceNotSupported, "source", source)
 		}
-		var resp []map[string]interface{}
-		err = s.db.Collection(cName).Pipe(q).All(&resp)
+		query["source"] = source
+	}
 
+	err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+	if err != nil {
+		zap.L().Error(
+			pkg.ErrorDatabaseQueryFailed,
+			zap.Error(err),
+			zap.String(pkg.ErrorDatabaseFieldCollection, cName),
+			zap.Any(pkg.ErrorDatabaseFieldQuery, query),
+		)
+	}
+
+	// requested pair is not found in central banks rates
+	// try to fallback to OXR rate for it
+	if err == mgo.ErrNotFound && isCentralbank {
+		cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
 		if err != nil {
 			return err
 		}
-
-		if len(resp) == 0 {
-			return mgo.ErrNotFound
-		}
-
-		res.Pair = pair
-		res.Rate = s.toPrecise(resp[0]["value"].(float64))
-		res.Source = cardpaySource
-
-	} else {
-		if isCentralbank {
-			source = strings.ToUpper(source)
-			if _, ok := availableCentralbanksSources[source]; !ok {
-				// temporarily ignore unsupported central banks
-				zap.S().Warnw(errorSourceNotSupported, "source", source)
-			}
-			query["source"] = source
-		}
-
+		delete(query, "source")
 		err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
-
-		// requested pair is not found in central banks rates
-		// try to fallback to OXR rate for it
-		if err == mgo.ErrNotFound && isCentralbank {
-			cName, err = s.getCollectionName(collectionRatesNameSuffixOxr)
-			if err != nil {
-				return err
-			}
-			delete(query, "source")
-			err = s.db.Collection(cName).Find(query).Sort("-_id").Limit(1).One(&res)
+		if err != nil {
+			zap.L().Error(
+				pkg.ErrorDatabaseQueryFailed,
+				zap.Error(err),
+				zap.String(pkg.ErrorDatabaseFieldCollection, cName),
+				zap.Any(pkg.ErrorDatabaseFieldQuery, query),
+			)
 		}
 	}
+
 	if err != nil {
 		return err
 	}
@@ -447,7 +330,7 @@ func (s *Service) saveRates(collectionRatesNameSuffix string, data []interface{}
 }
 
 func (s *Service) getByDateQuery(date time.Time) bson.M {
-	return bson.M{"created_at": bson.M{"$lte": s.eod(date)}}
+	return bson.M{"created_at": bson.M{"$lte": now.New(date).EndOfDay()}}
 }
 
 func (s *Service) exchangeCurrencyByDate(
@@ -589,18 +472,6 @@ func (s *Service) sendCentrifugoMessage(message string, error error) {
 	}
 }
 
-// returns begin-of-day for passed date
-func (s *Service) bod(t time.Time) time.Time {
-	year, month, day := t.Date()
-	return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
-}
-
-// returns end-of-day for passed date
-func (s *Service) eod(t time.Time) time.Time {
-	year, month, day := t.Date()
-	return time.Date(year, month, day, 23, 59, 59, 999999999, t.Location())
-}
-
 func (s *Service) getCollectionName(suffix string) (string, error) {
 	if !s.contains(s.cfg.RatesTypes, suffix) {
 		return "", errors.New(errorRateTypeInvalid)
@@ -631,56 +502,4 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
 		return
 	}
 	rd.Rate = s.toPrecise(rd.Rate / (1 - (value / 100)))
-}
-
-func (s *Service) pullTrigger(triggerType int) error {
-	trg := &trigger{
-		Type:      triggerType,
-		Active:    true,
-		CreatedAt: time.Now(),
-	}
-	return s.db.Collection(collectionNameTriggers).Insert(trg)
-}
-
-func (s *Service) releaseTrigger(triggerType int) error {
-	trg := &trigger{
-		Type:      triggerType,
-		Active:    false,
-		CreatedAt: time.Now(),
-	}
-	return s.db.Collection(collectionNameTriggers).Insert(trg)
-}
-
-func (s *Service) getTrigger(triggerType int) (*trigger, error) {
-	query := bson.M{"type": triggerType}
-	res := &trigger{
-		Type:      triggerType,
-		Active:    false,
-		CreatedAt: time.Now(),
-	}
-	err := s.db.Collection(collectionNameTriggers).Find(query).Sort("-_id").Limit(1).One(res)
-	if err != nil && err != mgo.ErrNotFound {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (s *Service) planDelayedTask(delay int64, trigger int, fn callable) error {
-	ticker := time.NewTicker(time.Second * time.Duration(delay))
-	err := s.pullTrigger(trigger)
-	if err != nil {
-		zap.S().Errorw(errorPullTrigger, "error", err, "trigger", trigger)
-	}
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				err := fn()
-				zap.S().Errorw(errorDelayedFunction, "error", err)
-				s.sendCentrifugoMessage(errorDelayedFunction, err)
-				ticker.Stop()
-			}
-		}
-	}()
-	return err
 }
