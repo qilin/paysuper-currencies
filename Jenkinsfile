@@ -1,6 +1,6 @@
 @Library('p1pipeline')_
 
-p1pipeline("paysupercurrencies",
+p1pipeline("pscurrencies",
            "paysupercurrencies",
            "192706-currency-exchange-directions", // development branch for test releases
            "192585", // kubernetes namespace for test releases
