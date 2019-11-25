@@ -11,6 +11,7 @@ backend:
   replicas: 1
   service: 
     type: ClusterIP
+    name: paysupercurrencies
     port: 8080
     protocol: TCP
   env:
