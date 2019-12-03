@@ -59,7 +59,7 @@ var CurrencyDefinitions = map[string]CurrencyProperties{
 	"SEK": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"SGD": {Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"THB": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
-	"TRY": {Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
+	// "TRY": {Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"TWD": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"TZS": {Price: false, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"UAH": {Price: false, Settlement: false, Vat: false, Local: false, Accounting: false},
