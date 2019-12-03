@@ -377,8 +377,9 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerc
 
 func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_Ok() {
 	req1 := &currencies.CommonCorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
 	}
 	res1 := &currencies.EmptyResponse{}
 	err := suite.service.AddCommonRateCorrectionRule(context.TODO(), req1, res1)
@@ -387,9 +388,10 @@ func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_O
 
 func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule_Ok() {
 	req1 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
-		MerchantId:       bson.NewObjectId().Hex(),
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
+		MerchantId:        bson.NewObjectId().Hex(),
 	}
 	res1 := &currencies.EmptyResponse{}
 	err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
@@ -408,17 +410,18 @@ func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetCommonRateCorrectionRule_Ok() {
-	req1 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
-		MerchantId:       bson.NewObjectId().Hex(),
+	req1 := &currencies.CommonCorrectionRule{
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
 	}
 	res1 := &currencies.EmptyResponse{}
-	err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
+	err := suite.service.AddCommonRateCorrectionRule(context.TODO(), req1, res1)
 	assert.NoError(suite.T(), err)
 
 	req := &currencies.CommonCorrectionRuleRequest{
-		RateType: pkg.RateTypeOxr,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
 	}
 
 	res := &currencies.CorrectionRule{}
@@ -430,31 +433,35 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule
 	merchantId := bson.NewObjectId().Hex()
 
 	req1 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
-		MerchantId:       merchantId,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
+		MerchantId:        merchantId,
 	}
 	res1 := &currencies.EmptyResponse{}
 	err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)
 	assert.NoError(suite.T(), err)
 
 	req := &currencies.MerchantCorrectionRuleRequest{
-		RateType:   pkg.RateTypeOxr,
-		MerchantId: merchantId,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		MerchantId:        merchantId,
 	}
 
 	res := &currencies.CorrectionRule{}
 	err = suite.service.GetMerchantRateCorrectionRule(context.TODO(), req, res)
 	assert.NoError(suite.T(), err)
+	assert.NotNil(suite.T(), res)
 }
 
 func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule_Fail() {
 	merchantId := bson.NewObjectId().Hex()
 
 	req1 := &currencies.CorrectionRule{
-		RateType:         pkg.RateTypeOxr,
-		CommonCorrection: 1,
-		MerchantId:       merchantId,
+		RateType:          pkg.RateTypeOxr,
+		ExchangeDirection: pkg.ExchangeDirectionSell,
+		CommonCorrection:  1,
+		MerchantId:        merchantId,
 	}
 	res1 := &currencies.EmptyResponse{}
 	err := suite.service.AddMerchantRateCorrectionRule(context.TODO(), req1, res1)

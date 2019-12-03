@@ -23,12 +23,13 @@ type mgoRateData struct {
 
 // RateData struct for mongoDb
 type mgoCorrectionRule struct {
-	Id               bson.ObjectId      `bson:"_id"`
-	MerchantId       string             `bson:"merchant_id"`
-	RateType         string             `bson:"rate_type"`
-	CommonCorrection float64            `bson:"common_correction"`
-	PairCorrection   map[string]float64 `bson:"pair_correction"`
-	CreatedAt        time.Time          `bson:"created_at"`
+	Id                bson.ObjectId      `bson:"_id"`
+	MerchantId        string             `bson:"merchant_id"`
+	RateType          string             `bson:"rate_type"`
+	ExchangeDirection string             `bson:"exchange_direction"`
+	CommonCorrection  float64            `bson:"common_correction"`
+	PairCorrection    map[string]float64 `bson:"pair_correction"`
+	CreatedAt         time.Time          `bson:"created_at"`
 }
 
 // RateData.SetBSON
@@ -92,6 +93,7 @@ func (p *CorrectionRule) SetBSON(raw bson.Raw) error {
 	p.Id = decoded.Id.Hex()
 	p.MerchantId = decoded.MerchantId
 	p.RateType = decoded.RateType
+	p.ExchangeDirection = decoded.ExchangeDirection
 	p.CommonCorrection = decoded.CommonCorrection
 	p.PairCorrection = decoded.PairCorrection
 
@@ -106,10 +108,11 @@ func (p *CorrectionRule) SetBSON(raw bson.Raw) error {
 // CorrectionRule.GetBSON
 func (p *CorrectionRule) GetBSON() (interface{}, error) {
 	st := &mgoCorrectionRule{
-		RateType:         p.RateType,
-		CommonCorrection: p.CommonCorrection,
-		PairCorrection:   p.PairCorrection,
-		MerchantId:       p.MerchantId,
+		RateType:          p.RateType,
+		ExchangeDirection: p.ExchangeDirection,
+		CommonCorrection:  p.CommonCorrection,
+		PairCorrection:    p.PairCorrection,
+		MerchantId:        p.MerchantId,
 	}
 
 	if len(p.Id) <= 0 {
