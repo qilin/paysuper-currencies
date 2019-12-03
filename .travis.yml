@@ -9,7 +9,7 @@ addons:
 stages:
   - test
   - name: deploy
-    if: branch in (develop, 192706-currency-exchange-directions)
+    if: branch = develop
 jobs:
   include:
     - stage: test
