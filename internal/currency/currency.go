@@ -25,7 +25,6 @@ var CurrencyDefinitions = map[string]CurrencyProperties{
 	"CLP": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"CNY": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"COP": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
-	"CRC": {Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"CZK": {Price: true, Settlement: false, Vat: false, Local: true, Accounting: false},
 	"DKK": {Price: true, Settlement: false, Vat: false, Local: true, Accounting: false},
 	"EGP": {Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
