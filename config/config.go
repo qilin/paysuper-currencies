@@ -23,6 +23,8 @@ type Config struct {
 
 	Currencies map[string]currency.CurrencyProperties
 
+	CurrenciesPrecision map[string]int32
+
 	SettlementCurrencies   []string
 	PriceCurrencies        []string
 	VatCurrencies          []string
@@ -53,10 +55,12 @@ func NewConfig() (*Config, error) {
 
 	cfg.Currencies = currency.CurrencyDefinitions
 	cfg.SupportedCurrenciesParsed = make(map[string]bool, len(cfg.Currencies))
+	cfg.CurrenciesPrecision = make(map[string]int32, len(cfg.Currencies))
 
 	for code, properties := range cfg.Currencies {
 		cfg.SupportedCurrencies = append(cfg.SupportedCurrencies, code)
 		cfg.SupportedCurrenciesParsed[code] = true
+		cfg.CurrenciesPrecision[code] = properties.Precision
 
 		if properties.Price || properties.Vat || properties.Local {
 			cfg.RatesRequestCurrencies = append(cfg.RatesRequestCurrencies, code)

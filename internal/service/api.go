@@ -333,3 +333,13 @@ func (s *Service) GetAccountingCurrencies(
 	}
 	return nil
 }
+
+// GetCurrenciesPrecision - returns map of currencies with theirs precision
+func (s *Service) GetCurrenciesPrecision(
+	ctx context.Context,
+	req *currencies.EmptyRequest,
+	res *currencies.CurrenciesPrecisionResponse,
+) error {
+	res.Values = s.cfg.CurrenciesPrecision
+	return nil
+}
