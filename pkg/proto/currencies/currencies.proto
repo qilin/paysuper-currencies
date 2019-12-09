@@ -49,6 +49,9 @@ service currencyratesService {
 
     rpc GetAccountingCurrencies (EmptyRequest) returns (CurrenciesList) {
     }
+
+    rpc GetCurrenciesPrecision (EmptyRequest) returns (CurrenciesPrecisionResponse) {
+    }
 }
 
 message GetRateCurrentCommonRequest {
@@ -283,3 +286,8 @@ message ExchangeCurrencyResponse {
 message CurrenciesList {
     repeated string currencies = 1;
 }
+
+message CurrenciesPrecisionResponse {
+    map<string, int32> values = 1;
+}
+
