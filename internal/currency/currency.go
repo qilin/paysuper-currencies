@@ -18,7 +18,7 @@ var CurrencyDefinitions = map[string]CurrencyProperties{
 	"ARS": {Precision: 2, Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"AUD": {Precision: 2, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"BGN": {Precision: 2, Price: false, Settlement: false, Vat: false, Local: true, Accounting: false},
-	"BHD": {Precision: 3, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
+	"BHD": {Precision: 2, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false}, // real Precision: 3
 	"BRL": {Precision: 2, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"BYN": {Precision: 2, Price: false, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"CAD": {Precision: 2, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
@@ -42,7 +42,7 @@ var CurrencyDefinitions = map[string]CurrencyProperties{
 	"JPY": {Precision: 0, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"KES": {Precision: 2, Price: false, Settlement: false, Vat: true, Local: true, Accounting: false},
 	"KRW": {Precision: 0, Price: true, Settlement: false, Vat: true, Local: true, Accounting: false},
-	"KWD": {Precision: 3, Price: false, Settlement: false, Vat: false, Local: false, Accounting: false},
+	"KWD": {Precision: 2, Price: false, Settlement: false, Vat: false, Local: false, Accounting: false}, // real Precision: 3
 	"KZT": {Precision: 2, Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"MXN": {Precision: 2, Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},
 	"MYR": {Precision: 2, Price: true, Settlement: false, Vat: false, Local: false, Accounting: false},

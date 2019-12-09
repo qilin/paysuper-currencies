@@ -530,5 +530,5 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetCurrenciesPrecision_Ok() {
 	assert.NoError(suite.T(), err)
 	assert.EqualValues(suite.T(), res.Values["RUB"], 2)
 	assert.EqualValues(suite.T(), res.Values["CLP"], 0)
-	assert.EqualValues(suite.T(), res.Values["BHD"], 3)
+	assert.EqualValues(suite.T(), res.Values["BHD"], 2)
 }
