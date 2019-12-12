@@ -27,6 +27,7 @@ It has these top-level messages:
 	ExchangeCurrencyByDateForMerchantRequest
 	ExchangeCurrencyResponse
 	CurrenciesList
+	CurrenciesPrecisionResponse
 */
 package currencies
 
@@ -77,6 +78,7 @@ type CurrencyratesService interface {
 	GetPriceCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
 	GetVatCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
 	GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesList, error)
+	GetCurrenciesPrecision(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesPrecisionResponse, error)
 }
 
 type currencyratesService struct {
@@ -267,6 +269,16 @@ func (c *currencyratesService) GetAccountingCurrencies(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *currencyratesService) GetCurrenciesPrecision(ctx context.Context, in *EmptyRequest, opts ...client.CallOption) (*CurrenciesPrecisionResponse, error) {
+	req := c.c.NewRequest(c.name, "CurrencyratesService.GetCurrenciesPrecision", in)
+	out := new(CurrenciesPrecisionResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for CurrencyratesService service
 
 type CurrencyratesServiceHandler interface {
@@ -287,6 +299,7 @@ type CurrencyratesServiceHandler interface {
 	GetPriceCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
 	GetVatCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
 	GetAccountingCurrencies(context.Context, *EmptyRequest, *CurrenciesList) error
+	GetCurrenciesPrecision(context.Context, *EmptyRequest, *CurrenciesPrecisionResponse) error
 }
 
 func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServiceHandler, opts ...server.HandlerOption) error {
@@ -308,6 +321,7 @@ func RegisterCurrencyratesServiceHandler(s server.Server, hdlr CurrencyratesServ
 		GetPriceCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
 		GetVatCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
 		GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error
+		GetCurrenciesPrecision(ctx context.Context, in *EmptyRequest, out *CurrenciesPrecisionResponse) error
 	}
 	type CurrencyratesService struct {
 		currencyratesService
@@ -386,4 +400,8 @@ func (h *currencyratesServiceHandler) GetVatCurrencies(ctx context.Context, in *
 
 func (h *currencyratesServiceHandler) GetAccountingCurrencies(ctx context.Context, in *EmptyRequest, out *CurrenciesList) error {
 	return h.CurrencyratesServiceHandler.GetAccountingCurrencies(ctx, in, out)
+}
+
+func (h *currencyratesServiceHandler) GetCurrenciesPrecision(ctx context.Context, in *EmptyRequest, out *CurrenciesPrecisionResponse) error {
+	return h.CurrencyratesServiceHandler.GetCurrenciesPrecision(ctx, in, out)
 }

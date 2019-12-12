@@ -522,3 +522,13 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetAccountingCurrencies_Ok() 
 	assert.Equal(suite.T(), res.Currencies, suite.config.AccountingCurrencies)
 	assert.ElementsMatch(suite.T(), res.Currencies, accountingCurrencies)
 }
+
+func (suite *CurrenciesratesServiceTestSuite) Test_GetCurrenciesPrecision_Ok() {
+	req := &currencies.EmptyRequest{}
+	res := &currencies.CurrenciesPrecisionResponse{}
+	err := suite.service.GetCurrenciesPrecision(context.TODO(), req, res)
+	assert.NoError(suite.T(), err)
+	assert.EqualValues(suite.T(), res.Values["RUB"], 2)
+	assert.EqualValues(suite.T(), res.Values["CLP"], 0)
+	assert.EqualValues(suite.T(), res.Values["BHD"], 2)
+}
