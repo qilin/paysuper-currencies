@@ -1,0 +1,14 @@
+[
+  {
+    "insert": "correction_rules",
+    "documents": [
+      {
+        "rate_type": "paysuper",
+        "merchant_id": "",
+        "common_correction": 0,
+        "pair_correction": null,
+        "created_at": {"$date":{"$numberLong":"1573644048628"}}
+      }
+    ]
+  }
+]

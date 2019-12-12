@@ -39,7 +39,7 @@ func (s *Service) GetRateCurrentCommon(
 		zap.S().Errorw(errorGetRateCurrentCommonRequest, "error", err, "req", req)
 		return err
 	}
-	s.applyCorrection(res, req.RateType, "")
+	s.applyCorrection(res, req.RateType, req.ExchangeDirection, "")
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (s *Service) GetRateByDateCommon(
 		return err
 	}
 
-	s.applyCorrection(res, req.RateType, "")
+	s.applyCorrection(res, req.RateType, req.ExchangeDirection, "")
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (s *Service) GetRateCurrentForMerchant(
 		zap.S().Errorw(errorGetRateCurrentForMerchantRequest, "error", err, "req", req)
 		return err
 	}
-	s.applyCorrection(res, req.RateType, req.MerchantId)
+	s.applyCorrection(res, req.RateType, req.ExchangeDirection, req.MerchantId)
 	return nil
 }
 
@@ -113,7 +113,7 @@ func (s *Service) GetRateByDateForMerchant(
 		return err
 	}
 
-	s.applyCorrection(res, req.RateType, req.MerchantId)
+	s.applyCorrection(res, req.RateType, req.ExchangeDirection, req.MerchantId)
 	return nil
 }
 
@@ -127,7 +127,7 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
 	if req.RateType == pkg.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
-	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, "", query, req.Source, res)
+	err := s.exchangeCurrency(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, "", query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyCurrentCommon, "error", err, "req", req)
 		return err
@@ -149,7 +149,7 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
 	if req.RateType == pkg.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
-	err := s.exchangeCurrency(req.RateType, req.From, req.To, req.Amount, req.MerchantId, query, req.Source, res)
+	err := s.exchangeCurrency(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, req.MerchantId, query, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyCurrentForMerchant, "error", err, "req", req)
 		return err
@@ -169,7 +169,7 @@ func (s *Service) ExchangeCurrencyByDateCommon(
 		return err
 	}
 
-	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, "", dt, req.Source, res)
+	err = s.exchangeCurrencyByDate(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, "", dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyByDateCommon, "error", err, "req", req)
 		return err
@@ -194,7 +194,7 @@ func (s *Service) ExchangeCurrencyByDateForMerchant(
 		return err
 	}
 
-	err = s.exchangeCurrencyByDate(req.RateType, req.From, req.To, req.Amount, req.MerchantId, dt, req.Source, res)
+	err = s.exchangeCurrencyByDate(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, req.MerchantId, dt, req.Source, res)
 	if err != nil {
 		zap.S().Errorw(errorExchangeCurrencyByDateForMerchant, "error", err, "req", req)
 		return err
@@ -208,11 +208,19 @@ func (s *Service) GetCommonRateCorrectionRule(
 	req *currencies.CommonCorrectionRuleRequest,
 	res *currencies.CorrectionRule,
 ) error {
-	err := s.getCorrectionRule(req.RateType, "", res)
+	cr, err := s.getCorrectionRule(req.RateType, req.ExchangeDirection, "")
 	if err != nil {
 		zap.S().Errorw(errorCorrectionRuleNotFound, "error", err, "req", req)
 		return err
 	}
+
+	res.MerchantId = cr.MerchantId
+	res.RateType = cr.RateType
+	res.ExchangeDirection = cr.ExchangeDirection
+	res.CommonCorrection = cr.CommonCorrection
+	res.PairCorrection = cr.PairCorrection
+	res.CreatedAt = cr.CreatedAt
+
 	return nil
 }
 
@@ -227,11 +235,19 @@ func (s *Service) GetMerchantRateCorrectionRule(
 		return errors.New(errorMerchantIdRequired)
 	}
 
-	err := s.getCorrectionRule(req.RateType, req.MerchantId, res)
+	cr, err := s.getCorrectionRule(req.RateType, req.ExchangeDirection, req.MerchantId)
 	if err != nil {
 		zap.S().Errorw(errorCorrectionRuleNotFound, "error", err, "req", req)
 		return err
 	}
+
+	res.MerchantId = cr.MerchantId
+	res.RateType = cr.RateType
+	res.ExchangeDirection = cr.ExchangeDirection
+	res.CommonCorrection = cr.CommonCorrection
+	res.PairCorrection = cr.PairCorrection
+	res.CreatedAt = cr.CreatedAt
+
 	return nil
 }
 
@@ -241,7 +257,7 @@ func (s *Service) AddCommonRateCorrectionRule(
 	req *currencies.CommonCorrectionRule,
 	res *currencies.EmptyResponse,
 ) error {
-	return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, "")
+	return s.addCorrectionRule(req.RateType, req.ExchangeDirection, req.CommonCorrection, req.PairCorrection, "")
 }
 
 // AddMerchantRateCorrectionRule - adding new merchant's correction rule for passed rate type and merchant id
@@ -255,7 +271,7 @@ func (s *Service) AddMerchantRateCorrectionRule(
 		return errors.New(errorMerchantIdRequired)
 	}
 
-	return s.addCorrectionRule(req.RateType, req.CommonCorrection, req.PairCorrection, req.MerchantId)
+	return s.addCorrectionRule(req.RateType, req.ExchangeDirection, req.CommonCorrection, req.PairCorrection, req.MerchantId)
 }
 
 // GetSupportedCurrencies - returns list of all supported currencies

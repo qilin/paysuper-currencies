@@ -22,14 +22,8 @@ const (
 	// RateTypeCardpay - rate type value for Cardpay rates
 	RateTypeCardpay = "cardpay"
 
-	// CardpayTopicRateData - rabbitMq topic name for Cardpay rate data
-	CardpayTopicRateData = "cardpay-rate-data"
-
-	// CardpayTopicRateData - rabbitMq topic name for Cardpay rate data retry
-	CardpayTopicRateDataRetry = "cardpay-rate-data-retry"
-
-	// CardpayTopicRateData - rabbitMq topic name for Cardpay rates finished
-	CardpayTopicRateDataFinished = "cardpay-rate-data-finished"
+	ExchangeDirectionSell = "sell"
+	ExchangeDirectionBuy  = "buy"
 
 	ErrorDatabaseQueryFailed          = "Query to database collection failed"
 	ErrorDatabaseFieldCollection      = "collection"
@@ -44,4 +38,11 @@ const (
 	ErrorDatabaseFieldOperationUpdate = "update"
 	ErrorDatabaseFieldOperationUpsert = "upsert"
 	ErrorDatabaseFieldDocument        = "document"
+)
+
+var (
+	SupportedExchangeDirections = map[string]bool{
+		ExchangeDirectionSell: true,
+		ExchangeDirectionBuy:  true,
+	}
 )
