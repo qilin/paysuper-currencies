@@ -24,7 +24,7 @@ This service is designed to synchronize currencies rates and to store it locally
     - [Correction rules](#storing)
     - [Exchange directions](#storing)
     - [Storing](#storing)
-- [Contributing](#contributing)
+- [Contributing](#contributing-feature-requests-and-support)
 - [License](#license)
 
 ## Developing
@@ -37,17 +37,16 @@ We use the [GitFlow](https://nvie.com/posts/a-successful-git-branching-model) as
 
 Application can be started in two modes:
 
-* **microservice** - to maintain rates requests from other components of system. This mode does not request any rates. To run application as microservice don't pass any flags to a command line.
-* **console mode** - to retrieve new rates from a source that has been passed as a command line argument. The console mode can be used with a cron schedule.
+* **microservice** - to maintain rates requests from other components of the PaySuper system. This mode does not request any rates. To run application as microservice don't pass any flags to a command line.
+* **console mode** - to retrieve new rates from a source that has been passed as a command-line argument. The console mode can be used with a cron schedule.
 
-To start an application in a console mode you need to set a `-source` flag in a command line with one of following values:
+To start an application in a console mode you need to set a `-source` flag in a command line with one of the following values:
 
-* `oxr` - to get the rates from openexchangerates.org and recalculate the PaySuper prediction rates.
-* `paysuper` - to recalculate only the PaySuper prediction rates.
+* `oxr` - to get the rates from openexchangerates.org.
 * `centralbanks` - to get the rates from central banks (currently from cbr.ru and ecb.europa.eu).
 * `stock` - to calculate the stock rates.
 
-This is an example of command that runs rates requests from openexchangerates.org and at the end exits the application:
+This is an example of a command that runs rates requests from openexchangerates.org and at the end exits the application:
 
 ```bash
 paysuper-currencies.exe -source=oxr
@@ -60,16 +59,16 @@ paysuper-currencies.exe -source=oxr
 | OXR_APP_ID                           | true     | 1                        | API App id for openexchangerates.org                                                |
 | MONGO_DSN                            | true     | -                        | MongoBD DSN connection string                                                       |
 | MONGO_DIAL_TIMEOUT                   | -        | 10                       | MongoBD dial timeout in seconds                                                     |
-| CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo url                                                                      |
+| CENTRIFUGO_URL                       | -        | http://127.0.0.1:8000    | Centrifugo URL                                                                      |
 | CENTRIFUGO_SECRET                    | true     | -                        | Centrifugo secret key                                                               |
 | CENTRIFUGO_CHANNEL                   | -        | paysuper:admin           | Centrifugo channel name to send alert notifications to admins                       |
 | METRICS_PORT                         | -        | 80                       | Port for metrics and health check                                                   |
 
 ## Correction rules
 
-There are correction rules for a rate. The correction rules can be applied at the moment of a rate or exchange request processing.
+For a rate may be applied correction rules. The correction rules apply at the moment of a rate or exchange request processing.
 
-The correction rules can be defined for: 
+The correction rules can be defined for:
 * a combination of RateType, ExchangeDirection, Merchant,
 * optionally, for some currencies' pair (or for all pairs by default).
 
@@ -79,10 +78,10 @@ The system correction can be defined for:
 
 ## Exchange directions
 
-There are two directions for exchange and rates requests: `buy` and `sell`. The direction affects the application of the correction rules for rates and exchages.
+There are two directions for exchange and rates requests: `buy` and `sell`. The direction affects the application of the correction rules for rates and exchanges.
 
-* Exchange direction `buy` increases an exchange rate for a percent determined in the corresponding correction rule, and decreases a result amount.
-* Exchange direction `sell` decreases an exchange rate for a percent determined in the corresponding correction rule, and increases a result amount.
+* Exchange direction `buy` increases an exchange rate for a per cent determined in the corresponding correction rule and decreases a result amount.
+* Exchange direction `sell` decreases an exchange rate for a per cent determined in the corresponding correction rule and increases a result amount.
 
 ### Storing
 
@@ -110,14 +109,19 @@ Attribute|Description
 `source`|The code of a rates source.
 `volume`|The volume of exchanges that has been made for this rate. Optional. Default value equals to 0.
 
+## Contributing, Feature Requests and Support
 
-## Contributing
+If you like this project then you can put a ⭐️ on it. It means a lot to us.
 
-If you like this project then you can put a ⭐️ on it.
+If you have an idea of how to improve PaySuper (or any of the product parts) or have general feedback, you're welcome to submit a [feature request](../../issues/new?assignees=&labels=&template=feature_request.md&title=).
 
-We welcome contributions to PaySuper of any kind including documentation, suggestions, bug reports, pull requests etc. We would love to hear from you. In general, we follow the "fork-and-pull" Git workflow.
+Chances are, you like what we have already but you may require a custom integration, a special license or something else big and specific to your needs. We're generally open to such conversations.
 
-We feel that a welcoming community is important and we ask that you follow the PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.
+If you have a question and can't find the answer yourself, you can [raise an issue](../../issues/new?assignees=&labels=&template=support-request.md&title=I+have+a+question+about+%3Cthis+and+that%3E+%5BSupport%5D) and describe what exactly you're trying to do. We'll do our best to reply in a meaningful time.
+
+We feel that a welcoming community is important and we ask that you follow PaySuper's [Open Source Code of Conduct](https://github.com/paysuper/code-of-conduct/blob/master/README.md) in all interactions with the community.
+
+PaySuper welcomes contributions from anyone and everyone. Please refer to [our contribution guide to learn more](CONTRIBUTING.md).
 
 ## License
 
