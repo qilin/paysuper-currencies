@@ -159,11 +159,11 @@ func (s *Service) processRatesCbeu(res *cbeuResponse) ([]interface{}, error) {
 	}
 
 	for _, cFrom := range s.cfg.RatesRequestCurrencies {
-		if cFrom == cbauTo {
+		if cFrom == cbeuTo {
 			continue
 		}
 		if _, ok := counter[cFrom]; !ok {
-			zap.S().Warnw(errorCbeuRateDataNotFound, "from", cFrom, "to", cbauTo)
+			zap.S().Warnw(errorCbeuRateDataNotFound, "from", cFrom, "to", cbeuTo)
 		}
 	}
 
