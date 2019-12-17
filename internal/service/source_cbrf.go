@@ -32,6 +32,7 @@ type cbrfResponseRate struct {
 	XMLName      xml.Name `xml:"Valute"`
 	CurrencyCode string   `xml:"CharCode"`
 	Value        string   `xml:"Value"`
+	Nominal      float64  `xml:"Nominal"`
 }
 
 // RequestRatesCbrf - retriving current rates from Central bank of Russia
@@ -128,10 +129,12 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 			return nil, errors.New(errorCbrfParseFloatError)
 		}
 
+		rateByNominal := rate / rateItem.Nominal
+
 		// direct pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   rateItem.CurrencyCode + cbrfTo,
-			Rate:   s.toPrecise(rate),
+			Rate:   s.toPrecise(rateByNominal),
 			Source: cbrfSource,
 			Volume: 1,
 		})
@@ -139,7 +142,7 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 		// inverse pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   cbrfTo + rateItem.CurrencyCode,
-			Rate:   s.toPrecise(1 / rate),
+			Rate:   s.toPrecise(1 / rateByNominal),
 			Source: cbrfSource,
 			Volume: 1,
 		})
@@ -151,11 +154,11 @@ func (s *Service) processRatesCbrf(res *cbrfResponse) ([]interface{}, error) {
 	}
 
 	for _, cFrom := range s.cfg.RatesRequestCurrencies {
-		if cFrom == cbauTo {
+		if cFrom == cbrfTo {
 			continue
 		}
 		if _, ok := counter[cFrom]; !ok {
-			zap.S().Warnw(errorCbrfRateDataNotFound, "from", cFrom, "to", cbauTo)
+			zap.S().Warnw(errorCbrfRateDataNotFound, "from", cFrom, "to", cbrfTo)
 		}
 	}
 
