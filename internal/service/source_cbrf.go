@@ -20,7 +20,7 @@ const (
 
 	cbrfTo     = "RUB"
 	cbrfSource = "CBRF"
-	cbrfUrl    = "http://www.cbr.ru/scripts/XML_daily.asp"
+	cbrfUrl    = "https://www.cbr.ru/scripts/XML_daily.asp"
 )
 
 type cbrfResponse struct {
