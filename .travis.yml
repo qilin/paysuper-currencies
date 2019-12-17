@@ -9,7 +9,7 @@ addons:
 stages:
   - test
   - name: deploy
-    if: branch = develop
+    if: branch = develop AND type = push
 jobs:
   include:
     - stage: test
