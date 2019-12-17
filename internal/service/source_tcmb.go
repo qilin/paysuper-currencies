@@ -14,7 +14,8 @@ const (
 	errorTcmbProcessRatesFailed    = "TCMB Rates save data failed"
 	errorTcmbNoResults             = "TCMB Rates no results"
 	errorTcmbRateDataNotFound      = "TCMB Rate data not found"
-	errorTcmbNotSupported      = "TCMB Rate for curency not supported"
+	errorTcmbNotSupported          = "TCMB Rate for curency not supported"
+	errorTcmbRateUnitZero          = "TCMB Rate unit is zero"
 
 	tcmbTo     = "TRY"
 	tcmbSource = "TCMB"
@@ -29,7 +30,7 @@ type tcmbResponse struct {
 type tcmbResponseRate struct {
 	XMLName         xml.Name `xml:"Currency"`
 	CurrencyCode    string   `xml:"CurrencyCode,attr"`
-	Unit            float64    `xml:"Unit"`
+	Unit            float64  `xml:"Unit"`
 	ForexBuying     float64  `xml:"ForexBuying"`
 	ForexSelling    float64  `xml:"ForexSelling"`
 	BanknoteBuying  float64  `xml:"BanknoteBuying"`
@@ -131,12 +132,20 @@ func (s *Service) processRatesTcmb(res *tcmbResponse) ([]interface{}, error) {
 			continue
 		}
 
+		if rateItem.Unit == 0 {
+			// Hello there! We have a trouble
+			zap.S().Errorw(errorTcmbRateUnitZero, "currency", rateItem.CurrencyCode)
+			continue
+		}
+
+		rate = rate / rateItem.Unit
+
 		// direct pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   rateItem.CurrencyCode + tcmbTo,
 			Rate:   s.toPrecise(rate),
 			Source: tcmbSource,
-			Volume: rateItem.Unit,
+			Volume: 1,
 		})
 
 		// inverse pair
@@ -144,7 +153,7 @@ func (s *Service) processRatesTcmb(res *tcmbResponse) ([]interface{}, error) {
 			Pair:   tcmbTo + rateItem.CurrencyCode,
 			Rate:   s.toPrecise(1 / rate),
 			Source: tcmbSource,
-			Volume: rateItem.Unit,
+			Volume: 1,
 		})
 
 		counter[rateItem.CurrencyCode] = true
