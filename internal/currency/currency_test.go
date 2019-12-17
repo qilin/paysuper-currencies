@@ -24,5 +24,5 @@ func (suite *CurrenciesTestSuite) SetupTest() {
 }
 
 func (suite *CurrenciesTestSuite) Test_Currencies() {
-	assert.Equal(suite.T(), len(CurrencyDefinitions), 54)
+	assert.Equal(suite.T(), len(CurrencyDefinitions), 55)
 }

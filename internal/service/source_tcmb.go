@@ -11,10 +11,10 @@ import (
 const (
 	errorTcmbRequestFailed         = "TCMB Rates request failed"
 	errorTcmbResponseParsingFailed = "TCMB Rates response parsing failed"
-	errorTcmbParseFloatError       = "TCMB Rates parse float error"
 	errorTcmbProcessRatesFailed    = "TCMB Rates save data failed"
 	errorTcmbNoResults             = "TCMB Rates no results"
 	errorTcmbRateDataNotFound      = "TCMB Rate data not found"
+	errorTcmbNotSupported      = "TCMB Rate for curency not supported"
 
 	tcmbTo     = "TRY"
 	tcmbSource = "TCMB"
@@ -121,9 +121,14 @@ func (s *Service) processRatesTcmb(res *tcmbResponse) ([]interface{}, error) {
 			continue
 		}
 
-		rate := rateItem.ForexBuying
+		rate := rateItem.BanknoteBuying
 		if rate == 0.0 {
-			rate = rateItem.BanknoteBuying
+			rate = rateItem.BanknoteSelling
+		}
+
+		if rate == 0.0 {
+			zap.S().Infow(errorTcmbNotSupported, "currency", rateItem.CurrencyCode)
+			continue
 		}
 
 		// direct pair
