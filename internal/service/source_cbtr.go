@@ -19,7 +19,7 @@ const (
 
 	cbtrTo     = "TRY"
 	cbtrSource = "CBTR"
-	cbtrUrl    = "https://www.cbtr.gov.tr/kurlar/today.xml"
+	cbtrUrl    = "https://www.tcmb.gov.tr/kurlar/today.xml"
 )
 
 type cbtrResponse struct {
