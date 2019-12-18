@@ -5,15 +5,20 @@ import (
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesTcmb_Ok() {
+	shouldBe := require.New(suite.T())
+
 	// cleaning collection before test starts
 	err := suite.CleanRatesCollection(collectionRatesNameSuffixCentralbanks)
-	assert.NoError(suite.T(), err)
+	shouldBe.NoError(err)
 
 	err = suite.service.RequestRatesCbtr()
-	assert.NoError(suite.T(), err)
+	shouldBe.NoError(err)
+	err = suite.service.RequestRatesOxr()
+	shouldBe.NoError(err)
 
 	res := &currencies.RateData{}
 
@@ -25,16 +30,14 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesTcmb_Ok() {
 		}
 
 		err = suite.service.getRate(pkg.RateTypeCentralbanks, from, cbtrTo, bson.M{}, source, res)
-		assert.NoError(suite.T(), err)
+		assert.NoError(suite.T(), err, "`%s` `%s` `%s`", from, cbtrTo, source)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), from+cbtrTo, res.Pair)
-		assert.Equal(suite.T(), source, res.Source)
 
 		err = suite.service.getRate(pkg.RateTypeCentralbanks, cbtrTo, from, bson.M{}, source, res)
 		assert.NoError(suite.T(), err)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), cbtrTo+from, res.Pair)
-		assert.Equal(suite.T(), source, res.Source)
 	}
 }
 
