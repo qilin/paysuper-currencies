@@ -27,6 +27,7 @@ type cbplResponse struct {
 
 type cbplResponseRate struct {
 	CurrencyCode string  `xml:"code,attr"`
+	Units        float64 `xml:"units,attr"`
 	Value        float64 `xml:",chardata"`
 }
 
@@ -116,10 +117,12 @@ func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 
 		rate := rateItem.Value
 
+		rateByNominal := rate / rateItem.Units
+
 		// direct pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   rateItem.CurrencyCode + cbplTo,
-			Rate:   s.toPrecise(rate),
+			Rate:   s.toPrecise(rateByNominal),
 			Source: cbplSource,
 			Volume: 1,
 		})
@@ -127,7 +130,7 @@ func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 		// inverse pair
 		rates = append(rates, &currencies.RateData{
 			Pair:   cbplTo + rateItem.CurrencyCode,
-			Rate:   s.toPrecise(1 / rate),
+			Rate:   s.toPrecise(1 / rateByNominal),
 			Source: cbplSource,
 			Volume: 1,
 		})
@@ -139,11 +142,11 @@ func (s *Service) processRatesCbpl(res *cbplResponse) ([]interface{}, error) {
 	}
 
 	for _, cFrom := range s.cfg.RatesRequestCurrencies {
-		if cFrom == cbauTo {
+		if cFrom == cbplTo {
 			continue
 		}
 		if _, ok := counter[cFrom]; !ok {
-			zap.S().Warnw(errorCbplRateDataNotFound, "from", cFrom, "to", cbauTo)
+			zap.S().Warnw(errorCbplRateDataNotFound, "from", cFrom, "to", cbplTo)
 		}
 	}
 
