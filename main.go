@@ -102,7 +102,7 @@ func main() {
 				return cs.RequestRatesCbau()
 			})
 			g.Go(func() error {
-				return cs.RequestRatesTcmb()
+				return cs.RequestRatesCbtr()
 			})
 		case "stock":
 			g.Go(func() error {
