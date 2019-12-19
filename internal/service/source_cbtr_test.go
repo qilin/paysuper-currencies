@@ -29,6 +29,10 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesTcmb_Ok() {
 			source = stubSource
 		}
 
+		if from == cbrfTo {
+			continue
+		}
+
 		err = suite.service.getRate(pkg.RateTypeCentralbanks, from, cbtrTo, bson.M{}, source, res)
 		assert.NoError(suite.T(), err, "`%s` `%s` `%s`", from, cbtrTo, source)
 		assert.True(suite.T(), res.Rate > 0)
