@@ -101,6 +101,9 @@ func main() {
 			g.Go(func() error {
 				return cs.RequestRatesCbau()
 			})
+			g.Go(func() error {
+				return cs.RequestRatesCbtr()
+			})
 		case "stock":
 			g.Go(func() error {
 				return cs.SetRatesStock()
