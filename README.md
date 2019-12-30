@@ -1,8 +1,8 @@
 # Paysuper currency rates
 [![License: GNU 3.0](https://img.shields.io/badge/License-GNU3.0-green.svg)](https://opensource.org/licenses/GNU3.0)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/paysuper/paysuper-currencies/issues)
-[![Build Status](https://travis-ci.org/paysuper/paysuper-currencies.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-currencies)
-[![codecov](https://codecov.io/gh/paysuper/paysuper-currencies/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-currencies)
+[![Build Status](https://travis-ci.com/paysuper/paysuper-currencies.svg?branch=develop)](https://travis-ci.com/paysuper/paysuper-currencies)
+[![codecov](https://codecov.io/gh/paysuper/paysuper-currencies/branch/develop/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-currencies)
 [![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-currencies)](https://goreportcard.com/report/github.com/paysuper/paysuper-currencies)
 
 This service is designed to synchronize currencies rates and to store it locally with a history of changes.
