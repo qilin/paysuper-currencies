@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"go.uber.org/zap"
 	"net/http"
 	"strconv"

@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -15,8 +15,8 @@ import (
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/internal/service"
 	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-database-mongo"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -152,7 +152,7 @@ func main() {
 
 	var ms micro.Service
 	options := []micro.Option{
-		micro.Name(pkg.ServiceName),
+		micro.Name(currencies.ServiceName),
 		micro.Version(pkg.Version),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 		micro.BeforeStart(func() error {
@@ -195,7 +195,7 @@ func main() {
 	ms = micro.NewService(options...)
 	ms.Init()
 
-	err = currencies.RegisterCurrencyratesServiceHandler(ms.Server(), cs)
+	err = currencies.RegisterCurrencyRatesServiceHandler(ms.Server(), cs)
 	if err != nil {
 		logger.Fatal("Can`t register service in micro", zap.Error(err))
 	}
