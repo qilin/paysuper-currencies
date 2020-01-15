@@ -2,6 +2,7 @@ module github.com/paysuper/paysuper-currencies
 
 require (
 	github.com/InVisionApp/go-health v2.1.0+incompatible
+	github.com/InVisionApp/go-logger v1.0.1 // indirect
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/favadi/protoc-go-inject-tag v0.0.0-20181008023834-c2c1884c833d // indirect
@@ -14,7 +15,8 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-database-mongo v0.1.1
-	github.com/paysuper/paysuper-recurring-repository v1.0.123
+	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200115133446-91cd53438edf
+	github.com/paysuper/paysuper-tools v0.0.0-20200115135413-15b9d03f5ec4
 	github.com/prometheus/client_golang v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94

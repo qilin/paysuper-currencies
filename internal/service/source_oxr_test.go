@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/globalsign/mgo"
 	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/stretchr/testify/assert"
 )
 

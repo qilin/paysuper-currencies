@@ -6,7 +6,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"go.uber.org/zap"
 	"time"
 )
