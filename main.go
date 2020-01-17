@@ -14,7 +14,6 @@ import (
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/internal/service"
-	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-database-mongo"
 	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
