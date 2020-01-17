@@ -17,7 +17,7 @@ import (
 	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-database-mongo"
 	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
-	"github.com/paysuper/paysuper-tools"
+	tools "github.com/paysuper/paysuper-tools/http"
 	"go.uber.org/zap"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/go-playground/validator.v9"
