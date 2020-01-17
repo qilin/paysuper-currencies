@@ -153,7 +153,7 @@ func main() {
 	var ms micro.Service
 	options := []micro.Option{
 		micro.Name(currencies.ServiceName),
-		micro.Version(pkg.Version),
+		micro.Version(currencies.Version),
 		micro.WrapHandler(prometheus.NewHandlerWrapper()),
 		micro.BeforeStart(func() error {
 			go func() {
