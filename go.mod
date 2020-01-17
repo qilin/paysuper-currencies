@@ -15,14 +15,14 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-database-mongo v0.1.1
-	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200115133446-91cd53438edf
-	github.com/paysuper/paysuper-tools v0.0.0-20200115135413-15b9d03f5ec4
+	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200116234616-184ad6d9fc3c
+	github.com/paysuper/paysuper-tools v0.0.0-20200116214558-6afcd9131e1c
 	github.com/prometheus/client_golang v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	github.com/thetruetrade/gotrade v0.0.0-20140906064133-08b7c41e93d9
-	go.uber.org/zap v1.10.0
+	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	gopkg.in/go-playground/validator.v9 v9.29.1
