@@ -15,7 +15,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-database-mongo v0.1.1
-	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200117000227-4095f04b7f12
+	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200117120536-3dfd2bef8623
 	github.com/paysuper/paysuper-tools v0.0.0-20200116214558-6afcd9131e1c
 	github.com/prometheus/client_golang v1.0.0
 	github.com/satori/go.uuid v1.2.0
