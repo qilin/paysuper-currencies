@@ -16,11 +16,14 @@ jobs:
       services:
         - mongodb
       go:
-        - 1.11.x
+        - 1.13.x
       env:
         - GO111MODULE=on
         - MONGO_DSN=mongodb://127.0.0.1:27017/currency_rates_test
         - CENTRIFUGO_SECRET=some-key
+      cache:
+        directories:
+          - $GOPATH/pkg/mod        
       install: true
       script:
         - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
