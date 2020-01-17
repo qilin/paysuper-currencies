@@ -1,9 +1,6 @@
 package pkg
 
 const (
-	// Version - version of service
-	Version = "latest"
-
 	// RateTypeOxr - rate type value for Oxr rates
 	RateTypeOxr = "oxr"
 
