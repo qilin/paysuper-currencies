@@ -60,10 +60,10 @@ const (
 
 	collectionRatesNameTemplate           = "%s_%s"
 	collectionRatesNamePrefix             = "currency_rates"
-	collectionRatesNameSuffixOxr          = pkg.RateTypeOxr
-	collectionRatesNameSuffixCentralbanks = pkg.RateTypeCentralbanks
-	collectionRatesNameSuffixPaysuper     = pkg.RateTypePaysuper
-	collectionRatesNameSuffixStock        = pkg.RateTypeStock
+	collectionRatesNameSuffixOxr          = currencies.RateTypeOxr
+	collectionRatesNameSuffixCentralbanks = currencies.RateTypeCentralbanks
+	collectionRatesNameSuffixPaysuper     = currencies.RateTypePaysuper
+	collectionRatesNameSuffixStock        = currencies.RateTypeStock
 
 	collectionNamePaysuperCorrections = "paysuper_corrections"
 	collectionNameCorrectionRules     = "correction_rules"
@@ -263,7 +263,7 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 
 	query["pair"] = pair
 
-	isCentralbank := collectionRatesNameSuffix == pkg.RateTypeCentralbanks
+	isCentralbank := collectionRatesNameSuffix == currencies.RateTypeCentralbanks
 
 	cName, err := s.getCollectionName(collectionRatesNameSuffix)
 	if err != nil {

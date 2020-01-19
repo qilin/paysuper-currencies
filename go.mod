@@ -14,8 +14,9 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/paysuper/paysuper-database-mongo v0.1.1
-	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200117120536-3dfd2bef8623
+	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200119002105-6af7d2096854
 	github.com/paysuper/paysuper-tools v0.0.0-20200116214558-6afcd9131e1c
 	github.com/prometheus/client_golang v1.0.0
 	github.com/satori/go.uuid v1.2.0
@@ -25,6 +26,7 @@ require (
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 )
 
