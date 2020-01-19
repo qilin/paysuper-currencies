@@ -539,10 +539,10 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
 
 	switch rule.ExchangeDirection {
 
-	case pkg.ExchangeDirectionSell:
+	case currencies.ExchangeDirectionSell:
 		divider = 1 - (value / 100)
 
-	case pkg.ExchangeDirectionBuy:
+	case currencies.ExchangeDirectionBuy:
 		divider = 1 + (value / 100)
 	}
 

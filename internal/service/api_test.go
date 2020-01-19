@@ -5,7 +5,6 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/paysuper/paysuper-currencies/pkg"
 	"github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/stretchr/testify/assert"
 )
@@ -379,7 +378,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_ExchangeCurrencyByDateForMerc
 func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_Ok() {
 	req1 := &currenciespb.CommonCorrectionRule{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		CommonCorrection:  1,
 	}
 	res1 := &currenciespb.EmptyResponse{}
@@ -390,7 +389,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_AddCommonRateCorrectionRule_O
 func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule_Ok() {
 	req1 := &currenciespb.CorrectionRule{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		CommonCorrection:  1,
 		MerchantId:        bson.NewObjectId().Hex(),
 	}
@@ -413,7 +412,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_AddMerchantRateCorrectionRule
 func (suite *CurrenciesratesServiceTestSuite) Test_GetCommonRateCorrectionRule_Ok() {
 	req1 := &currenciespb.CommonCorrectionRule{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		CommonCorrection:  1,
 	}
 	res1 := &currenciespb.EmptyResponse{}
@@ -422,7 +421,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetCommonRateCorrectionRule_O
 
 	req := &currenciespb.CommonCorrectionRuleRequest{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 	}
 
 	res := &currenciespb.CorrectionRule{}
@@ -435,7 +434,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule
 
 	req1 := &currenciespb.CorrectionRule{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		CommonCorrection:  1,
 		MerchantId:        merchantId,
 	}
@@ -445,7 +444,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule
 
 	req := &currenciespb.MerchantCorrectionRuleRequest{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		MerchantId:        merchantId,
 	}
 
@@ -460,7 +459,7 @@ func (suite *CurrenciesratesServiceTestSuite) Test_GetMerchantRateCorrectionRule
 
 	req1 := &currenciespb.CorrectionRule{
 		RateType:          currenciespb.RateTypeOxr,
-		ExchangeDirection: pkg.ExchangeDirectionSell,
+		ExchangeDirection: currenciespb.ExchangeDirectionSell,
 		CommonCorrection:  1,
 		MerchantId:        merchantId,
 	}

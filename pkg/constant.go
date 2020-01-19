@@ -1,5 +1,9 @@
 package pkg
 
+import (
+	"github.com/paysuper/paysuper-proto/go/currenciespb"
+)
+
 const (
 	ExchangeDirectionSell = "sell"
 	ExchangeDirectionBuy  = "buy"
@@ -21,7 +25,7 @@ const (
 
 var (
 	SupportedExchangeDirections = map[string]bool{
-		ExchangeDirectionSell: true,
-		ExchangeDirectionBuy:  true,
+		currenciespb.ExchangeDirectionSell: true,
+		currenciespb.ExchangeDirectionBuy:  true,
 	}
 )

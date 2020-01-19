@@ -508,6 +508,8 @@ github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200117120536-3dfd2be
 github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200117120536-3dfd2bef8623/go.mod h1:wIR2JxL/9AwhWKNC3PR2hdfdQttpSXjt7yw9D+5ySGQ=
 github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200119002105-6af7d2096854 h1:N0/QFn52/GMgCPHj+Sj/izmr2JLWH6yL17CNXoC4ma0=
 github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200119002105-6af7d2096854/go.mod h1:wIR2JxL/9AwhWKNC3PR2hdfdQttpSXjt7yw9D+5ySGQ=
+github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200119003232-91615911efec h1:mXKI+grvd3ta9ZnbryyrBF0RuJ4yNnBYHpTUmZUMuE4=
+github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200119003232-91615911efec/go.mod h1:wIR2JxL/9AwhWKNC3PR2hdfdQttpSXjt7yw9D+5ySGQ=
 github.com/paysuper/paysuper-tools v0.0.0-20200115135413-15b9d03f5ec4 h1:k+SVG9hyrWLSgI2CEw7r4y/1kltAEayL6zkVMIU/K5M=
 github.com/paysuper/paysuper-tools v0.0.0-20200115135413-15b9d03f5ec4/go.mod h1:ANn6M5FEYlAKdWWB/3DH4YLGORcMJs2IP7kBEzNS8rg=
 github.com/paysuper/paysuper-tools v0.0.0-20200116214558-6afcd9131e1c h1:Sethl1l+w6FYlaoq12i2iYS0MB4j/KzZTzZcEvU459E=
