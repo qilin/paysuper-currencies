@@ -2,8 +2,7 @@ package service
 
 import (
 	"github.com/globalsign/mgo/bson"
-	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,13 +28,13 @@ func (suite *CurrenciesratesServiceTestSuite) TestSource_RequestRatesCbca_Ok() {
 			source = stubSource
 		}
 
-		err = suite.service.getRate(pkg.RateTypeCentralbanks, from, cbcaTo, bson.M{}, source, res)
+		err = suite.service.getRate(currencies.RateTypeCentralbanks, from, cbcaTo, bson.M{}, source, res)
 		assert.NoError(suite.T(), err)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), res.Pair, from+cbcaTo)
 		assert.Equal(suite.T(), res.Source, source)
 
-		err = suite.service.getRate(pkg.RateTypeCentralbanks, cbcaTo, from, bson.M{}, source, res)
+		err = suite.service.getRate(currencies.RateTypeCentralbanks, cbcaTo, from, bson.M{}, source, res)
 		assert.NoError(suite.T(), err)
 		assert.True(suite.T(), res.Rate > 0)
 		assert.Equal(suite.T(), res.Pair, cbcaTo+from)

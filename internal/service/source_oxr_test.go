@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 	"github.com/globalsign/mgo"
-	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,12 +30,12 @@ func (suite *CurrenciesratesServiceTestSuite) TestSourceOxr_ProcessRatesOk() {
 	req1 := &currencies.GetRateCurrentCommonRequest{
 		From:     "USD",
 		To:       "AUD",
-		RateType: pkg.RateTypeOxr,
+		RateType: currencies.RateTypeOxr,
 	}
 	req2 := &currencies.GetRateCurrentCommonRequest{
 		From:     "AUD",
 		To:       "USD",
-		RateType: pkg.RateTypeOxr,
+		RateType: currencies.RateTypeOxr,
 	}
 	res := &currencies.RateData{}
 

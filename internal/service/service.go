@@ -15,9 +15,9 @@ import (
 	"github.com/jinzhu/now"
 	"github.com/paysuper/paysuper-currencies/config"
 	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-database-mongo"
-	"github.com/paysuper/paysuper-recurring-repository/tools"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
+	tools "github.com/paysuper/paysuper-tools/http"
 	"go.uber.org/zap"
 	"golang.org/x/net/html/charset"
 	"gopkg.in/go-playground/validator.v9"
@@ -60,10 +60,10 @@ const (
 
 	collectionRatesNameTemplate           = "%s_%s"
 	collectionRatesNamePrefix             = "currency_rates"
-	collectionRatesNameSuffixOxr          = pkg.RateTypeOxr
-	collectionRatesNameSuffixCentralbanks = pkg.RateTypeCentralbanks
-	collectionRatesNameSuffixPaysuper     = pkg.RateTypePaysuper
-	collectionRatesNameSuffixStock        = pkg.RateTypeStock
+	collectionRatesNameSuffixOxr          = currencies.RateTypeOxr
+	collectionRatesNameSuffixCentralbanks = currencies.RateTypeCentralbanks
+	collectionRatesNameSuffixPaysuper     = currencies.RateTypePaysuper
+	collectionRatesNameSuffixStock        = currencies.RateTypeStock
 
 	collectionNamePaysuperCorrections = "paysuper_corrections"
 	collectionNameCorrectionRules     = "correction_rules"
@@ -263,7 +263,7 @@ func (s *Service) getRate(collectionRatesNameSuffix string, from string, to stri
 
 	query["pair"] = pair
 
-	isCentralbank := collectionRatesNameSuffix == pkg.RateTypeCentralbanks
+	isCentralbank := collectionRatesNameSuffix == currencies.RateTypeCentralbanks
 
 	cName, err := s.getCollectionName(collectionRatesNameSuffix)
 	if err != nil {
@@ -539,10 +539,10 @@ func (s *Service) applyCorrectionRule(rd *currencies.RateData, rule *currencies.
 
 	switch rule.ExchangeDirection {
 
-	case pkg.ExchangeDirectionSell:
+	case currencies.ExchangeDirectionSell:
 		divider = 1 - (value / 100)
 
-	case pkg.ExchangeDirectionBuy:
+	case currencies.ExchangeDirectionBuy:
 		divider = 1 + (value / 100)
 	}
 
