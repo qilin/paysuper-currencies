@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/globalsign/mgo/bson"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"go.uber.org/zap"
 )
 

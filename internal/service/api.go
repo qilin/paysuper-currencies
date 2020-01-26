@@ -5,8 +5,7 @@ import (
 	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	currencies "github.com/paysuper/paysuper-proto/go/currenciespb"
 	"go.uber.org/zap"
 	"time"
 )
@@ -31,7 +30,7 @@ func (s *Service) GetRateCurrentCommon(
 	res *currencies.RateData,
 ) error {
 	query := bson.M{}
-	if req.RateType == pkg.RateTypeCardpay {
+	if req.RateType == currencies.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
 	err := s.getRate(req.RateType, req.From, req.To, query, req.Source, res)
@@ -77,7 +76,7 @@ func (s *Service) GetRateCurrentForMerchant(
 	}
 
 	query := bson.M{}
-	if req.RateType == pkg.RateTypeCardpay {
+	if req.RateType == currencies.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
 
@@ -124,7 +123,7 @@ func (s *Service) ExchangeCurrencyCurrentCommon(
 	res *currencies.ExchangeCurrencyResponse,
 ) error {
 	query := bson.M{}
-	if req.RateType == pkg.RateTypeCardpay {
+	if req.RateType == currencies.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
 	err := s.exchangeCurrency(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, "", query, req.Source, res)
@@ -146,7 +145,7 @@ func (s *Service) ExchangeCurrencyCurrentForMerchant(
 		return errors.New(errorMerchantIdRequired)
 	}
 	query := bson.M{}
-	if req.RateType == pkg.RateTypeCardpay {
+	if req.RateType == currencies.RateTypeCardpay {
 		query = s.getByDateQuery(time.Now())
 	}
 	err := s.exchangeCurrency(req.RateType, req.ExchangeDirection, req.From, req.To, req.Amount, req.MerchantId, query, req.Source, res)

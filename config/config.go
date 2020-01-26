@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/paysuper/paysuper-currencies/internal/currency"
-	"github.com/paysuper/paysuper-currencies/pkg"
+	"github.com/paysuper/paysuper-proto/go/currenciespb"
 )
 
 // Config is struct for store service configuration
@@ -47,11 +47,11 @@ func NewConfig() (*Config, error) {
 	err := envconfig.Process("", cfg)
 
 	cfg.RatesTypes = make(map[string]bool, 5)
-	cfg.RatesTypes[pkg.RateTypeOxr] = true
-	cfg.RatesTypes[pkg.RateTypeCentralbanks] = true
-	cfg.RatesTypes[pkg.RateTypePaysuper] = true
-	cfg.RatesTypes[pkg.RateTypeStock] = true
-	cfg.RatesTypes[pkg.RateTypeCardpay] = true
+	cfg.RatesTypes[currenciespb.RateTypeOxr] = true
+	cfg.RatesTypes[currenciespb.RateTypeCentralbanks] = true
+	cfg.RatesTypes[currenciespb.RateTypePaysuper] = true
+	cfg.RatesTypes[currenciespb.RateTypeStock] = true
+	cfg.RatesTypes[currenciespb.RateTypeCardpay] = true
 
 	cfg.Currencies = currency.CurrencyDefinitions
 	cfg.SupportedCurrenciesParsed = make(map[string]bool, len(cfg.Currencies))
