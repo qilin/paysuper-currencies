@@ -16,6 +16,7 @@ backend:
     protocol: TCP
   env:
     - MICRO_REGISTRY
+    - MICRO_REGISTRY_ADDRESS
     - MICRO_TRANSPORT
     - BROKER_ADDRESS
     - CENTRIFUGO_URL
