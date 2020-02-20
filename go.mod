@@ -12,6 +12,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-plugins/client/selector/static v0.0.0-20200119172437-4fe21aa238fd
+	github.com/micro/go-plugins/registry/etcd v0.0.0-20200119172437-4fe21aa238fd
 	github.com/micro/go-plugins/wrapper/monitoring/prometheus v0.0.0-20200119172437-4fe21aa238fd
 	github.com/paysuper/paysuper-database-mongo v0.1.1
 	github.com/paysuper/paysuper-proto/go/currenciespb v0.0.0-20200203130641-45056764a1d7
