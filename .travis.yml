@@ -10,6 +10,11 @@ stages:
   - test
   - name: deploy
     if: branch = develop AND type = push
+  - name: deploy-stg-rb
+    if: branch =~ ^release
+  - name: deploy-stg-tag
+    if: tag =~ ^v    
+
 jobs:
   include:
     - stage: test
@@ -40,6 +45,20 @@ jobs:
           -e JENKINS_BUILD_PROJECT=$TRAVIS_REPO_SLUG
           -e JENKINS_BUILD_BRANCH=$TRAVIS_BRANCH
           p1hub/p1jenkinstrigger
+    - stage: deploy-stg-rb
+      services: docker
+      install: true
+      script:
+      - docker run -it -e JENKINS_AUTH_TOKEN=$JENKINS_AUTH_TOKEN -e JENKINS_BUILD_TOKEN=$JENKINS_BUILD_TOKEN
+        -e JENKINS_BUILD_PROJECT=$TRAVIS_REPO_SLUG -e JENKINS_BUILD_BRANCH=$TRAVIS_BRANCH -e DEPLOY_TO_ENV="stg" -e IS_RB="true"
+        p1hub/p1jenkinstrigger
+    - stage: deploy-stg-tag
+      services: docker
+      install: true
+      script:
+      - docker run -it -e JENKINS_AUTH_TOKEN=$JENKINS_AUTH_TOKEN -e JENKINS_BUILD_TOKEN=$JENKINS_BUILD_TOKEN
+        -e JENKINS_BUILD_PROJECT=$TRAVIS_REPO_SLUG -e JENKINS_BUILD_BRANCH=$TRAVIS_TAG -e DEPLOY_TO_ENV="stg"
+        p1hub/p1jenkinstrigger          
 env:
   global:
     secure: ClZ4OJDSIPJE4NaBwMhRRr3bfLDLNKXnGYwaplUt1TfW5uhIPmFaspd9gdfyUejgvpfmbJu4faGsfE01xpn5ZNdc125sKXrGMgqGSYfuK7bLwYaN2+5cFL2z14d58S4u3NI4TnIHj6kSC01Vnqo0NtBkN4y1bh4u+rMQJq/HpE5GeRoI6Is58UEfcg4Hkma0pibkVZmPdmlOxJ+manI4Jg/K44SJz4NpxQ/S0fUlZnliTItMcGuHZHmqrqbpmZ0Fv/Isbz8iw1aoDy21iA3yDOkOAt8jyludXaHXfKxs9WQrC8EaPI9LQIU84/+GvUWw7roUkHAfN+TQQKJtNTGH51jnrQ/wsHj5C7BjSo7+pdy7KEZ/aYvYxlGMSObftD4x80Yq3UsA+M20rFfnx28wbYJ6tJNYt4JBHkMnnNksqbZhvQEusahu1AUf+24ghysRjd0CJmvBUg8/eB0yCKX8aYThHXYur/wjKNSh6YCUZI3fzm5B+swfOJ2akj7PlNHtwpIcBN1YNmAFZKMZPYYI2YeHKanUIJItOriAckGn/9d4puNpE1oAwLFuy6W5zlmWV0qDKXKd1FdeaPraW8f5npST/OeovomlYDcZqQxZs6Sc+R/2KIDaKlEvfMJS60oMUEt4iqI9ZmxHcZTG14i4YZoBvWFXyGr3/84igj/1eR8=
