@@ -40,10 +40,6 @@ spec:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
         env:
-          - name: MICRO_REGISTRY
-            value: "mdns"
-          - name: MICRO_SELECTOR
-            value: "static"
           - name: MICRO_SERVER_ADDRESS
             value: "0.0.0.0:{{ $deployment.port }}"
           {{- range .Values.backend.env }}

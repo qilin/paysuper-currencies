@@ -15,6 +15,9 @@ backend:
     port: 8080
     protocol: TCP
   env:
+    - MICRO_REGISTRY
+    - MICRO_REGISTRY_ADDRESS
+    - MICRO_TRANSPORT
     - BROKER_ADDRESS
     - CENTRIFUGO_URL
     - CENTRIFUGO_SECRET
