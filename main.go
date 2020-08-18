@@ -4,12 +4,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/InVisionApp/go-health"
 	"github.com/InVisionApp/go-health/handlers"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/service/grpc"
 	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/micro/go-plugins/wrapper/monitoring/prometheus"
 	"github.com/paysuper/paysuper-currencies/config"
@@ -19,8 +23,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"net/http"
-	"time"
 )
 
 func main() {
@@ -191,7 +193,9 @@ func main() {
 
 	logger.Info("Initialize micro service")
 
-	ms = micro.NewService(options...)
+	// todo: micro.NewService replaced by grpc.NewService to get native gRPC client support
+	//ms = micro.NewService(options...)
+	ms = grpc.NewService(options...)
 	ms.Init()
 
 	err = currencies.RegisterCurrencyRatesServiceHandler(ms.Server(), cs)
