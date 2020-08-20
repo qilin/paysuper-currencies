@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "internal/integration/currencies";
+option go_package = "pkg/grpc/proto";
 package currencies;
 
 import "google/protobuf/timestamp.proto";
