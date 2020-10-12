@@ -4,19 +4,20 @@
 backend:
   name: gobackend
   role: gobackend
-  image: "p1hub/paysupercurrencies"
+  image: "p1hub/qilin-currencies"
   imageTag: latest
   port: 8080
   healthPort: 8081
   replicas: 1
   service: 
     type: ClusterIP
-    name: paysupercurrencies
+    name: qilin-currencies
     port: 8080
     protocol: TCP
   env:
-    - MICRO_REGISTRY
-    - MICRO_REGISTRY_ADDRESS
+#    - MICRO_REGISTRY
+#    - MICRO_REGISTRY_ADDRESS
+#    - MICRO_SERVER_ADDRESS
     - MICRO_TRANSPORT
     - BROKER_ADDRESS
     - CENTRIFUGO_URL

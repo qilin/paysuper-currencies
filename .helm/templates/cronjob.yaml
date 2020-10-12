@@ -13,7 +13,7 @@ metadata:
   annotations: 
     released: {{ .Release.Time }} 
 spec:
-  schedule: 0 8 * * *
+  schedule: 10 3 * * *
   jobTemplate:
     spec:
       template:
@@ -46,7 +46,7 @@ metadata:
   annotations: 
     released: {{ .Release.Time }} 
 spec:
-  schedule: 0 8 * * *
+  schedule: 5 3 * * *
   jobTemplate:
     spec:
       template:
